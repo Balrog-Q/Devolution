@@ -13,7 +13,7 @@ class Player(startingArea: Area):
 
   private var currentLocation = startingArea        // gatherer: changes in relation to the previous location
   private var quitCommandGiven = false              // one-way flag
-  private val possessions = Map[String, Item]()     // container of all the items that the player has
+  private val possessions = Map[String, Ability]()     // container of all the abilities that the player has
   /** Determines if the player has indicated a desire to quit the game. */
   def hasQuit = this.quitCommandGiven
   /** Returns the player’s current location. */
@@ -36,43 +36,43 @@ class Player(startingArea: Area):
     ""
   /** Returns a brief description of the player’s state, for debugging purposes. */
   override def toString = "Now at: " + this.location.name
-  /** Tries to pick up an item of the given name. This is successful if such an item is
-    * located in the player’s current location. If so, the item is added to the player’s
-    * inventory and removed from the location. Returns a description of the result:
-    * "You pick up the ITEM." or "There is no ITEM here to pick up." */
-  def get(itemName: String) =
-    val received = this.location.removeItem(itemName)
-    for newItem <- received do
-      this.possessions.put(newItem.name, newItem)
+  /** Tries to pick up an ability of the given name. This is successful if such an ability is
+    * located in the player’s current location. If so, the ability is added to the player’s
+    * knowledge and removed from the location. Returns a description of the result:
+    * "You pick up the ABILITY." or "There is no ABILITY here to pick up." */
+  def get(abilityName: String) =
+    val received = this.location.removeAbility(abilityName)
+    for newAbility <- received do
+      this.possessions.put(newAbility.name, newAbility)
     if received.isDefined then
-      "You pick up the " + itemName + "."
+      "You pick up the " + abilityName + "."
     else
-      "There is no " + itemName + " here to pick up."
-  /** Determines whether the player is carrying an item of the given name. */
-  def has(itemName: String) = this.possessions.contains(itemName)
-  /** Tries to drop an item of the given name. This is successful if such an item is
-    * currently in the player’s possession. If so, the item is removed from the
-    * player’s inventory and placed in the area. Returns a description of the result
-    * of the attempt: "You drop the ITEM." or "You don't have that!". */
-  def drop(itemName: String) =
-    val removed = this.possessions.remove(itemName)
-    for oldItem <- removed do
-      this.location.addItem(oldItem)
-    if removed.isDefined then "You drop the " + itemName + "." else "You don't have that!"
-  /** Causes the player to examine the item of the given name. This is successful if such
-    * an item is currently in the player’s possession. Returns a description of the result,
-    * which, if the attempt is successful, includes a description of the item. The description
-    * has the form: "You look closely at the ITEM.\nDESCRIPTION" or "If you want
+      "There is no " + abilityName + " here to pick up."
+  /** Determines whether the player is carrying an ability of the given name. */
+  def has(abilityName: String) = this.possessions.contains(abilityName)
+  /** Tries to drop an ability of the given name. This is successful if such an ability is
+    * currently in the player’s possession. If so, the ability is removed from the
+    * player’s knowledge and placed in the area. Returns a description of the result
+    * of the attempt: "You drop the ABILITY." or "You don't have that!". */
+  def drop(abilityName: String) =
+    val removed = this.possessions.remove(abilityName)
+    for oldAbility <- removed do
+      this.location.addAbility(oldAbility)
+    if removed.isDefined then "You drop the " + abilityName + "." else "You don't have that!"
+  /** Causes the player to examine the ability of the given name. This is successful if such
+    * an ability is currently in the player’s possession. Returns a description of the result,
+    * which, if the attempt is successful, includes a description of the ability. The description
+    * has the form: "You look closely at the ABILITY.\nDESCRIPTION" or "If you want
     * to examine something, you need to pick it up first." */
-  def examine(itemName: String) =
-    def lookText(item: Item) = "You look closely at the " + item.name + ".\n" + item.description
+  def examine(abilityName: String) =
+    def lookText(ability: Ability) = "You look closely at the " + ability.name + ".\n" + ability.description
     val failText = "If you want to examine something, you need to pick it up first."
-    this.possessions.get(itemName).map(lookText).getOrElse(failText)
+    this.possessions.get(abilityName).map(lookText).getOrElse(failText)
   /** Causes the player to list what they are carrying. Returns a listing of the player’s
     * possessions or a statement indicating that the player is carrying nothing. The return
-    * value has the form "You are carrying:\nITEMS ON SEPARATE LINES" or "You are empty-handed."
-    * The items are listed in an arbitrary order. */
-  def inventory =
+    * value has the form "You are carrying:\nABILITIES ON SEPARATE LINES" or "You are empty-handed."
+    * The abilities are listed in an arbitrary order. */
+  def knowledge =
     if this.possessions.isEmpty then
       "You are empty-handed."
     else

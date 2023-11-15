@@ -9,7 +9,7 @@ import scala.io.StdIn.*
   * @see [[AdventureGUI]] */
 object AdventureTextUI extends App:
 
-  private val game = Timeline()
+  private val game = Game()
   private val player = game.player
   this.run()
 

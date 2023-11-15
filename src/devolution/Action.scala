@@ -19,7 +19,7 @@ class Action(input: String):
     case "rest"      => Some(actor.rest())
     case "xyzzy"     => Some("The grue tastes yummy.")
     case "quit"      => Some(actor.quit())
-    case "inventory" => Some(actor.inventory)
+    case "knowledge" => Some(actor.knowledge)
     case "get"       => Some(actor.get(this.modifiers))
     case "drop"      => Some(actor.drop(this.modifiers))
     case "examine"   => Some(actor.examine(this.modifiers))

@@ -12,6 +12,7 @@ import scala.collection.mutable.Map
 class Area(var name: String, var description: String):
 
   private val neighbors = Map[String, Area]()
+  private val items = Map[String, Item]()
 
   /** Returns the area that can be reached from this area by moving in the given direction. The result
     * is returned in an `Option`; `None` is returned if there is no exit in the given direction. */
@@ -38,11 +39,21 @@ class Area(var name: String, var description: String):
     * DIRECTIONS SEPARATED BY SPACES". The items and directions are listed in an arbitrary order. */
   def fullDescription =
     val exitList = "\n\nExits available: " + this.neighbors.keys.mkString(" ")
-    this.description + exitList
+    val itemList = "\nYou see here: " + this.items.keys.mkString(" ")
+    if this.items.nonEmpty then
+      this.description + itemList + exitList
+    else
+      this.description + exitList
+
+
+  def addItem(item: Item) = this.items(item.name) = item
+
+  def contains(itemName: String) = this.items.contains(itemName)
+
+  def removeItem(itemName: String) = this.items.remove(itemName)
 
 
   /** Returns a single-line description of the area for debugging purposes. */
   override def toString = this.name + ": " + this.description.replaceAll("\n", " ").take(150)
 
 end Area
-

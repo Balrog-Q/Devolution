@@ -1,4 +1,4 @@
-package o1.adventure
+package devolution
 
 /** The class `Action` represents actions that a player may take in a text adventure game.
   * `Action` objects are constructed on the basis of textual commands and are, in effect,
@@ -19,14 +19,11 @@ class Action(input: String):
     case "rest"      => Some(actor.rest())
     case "xyzzy"     => Some("The grue tastes yummy.")
     case "quit"      => Some(actor.quit())
-    case "inventory" => Some(actor.inventory)
-    case "examine"   => Some(actor.examine(this.modifiers))
+    case "knowledge" => Some(actor.knowledge)
     case "get"       => Some(actor.get(this.modifiers))
     case "drop"      => Some(actor.drop(this.modifiers))
+    case "examine"   => Some(actor.examine(this.modifiers))
     case other       => None
-
   /** Returns a textual description of the action object, for debugging purposes. */
   override def toString = s"$verb (modifiers: $modifiers)"
-
 end Action
-

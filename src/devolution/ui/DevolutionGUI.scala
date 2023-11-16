@@ -22,14 +22,14 @@ import scala.language.adhocExtensions // enable extension of Swing classes
   * on the inside. It’s enough to know that you can use this file to start the program.**
   *
   * @see [[AdventureTextUI]] */
-object AdventureGUI extends SimpleSwingApplication:
+object DevolutionGUI extends SimpleSwingApplication:
   UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName)
 
   def top = new MainFrame:
 
     // Access to the application’s internal logic:
 
-    val game = Adventure()
+    val game = Game()
     val player = game.player
 
     // Components:

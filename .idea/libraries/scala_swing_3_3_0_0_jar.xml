@@ -1,0 +1,16 @@
+<component name="libraryTable">
+  <library name="scala-swing_3-3.0.0.jar" type="Scala">
+    <properties>
+      <language-level>Scala_3_2</language-level>
+    </properties>
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.scala-lang/scala3-library_3/jars/scala3-library_3-3.3.1.jar!/" />
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.13.10.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.scala-lang/scala3-library_3/srcs/scala3-library_3-3.3.1-sources.jar!/" />
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.13.10.jar!/" />
+    </SOURCES>
+  </library>
+</component>

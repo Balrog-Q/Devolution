@@ -14,13 +14,13 @@ object Dialogues:
 
   //---- Zones ----
 
-  //big bang dialogues map
-  val bb = ZoneDialogues(
+  //big bang dialogues
+  val bb = ZoneDialogues("", "",
     Vector("Everything here. Unfortunately, -", "Every interesting thing is here. If it wasn’t for -", "It’s not through memory that you get here. But -", "You can’t find something that survives if you don’t do it yourse-", "Everything, but not what you just did. Pretty unexpected to -"),
     Vector("Just black, no light to be seen, aside from one singular peculiar point", "Nothing physical is here, but it will soon be", "Not much to hear here", "Time is going to start soon", "You already know what is going to hap-"))
 
-  //primordial soup dialogues map
-  val ps = ZoneDialogues(
+  //primordial soup dialogues
+  val ps = ZoneDialogues("from", "What is the point of this?",
     Vector("Nothing interesting here", "Seems interesting", "Memory is not yet a thing here", "What you experienced had no effect here", "The place where interesting things just happened", "X Is no danger here, only opportunities", "X Some say this is also a peak, but you are looking for a less abstract one"),
     Vector("Nothing to see really. There is still no source of light", "You miss a floor between your feets", "Sound travels through air, and there isn’t much here", "At these scales, time almost feel frozen", "The butterfly effect at its finest. Put some dust together now and who knows what could happen in a few billion years"))
 
@@ -34,7 +34,7 @@ object Dialogues:
 /**
   * Helper to set and access dialogues of timelines or areas
  */
-class ZoneDialogues(private val phaseDescriptions: Vector[String], private val abilityDescriptions: Vector[String]):
+class ZoneDialogues(private val foundWord: String, private val finalQuestion: String, phaseDescriptions: Vector[String], abilityDescriptions: Vector[String]):
   def phaseDesc(i: Int) = phaseDescriptions.lift(i).getOrElse("")
   val visualDesc = abilityDescriptions.lift(1).getOrElse("")
   val soundDesc = abilityDescriptions.lift(1).getOrElse("")

@@ -31,10 +31,13 @@ class Game:
   var turnCount = 0
   /** The maximum number of turns that this adventure game allows before time runs out. */
   val timeLimit = 40
-  /** Determines if the adventure is complete, that is, if the player has won. */
 
-  /** The character who is the protagonist of the adventure and whom the real-life player controls. */
+  /** The phase the player is currently in. It allows to select the right dialogues. */
+  val phase = 0
+
+  /** Determines if the adventure is complete, that is, if the player has won. */
   private val destination = bb
+  /** The character who is the protagonist of the adventure and whom the real-life player controls. */
   val player = Player(bb)
   def isComplete =
     this.player.location == this.destination && this.player.has("battery") && this.player.has("remote")

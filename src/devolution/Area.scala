@@ -34,6 +34,7 @@ class Area(var name: String):
     * @see [[setNeighbor]] */
   def setNeighbors(exits: Vector[(String, Area)]) =
     this.neighbors ++= exits
+    
   /** Returns a multi-line description of the area as a player sees it. This includes a basic
     * description of the area as well as information about exits and abilities. If there are no
     * abilities present, the return value has the form "DESCRIPTION\n\nExits available:
@@ -41,6 +42,7 @@ class Area(var name: String):
     * value has the form "DESCRIPTION\nYou see here: ABILITIES SEPARATED BY SPACES\n\nExits available:
     * DIRECTIONS SEPARATED BY SPACES". The abilities and directions are listed in an arbitrary order. */
   def fullDescription =
+    this.description 
     val exitList = "\n\nExits available: " + this.neighbors.keys.mkString(" ")
     val abilityList = "\nYou see here: " + this.abilities.keys.mkString(" ")
     if this.abilities.nonEmpty then

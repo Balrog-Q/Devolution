@@ -1,9 +1,9 @@
-package o1.adventure.ui
+package devolution.ui
 
 import scala.swing.*
 import scala.swing.event.*
 import javax.swing.UIManager
-import o1.adventure.Adventure
+import devolution.Game
 import java.awt.{Point, Insets, Dimension}
 import scala.language.adhocExtensions // enable extension of Swing classes
 
@@ -84,6 +84,8 @@ object DevolutionGUI extends SimpleSwingApplication:
     this.minimumSize = Dimension(200, 200)
     this.pack()
     this.input.requestFocusInWindow()
+    // sends an empty command to trigger the story logic
+    this.playTurn("")
 
 
     def playTurn(command: String) =
@@ -101,7 +103,7 @@ object DevolutionGUI extends SimpleSwingApplication:
       else
         this.turnOutput.text = info + "\n\n" + this.game.goodbyeMessage
       this.locationInfo.text = this.player.location.fullDescription
-      this.turnCounter.text = "Turns played: " + this.game.turnCount
+      //this.turnCounter.text = "Turns played: " + this.game.turnCount
 
   end top
 
@@ -109,5 +111,5 @@ object DevolutionGUI extends SimpleSwingApplication:
   private given CanEqual[Component, Component] = CanEqual.derived
   private given CanEqual[Key.Value, Key.Value] = CanEqual.derived
 
-end AdventureGUI
+end DevolutionGUI
 

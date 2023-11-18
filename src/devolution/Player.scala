@@ -24,11 +24,11 @@ class Player(startingArea: Area):
   def go(direction: String) =
     val destination = this.location.neighbor(direction)
     this.currentLocation = destination.getOrElse(this.currentLocation)
-    if destination.isDefined then "You go " + direction + "." else "You can't go " + direction + "."
+    ""
+    //if destination.isDefined then "You go " + direction + "." else "You can't go " + direction + "."
   /** Causes the player to rest for a short while (this has no substantial effect in game terms).
     * Returns a description of what happened. */
-  def rest() =
-    "You rest for a while. Better get a move on, though."
+  //def rest() = "You rest for a while. Better get a move on, though."
   /** Signals that the player wants to quit the game. Returns a description of what happened
     * within the game as a result (which is the empty string, in this case). */
   def quit() =
@@ -40,25 +40,27 @@ class Player(startingArea: Area):
     * located in the player’s current location. If so, the ability is added to the player’s
     * knowledge and removed from the location. Returns a description of the result:
     * "You pick up the ABILITY." or "There is no ABILITY here to pick up." */
-  def get(abilityName: String) =
+  /*def get(abilityName: String) =
     val received = this.location.removeAbility(abilityName)
     for newAbility <- received do
       this.possessions.put(newAbility.name, newAbility)
     if received.isDefined then
       "You pick up the " + abilityName + "."
     else
-      "There is no " + abilityName + " here to pick up."
+      "There is no " + abilityName + " here to pick up."*/
   /** Determines whether the player is carrying an ability of the given name. */
   def has(abilityName: String) = this.possessions.contains(abilityName)
   /** Tries to drop an ability of the given name. This is successful if such an ability is
     * currently in the player’s possession. If so, the ability is removed from the
     * player’s knowledge and placed in the area. Returns a description of the result
     * of the attempt: "You drop the ABILITY." or "You don't have that!". */
-  def drop(abilityName: String) =
+  /*def drop(abilityName: String) =
     val removed = this.possessions.remove(abilityName)
     for oldAbility <- removed do
       this.location.addAbility(oldAbility)
     if removed.isDefined then "You drop the " + abilityName + "." else "You don't have that!"
+  */
+  def remembers = this.has("memory")
   /** Causes the player to examine the ability of the given name. This is successful if such
     * an ability is currently in the player’s possession. Returns a description of the result,
     * which, if the attempt is successful, includes a description of the ability. The description
@@ -77,4 +79,13 @@ class Player(startingArea: Area):
       "You are empty-handed."
     else
       "You are carrying:\n" + this.possessions.keys.mkString("\n")
+
+  def devolve() =
+    this.go("past")
+    ""
+
+  def evolve() =
+    this.go("future")
+    ""
+
 end Player

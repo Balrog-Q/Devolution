@@ -12,9 +12,9 @@ import scala.collection.mutable.Map
   * other, neighboring areas. An area also has a name and a description.
   * @param name         the name of the area
 */
-class Area(var name: String):
+class Area(val name: String, val timeline: String):
 
-  val description = D.zones(name).phaseDesc(0)
+  val description = D.zones(timeline).area(name).phaseDesc(0)
   private val neighbors = Map[String, Area]()
   private val abilities = Map[String, Ability]()
 
@@ -42,7 +42,7 @@ class Area(var name: String):
     * value has the form "DESCRIPTION\nYou see here: ABILITIES SEPARATED BY SPACES\n\nExits available:
     * DIRECTIONS SEPARATED BY SPACES". The abilities and directions are listed in an arbitrary order. */
   def fullDescription =
-    this.description 
+    //this.description
     val exitList = "\n\nExits available: " + this.neighbors.keys.mkString(" ")
     val abilityList = "\nYou see here: " + this.abilities.keys.mkString(" ")
     if this.abilities.nonEmpty then
@@ -54,4 +54,14 @@ class Area(var name: String):
   def removeAbility(abilityName: String) = this.abilities.remove(abilityName)
   /** Returns a single-line description of the area for debugging purposes. */
   override def toString = this.name + ": " + this.description.replaceAll("\n", " ").take(150)
+
+  /**
+    * Tries to use a story-specific word WORK IN PROGRESS: MAYBE NOT
+    * @param input The word that could be potentially required in a centrain part of the game
+    * @return
+    */
+  /*def parseInput(input: String) =
+    input*/
+
+
 end Area

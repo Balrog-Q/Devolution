@@ -1,11 +1,12 @@
 package devolution
 
 import scala.collection.mutable.Map
+import devolution.helpers.*
 
 /** A `Player` object represents a player character controlled by the real-life user
   * of the program.
   *
-  * A player object’s state is mutable: the player’s location and possessions can change,
+  * A player object’s state is mutable: the player’s location and abilities can change,
   * for instance.
   *
   * @param startingArea  the player’s initial location */
@@ -13,7 +14,11 @@ class Player(startingArea: Area):
 
   private var currentLocation = startingArea        // gatherer: changes in relation to the previous location
   private var quitCommandGiven = false              // one-way flag
-  private val possessions = Map[String, Ability]()     // container of all the abilities that the player has
+  var abilities = Vector[String]()     // container of all the abilities that the player has
+  var dead = false
+
+  /* The phase the player is currently in. It allows to select the right dialogues. */
+  var phase = 0
   /** Determines if the player has indicated a desire to quit the game. */
   def hasQuit = this.quitCommandGiven
   /** Returns the player’s current location. */
@@ -43,49 +48,68 @@ class Player(startingArea: Area):
   /*def get(abilityName: String) =
     val received = this.location.removeAbility(abilityName)
     for newAbility <- received do
-      this.possessions.put(newAbility.name, newAbility)
+      this.abilities.put(newAbility.name, newAbility)
     if received.isDefined then
       "You pick up the " + abilityName + "."
     else
       "There is no " + abilityName + " here to pick up."*/
+  def learn(abilityName: String) =
+    this.abilities = this.abilities :+ abilityName
+    D.knowledge("new") + abilityName + ".\n" + D.knowledge.desc(abilityName)
+
+
   /** Determines whether the player is carrying an ability of the given name. */
-  def has(abilityName: String) = this.possessions.contains(abilityName)
+  def has(abilityName: String) = this.abilities.contains(abilityName)
   /** Tries to drop an ability of the given name. This is successful if such an ability is
     * currently in the player’s possession. If so, the ability is removed from the
     * player’s knowledge and placed in the area. Returns a description of the result
     * of the attempt: "You drop the ABILITY." or "You don't have that!". */
   /*def drop(abilityName: String) =
-    val removed = this.possessions.remove(abilityName)
+    val removed = this.abilities.remove(abilityName)
     for oldAbility <- removed do
       this.location.addAbility(oldAbility)
     if removed.isDefined then "You drop the " + abilityName + "." else "You don't have that!"
   */
-  def remembers = this.has("memory")
+  def remembers = this.has(D.possibleAbilities("memory"))
   /** Causes the player to examine the ability of the given name. This is successful if such
     * an ability is currently in the player’s possession. Returns a description of the result,
     * which, if the attempt is successful, includes a description of the ability. The description
     * has the form: "You look closely at the ABILITY.\nDESCRIPTION" or "If you want
     * to examine something, you need to pick it up first." */
-  def examine(abilityName: String) =
-    def lookText(ability: Ability) = "You look closely at the " + ability.name + ".\n" + ability.description
-    val failText = "If you want to examine something, you need to pick it up first."
-    this.possessions.get(abilityName).map(lookText).getOrElse(failText)
+  def examine(direction: String) =
+    //def lookText(ability: Ability) = "You look closely at the " + ability.name + ".\n" + ability.description
+    //val failText = "If you want to examine something, you need to pick it up first."
+    //this.abilities.get(abilityName).map(lookText).getOrElse(D.ability.misc("missingAbility"))
+    //this.abilities.get(abilityName).map(D.ability("desc")).getOrElse(D.ability.misc("missingAbility"))
+    if abilities.contains(D.possibleAbilities("proprio")) then
+      s"\n\nYou survey $direction: " + this.location.neighbor(direction).map(_.shortDescription(this.abilities)).getOrElse(D.misc("noArea"))
+    else
+      D.knowledge("missingAbility")
+
+
   /** Causes the player to list what they are carrying. Returns a listing of the player’s
-    * possessions or a statement indicating that the player is carrying nothing. The return
+    * abilities or a statement indicating that the player is carrying nothing. The return
     * value has the form "You are carrying:\nABILITIES ON SEPARATE LINES" or "You are empty-handed."
     * The abilities are listed in an arbitrary order. */
   def knowledge =
-    if this.possessions.isEmpty then
-      "You are empty-handed."
+    if this.abilities.isEmpty then
+      D.knowledge("noAbility")
     else
-      "You are carrying:\n" + this.possessions.keys.mkString("\n")
+      D.knowledge("knowledgeIntro") + "\n" + this.abilities.map(name => s"$name: ${D.knowledge(name)}").mkString("\n")
 
   def devolve() =
     this.go("past")
-    ""
+    D.actions("devolveAction")
 
   def evolve() =
     this.go("future")
-    ""
+    D.actions("evolveAction")
+
+  def die() =
+    this.dead = true
+    this.phase = 0
+    this.currentLocation = startingArea
+
+  def isDead = this.dead
 
 end Player

@@ -14,11 +14,16 @@ import scala.collection.mutable.Map
 */
 class Area(val name: String, val timeline: String):
 
-  val description = D.zones(timeline).area(name).phaseDesc(0)
+  val desc = D.zones(timeline).area(name)
   private val neighbors = Map[String, Area]()
-  private val abilities = Map[String, Ability]()
+  //private val abilities = Vector[Ability]()
 
-  val foundWord = ""
+  /**
+    * The minimum game phase required to move around from here.
+    */
+  private var movePhase = 0
+
+  val foundWord = D.zones(timeline).area(name)
   val finalQuestion = ""
 
   /** Returns the area that can be reached from this area by moving in the given direction. The result
@@ -41,27 +46,35 @@ class Area(val name: String, val timeline: String):
     * DIRECTIONS SEPARATED BY SPACES". If there are one or more abilities present, the return
     * value has the form "DESCRIPTION\nYou see here: ABILITIES SEPARATED BY SPACES\n\nExits available:
     * DIRECTIONS SEPARATED BY SPACES". The abilities and directions are listed in an arbitrary order. */
-  def fullDescription =
-    //this.description
-    val exitList = "\n\nExits available: " + this.neighbors.keys.mkString(" ")
-    val abilityList = "\nYou see here: " + this.abilities.keys.mkString(" ")
-    if this.abilities.nonEmpty then
+  def fullDescription(knowledge: Vector[String]) =
+    //this.shortDescription(knowledge) +
+    knowledge.map(desc.abilityDesc(_)).mkString("\n")
+    //if abilities.contains(D.abilities("proprioception") = "\n\nExits available: " + this.neighbors.keys.mkString(", ")
+    //val abilityList = "\nYou see here: " + this.abilities.keys.mkString(" ")
+    /*if this.knowledge.nonEmpty then
       this.description + abilityList + exitList
     else
-      this.description + exitList
-  def addAbility(ability: Ability) = this.abilities(ability.name) = ability
-  def contains(abilityName: String) = this.abilities.contains(abilityName)
-  def removeAbility(abilityName: String) = this.abilities.remove(abilityName)
+      this.description + exitList*/
+
+  def shortDescription(knowledge: Vector[String]) =
+    if knowledge.contains(D.knowledge("vision")) then
+      this.desc.abilityDesc(D.knowledge("vision"))
+    else
+      D.misc("undefinedArea")
+
+  //def learn(ability: Ability) = this.abilities(ability.name) = ability
+  //def contains(abilityName: String) = this.abilities.contains(abilityName)
+  //def removeAbility(abilityName: String) = this.abilities.remove(abilityName)
   /** Returns a single-line description of the area for debugging purposes. */
-  override def toString = this.name + ": " + this.description.replaceAll("\n", " ").take(150)
+  override def toString = this.name + ": " + this.desc.toString.replaceAll("\n", " ").take(150)
 
   /**
-    * Tries to use a story-specific word WORK IN PROGRESS: MAYBE NOT
-    * @param input The word that could be potentially required in a centrain part of the game
-    * @return
+    * Changes the default minimum move phase.
+    * Only the entry points have different move phases:
+    * they are the only areas where movement is constrained,
+    * but once that restriction is overcome, the movement becomes free in that timeline.
     */
-  /*def parseInput(input: String) =
-    input*/
+  def setMovePhase(phase: Int) = this.movePhase = phase
 
 
 end Area

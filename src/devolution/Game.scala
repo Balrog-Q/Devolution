@@ -42,6 +42,20 @@ class Game:
   elTower     .setNeighbors(Vector("past" -> geWhiteRoom, "future" -> hdVacuum))
   hdVacuum    .setNeighbors(Vector("past" -> elTower,     "future" -> hdVacuum))
 
+  val entryPoints = Vector(bbVacuum, psCenter, hdVacuum, maPath, phForest, olSurface, elTower, srRoom, geWhiteRoom)
+
+  // conditions to move between areas in that timeline
+  /*bbVacuum    .setMovePhase(0)
+  psCenter    .setMovePhase(1)
+  olSurface   .setMovePhase(5)
+  phForest    .setMovePhase(4)
+  maPath      .setMovePhase(3)
+  srRoom      .setMovePhase(7)
+  geWhiteRoom .setMovePhase(9)
+  elTower     .setMovePhase(6)
+  hdVacuum    .setMovePhase(2)*/
+  entryPoints.zipWithIndex.foreach(_.setMovePhase(_))
+
   private def startingPoint = geWhiteRoom
   /*private val middle      = Area("Forest", "You are somewhere in the forest. There are a lot of trees here.\nBirds are singing.")
   private val northForest = Area("Forest", "You are somewhere in the forest. A tangle of bushes blocks further passage north.\nBirds are singing.")
@@ -62,9 +76,6 @@ class Game:
   /** The maximum number of turns that this adventure game allows before time runs out. */
   //val timeLimit = 40
 
-  /** The phase the player is currently in. It allows to select the right dialogues. */
-  var phase = 0
-
   /** Determines if the adventure is complete, that is, if the player has won. */
   //private val destination = bb
   /** The character who is the protagonist of the adventure and whom the real-life player controls. */
@@ -84,43 +95,77 @@ class Game:
       "Oh no! Time's up. Starved of entertainment, you collapse and weep like a child.\nGame over!"
     else  // game over due to player quitting
       "Quitter!"*/
+
+  /**
+    * Manage the story progression and conditions.
+    * @param input The possible user command that will apport progression in the story
+    */
   def parseStoryCommand(input: String) =
     var outcome = ""
     //game start
-    if player.location == startingPoint then
-      outcome += D.misc("intro1")
-      if !player.remembers then
-        outcome += "\n" + D.misc("intro2")
+    D.zones.map((k,v) => v.question).zipWithIndex.filter((v,k) => v == input)
+    player.phase match
+      case 0 =>
+        if player.location == startingPoint then
+          outcome += D.misc("intro1")
+          if !player.remembers then
+            outcome += "\n" + D.misc("intro2")
 
-      //question guessed
-      if input == D.ge.question then
-        outcome = D.ge.answer
-        phase += 1
-      outcome
-    else
-      ""
+          //first question guessed
+          if input == D.ge.question then
+            outcome = D.ge.answer
+            player.phase += 1
+      case 1 =>
+        if player.location == psCenter && input == D.ps.question then
+          outcome = D.ps.answer
+          player.phase += 1
+      case 2 =>
+        if player.location == hdVacuum && input == D.hd.question then
+          outcome = D.hd.answer
+          player.phase += 1
+      case 2 =>
+        if player.location == hdVacuum && input == D.hd.question then
+          outcome = D.hd.answer
+          player.phase += 1
 
+
+      case _ =>
+        D.debug("noPhase")
     //ALL THE LOGIC ABOUT GAME PROGRESSION GOES HERE
+    outcome
+
+  /**
+    * Handle the dead of the player and the reset options/state changes.
+    */
+  def reset() =
+    player.phase = 0
+    this.player.dead = false
+
 
   /** Plays a turn by executing the given in-game command, such as “go west”. Returns a textual
     * report of what happened, or an error message if the command was unknown. In the latter
     * case, no turns elapse. */
-  def playTurn(command: String) =
+  def playTurn(command: String): String =
     val action = Action(command)
     var outcomeReport = action.execute(this.player)
+    if action.verb.isBlank then
+      ""
+    else
+      //check if the verb could still be meaningfull
+      if outcomeReport.isEmpty then
+        if !action.verb.isBlank then
+          outcomeReport = Some(parseStoryCommand(action.commandText))
 
-    //check if the verb could still be meaningfull
-    if outcomeReport.isEmpty then
-      if !action.verb.isBlank then
-        outcomeReport = Some(parseStoryCommand(action.commandText))
-
-    //default "unknown" output text
-    if outcomeReport.isEmpty then
-      if action.modifiers.isBlank then
-        D.misc("unknownCommand") + action.verb
-      else
-        D.misc("unknownParameter") + s"${action.verb} ${action.modifiers}"
-    else //this.turnCount += 1
-      outcomeReport.getOrElse(s"""There is something wrong with "$command".""")
+      //default "unknown" output text
+      if outcomeReport.isEmpty then
+        if action.modifiers.isBlank then
+          D.misc("unknownCommand") + action.verb
+          //if !action.verb.isBlank then
+          //else
+          //outcomeReport.getOrElse(s"""${D.debug("noOutput")} "$command"""")
+        else
+          D.misc("unknownParameter") + s"${action.verb} ${action.modifiers}"
+      else //this.turnCount += 1
+        outcomeReport.getOrElse(s"""${D.debug("noOutput")} "$command"""")
 
 end Game

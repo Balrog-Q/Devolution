@@ -1,7 +1,7 @@
 package devolution
 
 import devolution.*
-import devolution.helpers.D
+import devolution.helpers.{AreaDialogues, D}
 /** The class `Adventure` represents text adventure games. An adventure consists of a player and
   * a number of areas that make up the game world. It provides methods for playing the game one
   * turn at a time and for checking the state of the game.
@@ -98,48 +98,63 @@ class Game:
 
   /**
     * Manage the story progression and conditions.
-    * @param input The possible user command that will apport progression in the story
+    * @param action The possible user command that will apport progression in the story
     */
-  def parseStoryCommand(input: String) =
+  def parseStoryCommand(action: Action): String =
+    val input = action.commandText
     var outcome = ""
     //game start
     D.zones.map((k,v) => v.question).zipWithIndex.filter((v,k) => v == input)
-    player.phase match
-      case 0 =>
-        if player.location == startingPoint then
-          outcome += D.misc("intro1")
-          if !player.remembers then
-            outcome += "\n" + D.misc("intro2")
+    if player.location == bbVacuum then
+      player.die()
+      return ""
 
-          //first question guessed
-          if input == D.ge.question then
-            outcome = D.ge.answer
+    if !player.isDead then
+      player.phase match
+        case 0 =>
+          if player.location == startingPoint then
+            outcome += D.misc("intro1")
+            if !player.remembers then
+              outcome += "\n" + D.misc("intro2")
+
+            //first question guessed
+            if isQuestionRight(input, D.ge.question) then
+              outcome = D.ge.answer
+              player.phase += 1
+              action.success = true
+        case 1 =>
+          if player.timeline == D.areas("bb") && isQuestionRight(input, D.ps.question)  then
+            outcome = D.ps.answer
             player.phase += 1
-      case 1 =>
-        if player.location == psCenter && input == D.ps.question then
-          outcome = D.ps.answer
-          player.phase += 1
-      case 2 =>
-        if player.location == hdVacuum && input == D.hd.question then
-          outcome = D.hd.answer
-          player.phase += 1
-      case 2 =>
-        if player.location == hdVacuum && input == D.hd.question then
-          outcome = D.hd.answer
-          player.phase += 1
+              action.success = true
+        case 2 =>
+          if player.timeline == D.areas("hd") && isQuestionRight(input, D.hd.question)  then
+            outcome = D.hd.answer
+            player.phase += 1
+              action.success = true
+        case 3 =>
+          if player.timeline == D.areas("ma") && isQuestionRight(input, D.ma.question) then
+            outcome = D.ma.answer
+            player.phase += 1
+            action.success = true
 
 
-      case _ =>
-        D.debug("noPhase")
-    //ALL THE LOGIC ABOUT GAME PROGRESSION GOES HERE
+        case _ =>
+          D.debug("noPhase")
+      //ALL THE LOGIC ABOUT GAME PROGRESSION GOES HERE
     outcome
+
+  def isQuestionRight(input: String, question: String) =
+    !input.isBlank && input.contains("?") && question.toLowerCase().contains(input.toLowerCase())
 
   /**
     * Handle the dead of the player and the reset options/state changes.
+    * The program freeze for some instants to let the player read the output, then automatically reset.
     */
   def reset() =
     player.phase = 0
     this.player.dead = false
+    Thread.sleep(1000)
 
 
   /** Plays a turn by executing the given in-game command, such as “go west”. Returns a textual
@@ -147,25 +162,26 @@ class Game:
     * case, no turns elapse. */
   def playTurn(command: String): String =
     val action = Action(command)
-    var outcomeReport = action.execute(this.player)
-    if action.verb.isBlank then
-      ""
-    else
+    var storyReport = parseStoryCommand(action)
+    var outcomeReport = action.execute(this.player).getOrElse("")
+
+    if !action.success && !action.verb.isBlank && outcomeReport.isBlank && storyReport.isBlank then // needs to hide "command not found" error during successful output
       //check if the verb could still be meaningfull
-      if outcomeReport.isEmpty then
-        if !action.verb.isBlank then
-          outcomeReport = Some(parseStoryCommand(action.commandText))
+      //if outcomeReport.isEmpty then
+        //if !action.verb.isBlank then
+        //  outcomeReport = Some(parseStoryCommand(action.commandText))
 
       //default "unknown" output text
-      if outcomeReport.isEmpty then
-        if action.modifiers.isBlank then
-          D.misc("unknownCommand") + action.verb
-          //if !action.verb.isBlank then
-          //else
-          //outcomeReport.getOrElse(s"""${D.debug("noOutput")} "$command"""")
-        else
-          D.misc("unknownParameter") + s"${action.verb} ${action.modifiers}"
-      else //this.turnCount += 1
-        outcomeReport.getOrElse(s"""${D.debug("noOutput")} "$command"""")
-
+      //if action.verb.isEmpty then
+      if action.modifiers.isBlank then
+        s"$storyReport\nn${D.misc("unknownCommand")} ${action.verb}!"
+        //if !action.verb.isBlank then
+        //else
+        //outcomeReport.getOrElse(s"""${D.debug("noOutput")} "$command"""")
+      else
+        s"$storyReport\n\n${D.misc("unknownParameter")} ${action.verb} ${action.modifiers}..."
+      //else //this.turnCount += 1
+      //  outcomeReport.getOrElse(s"""${D.debug("noOutput")} "$command"""")
+    else
+      storyReport + outcomeReport
 end Game

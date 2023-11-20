@@ -5,7 +5,8 @@ package devolution
   * parsers for such commands. An action object is immutable after creation.
   * @param input  a textual in-game command such as “go east” or “rest” */
 class Action(input: String):
-
+  
+  var success     = false
   val commandText = input.trim.toLowerCase
   val verb        = commandText.takeWhile( _ != ' ' )
   val modifiers   = commandText.drop(verb.length).trim
@@ -21,6 +22,7 @@ class Action(input: String):
     //case "knowledge" => Some(actor.knowledge)
     case "examine"   => Some(actor.examine(this.modifiers))
     case "quit"      => Some(actor.quit())
+    case "$"         => Some("phase " + actor.phase + " " + actor.location.toString) // FOR DEBUG
     case other       => None
     //case "drop"      => Some(actor.drop(this.modifiers))
     //case "get"       => Some(actor.get(this.modifiers))

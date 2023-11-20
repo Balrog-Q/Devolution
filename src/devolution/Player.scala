@@ -23,6 +23,7 @@ class Player(startingArea: Area):
   def hasQuit = this.quitCommandGiven
   /** Returns the player’s current location. */
   def location = this.currentLocation
+  def timeline = this.currentLocation.timeline
   /** Attempts to move the player in the given direction. This is successful if there
     * is an exit from the player’s current location towards the direction name. Returns
     * a description of the result: "You go DIRECTION." or "You can't go DIRECTION." */
@@ -98,12 +99,18 @@ class Player(startingArea: Area):
       D.knowledge("knowledgeIntro") + "\n" + this.abilities.map(name => s"$name: ${D.knowledge(name)}").mkString("\n")
 
   def devolve() =
-    this.go("past")
-    D.actions("devolveAction")
+    if this.phase > 0 then
+      this.go("past")
+      D.actions("devolveAction")
+    else
+      ""
 
   def evolve() =
-    this.go("future")
-    D.actions("evolveAction")
+    if this.phase > 0 then
+      this.go("future")
+      D.actions("evolveAction")
+    else
+      ""
 
   def die() =
     this.dead = true

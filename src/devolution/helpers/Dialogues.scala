@@ -10,8 +10,8 @@ object Dialogues:
     "quote" -> "Devolution\n\nOne general law, leading to the advancement of all organic beings, is multiply\nTherein, let the strongest live, and the weakest die\nEventually, a species can become complacent\nAt that point, a de-evolution can occur\nA spiral downwards, signaling an end for that lifeform",
     "intro1" -> "But where?\nBut something else is also. But what?\nDespite your best efforts, you can’t come to any better conclusion.\nKnowledge gave you life, but now it seems that it all went missing.\nMaybe, if you could think of one precise single question, you would be able to focus…",
     "intro2" -> "You are here. But where?\nAnd is someone else also?",
-    "unknownCommand" -> "It’s not the right time to ",
-    "unknownParameter" -> "It doesn’t sound like a good idea to ",
+    "unknownCommand" -> "It’s not the right time to",
+    "unknownParameter" -> "It doesn’t sound like a good idea to",
     "undefinedArea" -> "You can't distinguish anything useful",
     "noArea" -> "There is nothing particularly interesting in that direction"
   )

@@ -104,7 +104,7 @@ object DevolutionGUI extends SimpleSwingApplication:
         this.turnOutput.text = info
       else
         this.turnOutput.text = info + "\n\n" + this.game.goodbyeMessage
-      this.locationInfo.text = this.player.location.fullDescription(player.abilities)
+      this.locationInfo.text = this.player.location.fullDescription(player.abilities, player.phase)
       //this.turnCounter.text = "Turns played: " + this.game.turnCount
 
   end top

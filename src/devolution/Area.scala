@@ -15,13 +15,13 @@ import scala.collection.mutable.Map
 class Area(val name: String, val timeline: String):
 
   val desc = D.zones(timeline).area(name)
-  private val neighbors = Map[String, Area]()
+  val neighbors = Map[String, Area]()
   //private val abilities = Vector[Ability]()
 
   /**
     * The minimum game phase required to move around from here.
     */
-  private var movePhase = 0
+  var movePhase = 0
 
   val foundWord = D.zones(timeline).area(name)
   val finalQuestion = ""
@@ -46,15 +46,18 @@ class Area(val name: String, val timeline: String):
     * DIRECTIONS SEPARATED BY SPACES". If there are one or more abilities present, the return
     * value has the form "DESCRIPTION\nYou see here: ABILITIES SEPARATED BY SPACES\n\nExits available:
     * DIRECTIONS SEPARATED BY SPACES". The abilities and directions are listed in an arbitrary order. */
-  def fullDescription(knowledge: Vector[String]) =
+  def fullDescription(knowledge: Vector[String], phase: Int) =
     //this.shortDescription(knowledge) +
-    knowledge.map(desc.abilityDesc(_)).mkString("\n")
+    var placeDesc = knowledge.map(desc.abilityDesc(_)).mkString("\n")
+    if placeDesc.isEmpty then
+      placeDesc = desc.phaseDesc(phase)
     //if abilities.contains(D.abilities("proprioception") = "\n\nExits available: " + this.neighbors.keys.mkString(", ")
     //val abilityList = "\nYou see here: " + this.abilities.keys.mkString(" ")
     /*if this.knowledge.nonEmpty then
       this.description + abilityList + exitList
     else
       this.description + exitList*/
+    placeDesc
 
   def shortDescription(knowledge: Vector[String]) =
     if knowledge.contains(D.knowledge("vision")) then
@@ -66,7 +69,7 @@ class Area(val name: String, val timeline: String):
   //def contains(abilityName: String) = this.abilities.contains(abilityName)
   //def removeAbility(abilityName: String) = this.abilities.remove(abilityName)
   /** Returns a single-line description of the area for debugging purposes. */
-  override def toString = this.name + ": " + this.desc.toString.replaceAll("\n", " ").take(150)
+  override def toString = this.name + ": " + this.timeline + ", " + this.neighbors.toString() + " " + this.neighbor("past").map(_.name) + " " + this.neighbor("future").map(_.name)
 
   /**
     * Changes the default minimum move phase.

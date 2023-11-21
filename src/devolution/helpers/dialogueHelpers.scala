@@ -24,9 +24,7 @@ class AreaDialogues(phaseDescriptions: Vector[String], abilityDescriptions: Map[
     * @param i The phase number.
     */
   def phaseDesc(i: Int) =
-    phaseDescriptions.lift(i).find(_ != "").getOrElse(
-      this.toString
-    )
+    phaseDescriptions.lift(i).find(_ != "").getOrElse(this.toString)
 
   def abilityDesc(abilityName: String) = abilityDescriptions.getOrElse(abilityName, "")
 

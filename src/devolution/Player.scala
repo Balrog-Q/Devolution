@@ -16,6 +16,7 @@ class Player(startingArea: Area):
   private var quitCommandGiven = false              // one-way flag
   var abilities = Vector[String]()     // container of all the abilities that the player has
   var dead = false
+  var lastEntryPoint = startingArea
 
   /* The phase the player is currently in. It allows to select the right dialogues. */
   var phase = 0
@@ -29,8 +30,13 @@ class Player(startingArea: Area):
     * a description of the result: "You go DIRECTION." or "You can't go DIRECTION." */
   def go(direction: String) =
     val destination = this.location.neighbor(direction)
-    this.currentLocation = destination.getOrElse(this.currentLocation)
-    ""
+    if this.location.movePhase <= this.phase || direction == D.movements("past") || direction == D.movements("future") then
+      this.currentLocation = destination.getOrElse(this.currentLocation)
+      D.misc("moved") + direction
+      //if this.location.isDeadly then
+      //  this.die()
+    else
+      ""
     //if destination.isDefined then "You go " + direction + "." else "You can't go " + direction + "."
   /** Causes the player to rest for a short while (this has no substantial effect in game terms).
     * Returns a description of what happened. */
@@ -100,14 +106,18 @@ class Player(startingArea: Area):
 
   def devolve() =
     if this.phase > 0 then
+      this.currentLocation = this.lastEntryPoint
       this.go("past")
+      this.lastEntryPoint = this.currentLocation
       D.actions("devolveAction")
     else
       ""
 
   def evolve() =
     if this.phase > 0 then
+      this.currentLocation = this.lastEntryPoint
       this.go("future")
+      this.lastEntryPoint = this.currentLocation
       D.actions("evolveAction")
     else
       ""

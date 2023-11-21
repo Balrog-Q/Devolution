@@ -42,7 +42,33 @@ class Game:
   elTower     .setNeighbors(Vector("past" -> geWhiteRoom, "future" -> hdVacuum))
   hdVacuum    .setNeighbors(Vector("past" -> elTower,     "future" -> hdVacuum))
 
-  val entryPoints = Vector(bbVacuum, psCenter, hdVacuum, maPath, phForest, olSurface, elTower, srRoom, geWhiteRoom)
+  val entryPoints = Vector(geWhiteRoom, psCenter, hdVacuum, maPath, phForest, olSurface, elTower, srRoom)
+    .zipWithIndex.map(_.swap).toMap
+  entryPoints.foreach((k,v) => v.setMovePhase(k))
+  //assign the correct move phase based on the order the zone has been added to the entryPoint vector
+
+
+  private val psPeriphery = Area(D.areas("closeVoid"), D.areas("ps"))
+  private val psVoid = Area(D.areas("vacuum"), D.areas("ps"))
+  psVoid.deadly = true
+  psCenter.setNeighbors(Vector(D.movements("forward") -> psPeriphery))
+  psPeriphery.setNeighbors(Vector(D.movements("back") -> psCenter, D.movements("forward") -> psVoid))
+
+  private val maCastle1 = Area(D.areas("castle1"), D.areas("ma"))
+  private val maCastle2 = Area(D.areas("castle2"), D.areas("ma"))
+  private val maField = Area(D.areas("field"), D.areas("ma"))
+  private val maHouse1 = Area(D.areas("house1"), D.areas("ma"))
+  private val maHouse2 = Area(D.areas("house2"), D.areas("ma"))
+  private val maStream = Area(D.areas("stream"), D.areas("ma"))
+  private val maGrave = Area(D.areas("grave"), D.areas("ma"))
+  maCastle2.deadly = true
+  maPath    .setNeighbors(Vector(D.movements("n") -> maGrave, D.movements("s") -> maField, D.movements("e") -> maStream, D.movements("w") -> maCastle1))
+  maCastle1 .setNeighbors(Vector(D.movements("w") -> maCastle2, D.movements("e") -> maPath, D.movements("s") -> maField))
+  maHouse1  .setNeighbors(Vector(D.movements("n") -> maGrave, D.movements("s") -> maField, D.movements("e") -> maStream, D.movements("w") -> maPath, D.movements("in") -> maHouse2))
+  maHouse2  .setNeighbors(Vector(D.movements("back") -> maHouse1))
+  maGrave .setNeighbors(Vector(D.movements("s") -> maHouse1, D.movements("w") -> maPath, D.movements("e") -> maStream))
+  maStream  .setNeighbors(Vector(D.movements("w") -> maHouse1))
+  maField .setNeighbors(Vector(D.movements("n") -> maPath))
 
   // conditions to move between areas in that timeline
   /*bbVacuum    .setMovePhase(0)
@@ -54,7 +80,7 @@ class Game:
   geWhiteRoom .setMovePhase(9)
   elTower     .setMovePhase(6)
   hdVacuum    .setMovePhase(2)*/
-  entryPoints.zipWithIndex.foreach(_.setMovePhase(_))
+
 
   private def startingPoint = geWhiteRoom
   /*private val middle      = Area("Forest", "You are somewhere in the forest. There are a lot of trees here.\nBirds are singing.")
@@ -103,44 +129,61 @@ class Game:
   def parseStoryCommand(action: Action): String =
     val input = action.commandText
     var outcome = ""
+    commandSuccess = false
     //game start
-    D.zones.map((k,v) => v.question).zipWithIndex.filter((v,k) => v == input)
-    if player.location == bbVacuum then
+    //D.zones.map((k,v) => v.question).zipWithIndex.filter((v,k) => v == input)
+    if player.location.isDeadly || player.location == bbVacuum then
       player.die()
-      return ""
 
-    if !player.isDead then
-      player.phase match
-        case 0 =>
-          if player.location == startingPoint then
+      //show a death message only if the user can see where he went
+      if player.abilities.contains(D.knowledge("vision")) then
+        return D.misc("dead") + player.location.name
+      else
+        return ""
+
+    //if action.verb == D.actionNames("evolve") || action.verb == D.actionNames("devolve") then
+    //  timelineDiscovered = false
+
+    //if player.phase == 1 then outcome = D.ge.answer
+    //show old answer as a hint
+    println(entryPoints.get(player.phase-1).map(_.timeline).getOrElse(""))
+    if player.location.timeline == entryPoints.get(player.phase-1).map(_.timeline).getOrElse("") then
+      //println(D.zones("Globalization era").answer + " " + D.areas(entryPoints.get(player.phase - 1).map(_.timeline).getOrElse("")))
+      return D.zones.get(entryPoints.get(player.phase-1).map(_.timeline).getOrElse("")).map(_.answer).getOrElse("non!")
+
+    player.phase match
+      case 0 =>
+        if player.location == startingPoint then
+          if isQuestionRight(input, D.ge.question) then
+            player.phase += 1
+            commandSuccess = true
+          else
             outcome += D.misc("intro1")
             if !player.remembers then
               outcome += "\n" + D.misc("intro2")
 
-            //first question guessed
-            if isQuestionRight(input, D.ge.question) then
-              outcome = D.ge.answer
-              player.phase += 1
-              action.success = true
-        case 1 =>
-          if player.timeline == D.areas("bb") && isQuestionRight(input, D.ps.question)  then
-            outcome = D.ps.answer
-            player.phase += 1
-              action.success = true
-        case 2 =>
-          if player.timeline == D.areas("hd") && isQuestionRight(input, D.hd.question)  then
-            outcome = D.hd.answer
-            player.phase += 1
-              action.success = true
-        case 3 =>
-          if player.timeline == D.areas("ma") && isQuestionRight(input, D.ma.question) then
-            outcome = D.ma.answer
-            player.phase += 1
-            action.success = true
+          //first question guessed
+      case 1 =>
+        //if player.timeline == D.areas("bb") && action.verb == D.actions("go") then
+          //timelineDiscovered = true
+        if player.timeline == D.areas("bb") && isQuestionRight(input, D.ps.question)  then
+          outcome = D.ps.answer
+          player.phase += 1
+            commandSuccess = true
+      case 2 =>
+        if player.timeline == D.areas("hd") && isQuestionRight(input, D.hd.question)  then
+          outcome = D.hd.answer
+          player.phase += 1
+            commandSuccess = true
+      case 3 =>
+        if player.timeline == D.areas("ma") && isQuestionRight(input, D.ma.question) then
+          outcome = D.ma.answer
+          player.phase += 1
+          commandSuccess = true
 
 
-        case _ =>
-          D.debug("noPhase")
+      case _ =>
+        D.debug("noPhase")
       //ALL THE LOGIC ABOUT GAME PROGRESSION GOES HERE
     outcome
 
@@ -153,9 +196,13 @@ class Game:
     */
   def reset() =
     player.phase = 0
-    this.player.dead = false
+    //timelineDiscovered = false
+    this.playTurn("")
     Thread.sleep(1000)
+    this.player.dead = false
 
+  var commandSuccess = false
+  //var timelineDiscovered = false
 
   /** Plays a turn by executing the given in-game command, such as “go west”. Returns a textual
     * report of what happened, or an error message if the command was unknown. In the latter
@@ -165,7 +212,7 @@ class Game:
     var storyReport = parseStoryCommand(action)
     var outcomeReport = action.execute(this.player).getOrElse("")
 
-    if !action.success && !action.verb.isBlank && outcomeReport.isBlank && storyReport.isBlank then // needs to hide "command not found" error during successful output
+    if !this.commandSuccess && outcomeReport.isBlank && !action.verb.isBlank && !player.isDead then //&& outcomeReport.isBlank && storyReport.isBlank then // needs to hide "command not found" error during successful output
       //check if the verb could still be meaningfull
       //if outcomeReport.isEmpty then
         //if !action.verb.isBlank then
@@ -174,7 +221,7 @@ class Game:
       //default "unknown" output text
       //if action.verb.isEmpty then
       if action.modifiers.isBlank then
-        s"$storyReport\nn${D.misc("unknownCommand")} ${action.verb}!"
+        s"$storyReport\n\n${D.misc("unknownCommand")} ${action.verb}!"
         //if !action.verb.isBlank then
         //else
         //outcomeReport.getOrElse(s"""${D.debug("noOutput")} "$command"""")
@@ -183,5 +230,6 @@ class Game:
       //else //this.turnCount += 1
       //  outcomeReport.getOrElse(s"""${D.debug("noOutput")} "$command"""")
     else
-      storyReport + outcomeReport
+      storyReport + outcomeReport + "\nDEBUG: " + Action("$").execute(this.player).getOrElse("No desc?")
+
 end Game

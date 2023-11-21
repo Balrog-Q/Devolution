@@ -13,12 +13,37 @@ object Dialogues:
     "unknownCommand" -> "It’s not the right time to",
     "unknownParameter" -> "It doesn’t sound like a good idea to",
     "undefinedArea" -> "You can't distinguish anything useful",
-    "noArea" -> "There is nothing particularly interesting in that direction"
+    "noArea" -> "There is nothing particularly interesting in that direction",
+    "dead" -> "You took one step too close to the ",
+    "moved" -> "You tried to move "
   )
 
+  val actionNames = Map[String, String](
+    "go" -> "go",
+    "evolve" -> "evolve",
+    "devolve" -> "devolve",
+    "examine" -> "examine",
+    "quit" -> "quit",
+    "" -> "",
+    "" -> ""
+  )
   val actions = Map[String, String](
     "evolveAction" -> "You wait",
     "devolveAction" -> "You make a hard choice",
+  )
+
+  val movements = Map[String, String](
+    "n" -> "north",
+    "s" -> "south",
+    "e" -> "east",
+    "w" -> "west",
+    "up" -> "up",
+    "down" -> "down",
+    "forward" -> "forward",
+    "back" -> "back",
+    "in" -> "in",
+    "past" -> "past",
+    "future" -> "future"
   )
 
   val debug = Map[String, String](
@@ -119,6 +144,17 @@ object Dialogues:
       )
     ),
     areas("closeVoid") -> AreaDialogues(
+      Vector("Everything here is alone"),
+      Map[String, String](
+        possibleAbilities("vision") -> "Nothing but darkness",
+        possibleAbilities("proprio") -> "You feel a strange pull from were you arrived, as if something is trying to swallow you whole",
+        possibleAbilities("hear") -> "You hear nothing but silence",
+        possibleAbilities("fear") -> "The fear of complete void hold you from getting further",
+        possibleAbilities("sad") -> "",
+        possibleAbilities("curious") -> ""
+      )
+    ),
+    areas("vacuum") -> AreaDialogues(
       Vector(""),
       Map[String, String](
         possibleAbilities("vision") -> "",
@@ -199,6 +235,17 @@ object Dialogues:
       )
     ),
     areas("lava") -> AreaDialogues(
+      Vector(""),
+      Map[String, String](
+        possibleAbilities("vision") -> "",
+        possibleAbilities("proprio") -> "",
+        possibleAbilities("hear") -> "",
+        possibleAbilities("fear") -> "",
+        possibleAbilities("sad") -> "",
+        possibleAbilities("curious") -> ""
+      )
+    ),
+    areas("volcano2") -> AreaDialogues(
       Vector(""),
       Map[String, String](
         possibleAbilities("vision") -> "",
@@ -379,12 +426,23 @@ object Dialogues:
         possibleAbilities("sad") -> "",
         possibleAbilities("curious") -> ""
       )
+    ),
+    areas("castle2") -> AreaDialogues(
+      Vector(""),
+      Map[String, String](
+        possibleAbilities("vision") -> "",
+        possibleAbilities("proprio") -> "",
+        possibleAbilities("hear") -> "",
+        possibleAbilities("fear") -> "",
+        possibleAbilities("sad") -> "",
+        possibleAbilities("curious") -> ""
+      )
     )
   ))
 
   //globalization era
   val ge = TimelineDialogues("you", "Am I alone?",
-    "Are you alone? Probably yes.\nAnd probably you are all posing the same question.\nTo find something that is also never alone, you’ll need to… devolve.", Map(
+    "Are you alone? Probably yes.\nAnd probably you are all posing the same question.\nTo find something that is also never alone, you’ll need to… devolve, and explore.", Map(
     areas("start") -> AreaDialogues(
       Vector("You are here.", "Not interesting yet", "They have a different concept of memory here", "You can’t explain what you feel being here"),
       Map[String, String](

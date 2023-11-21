@@ -5,6 +5,8 @@ import scala.swing.event.*
 import javax.swing.UIManager
 import devolution.Game
 import java.awt.{Point, Insets, Dimension}
+import java.awt.Robot
+import java.awt.event.KeyEvent
 import scala.language.adhocExtensions // enable extension of Swing classes
 
 ////////////////// NOTE TO STUDENTS //////////////////////////
@@ -31,6 +33,7 @@ object DevolutionGUI extends SimpleSwingApplication:
 
     val game = Game()
     val player = game.player
+    val robot = new Robot()
 
     // Components:
 
@@ -90,6 +93,12 @@ object DevolutionGUI extends SimpleSwingApplication:
 
     def playTurn(command: String) =
       val turnReport = this.game.playTurn(command)
+      println(player.isDead)
+      if this.player.isDead then
+        //simulate a key press to update the GUI
+        robot.keyPress(KeyEvent.VK_UNDERSCORE)
+        robot.keyPress(KeyEvent.VK_ENTER)
+        this.game.reset()
       if this.player.hasQuit then
         this.dispose()
       else
@@ -98,8 +107,6 @@ object DevolutionGUI extends SimpleSwingApplication:
 
 
     def updateInfo(info: String) =
-      if this.player.isDead then
-        this.game.reset()
       if !this.game.isOver then
         this.turnOutput.text = info
       else

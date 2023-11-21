@@ -16,6 +16,7 @@ class Area(val name: String, val timeline: String):
 
   val desc = D.zones(timeline).area(name)
   val neighbors = Map[String, Area]()
+  var deadly = false
   //private val abilities = Vector[Ability]()
 
   /**
@@ -69,7 +70,7 @@ class Area(val name: String, val timeline: String):
   //def contains(abilityName: String) = this.abilities.contains(abilityName)
   //def removeAbility(abilityName: String) = this.abilities.remove(abilityName)
   /** Returns a single-line description of the area for debugging purposes. */
-  override def toString = this.name + ": " + this.timeline + ", " + this.neighbors.toString() + " " + this.neighbor("past").map(_.name) + " " + this.neighbor("future").map(_.name)
+  override def toString = this.name + ": " + this.timeline + ", " + D.movements.map((k,m) => k + " " + this.neighbor(m).map(_.name)).mkString(" ")// + ", " + this.neighbor("west").name + ", " + this.neighbor("up").name + ", " + this.neighbor("down").name + ", " + this.neighbor("back").name + ", " + this.neighbor("forward").name + " " + this.neighbor("past").map(_.name) + " " + this.neighbor("future").map(_.name)
 
   /**
     * Changes the default minimum move phase.
@@ -79,5 +80,6 @@ class Area(val name: String, val timeline: String):
     */
   def setMovePhase(phase: Int) = this.movePhase = phase
 
+  def isDeadly = this.deadly
 
 end Area

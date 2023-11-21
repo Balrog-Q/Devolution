@@ -23,9 +23,11 @@ class Action(input: String):
     //case "knowledge" => Some(actor.knowledge)
     case D.actionNames("examine")   => Some(actor.examine(this.modifiers))
     case D.actionNames("quit")      => Some(actor.quit())
+    case D.actionNames("explore")   => Some(actor.enterTimeline())
     //case D.actionNames("see")       => Some(actor.interact(this.modifiers))
-    case other if !this.modifiers.isBlank => Some(actor.interact(this.verb, this.modifiers))
     case "$"                        => Some("phase " + actor.phase + " " + actor.location.toString) // FOR DEBUG
+    case "tp"                       => Some(actor.tp(this.modifiers))
+    case other if !this.modifiers.isBlank => Some(actor.interact(this.verb, this.modifiers))
     case other                      => None
     //case "drop"      => Some(actor.drop(this.modifiers))
     //case "get"       => Some(actor.get(this.modifiers))

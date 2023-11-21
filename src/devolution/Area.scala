@@ -60,7 +60,7 @@ class Area(val name: String, val timeline: String):
         return ""
 
     var placeDesc = knowledge.map(desc.abilityDesc(_)).mkString("\n")
-    if placeDesc.isEmpty then
+    if placeDesc.trim.isEmpty then
       placeDesc = desc.phaseDesc(phase)
     //if abilities.contains(D.abilities("proprioception") = "\n\nExits available: " + this.neighbors.keys.mkString(", ")
     //val abilityList = "\nYou see here: " + this.abilities.keys.mkString(" ")

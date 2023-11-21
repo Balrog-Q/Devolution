@@ -10,7 +10,7 @@ import java.awt.event.KeyEvent
 import scala.language.adhocExtensions // enable extension of Swing classes
 
 ////////////////// NOTE TO STUDENTS //////////////////////////
-// For the purposes of our course, it’s not necessary
+// For the purposes of our course, it's not necessary
 // that you understand or even look at the code in this file.
 //////////////////////////////////////////////////////////////
 
@@ -20,8 +20,8 @@ import scala.language.adhocExtensions // enable extension of Swing classes
   * its input from a text field and displays information about the game world in uneditable
   * text areas.
   *
-  * **NOTE TO STUDENTS: In this course, you don’t need to understand how this object works
-  * on the inside. It’s enough to know that you can use this file to start the program.**
+  * **NOTE TO STUDENTS: In this course, you don't need to understand how this object works
+  * on the inside. It's enough to know that you can use this file to start the program.**
   *
   * @see [[AdventureTextUI]] */
 object DevolutionGUI extends SimpleSwingApplication:
@@ -29,7 +29,7 @@ object DevolutionGUI extends SimpleSwingApplication:
 
   def top = new MainFrame:
 
-    // Access to the application’s internal logic:
+    // Access to the application's internal logic:
 
     val game = Game()
     val player = game.player
@@ -80,7 +80,7 @@ object DevolutionGUI extends SimpleSwingApplication:
         val quitAction = Action("Quit")( dispose() )
         contents += MenuItem(quitAction)
 
-    // Set up the GUI’s initial state:
+    // Set up the GUI's initial state:
     this.title = game.title
     this.updateInfo(this.game.welcomeMessage)
     this.location = Point(50, 50)
@@ -93,17 +93,16 @@ object DevolutionGUI extends SimpleSwingApplication:
 
     def playTurn(command: String) =
       val turnReport = this.game.playTurn(command)
-      println(player.isDead)
-      if this.player.isDead then
-        //simulate a key press to update the GUI
-        robot.keyPress(KeyEvent.VK_A)
-        robot.keyPress(KeyEvent.VK_ENTER)
-        this.game.reset()
       if this.player.hasQuit then
         this.dispose()
       else
         this.updateInfo(turnReport)
         this.input.enabled = !this.game.isOver
+      if this.player.isDead then
+        //simulate a key press to update the GUI
+        //robot.keyPress(KeyEvent.VK_A)
+        //robot.keyPress(KeyEvent.VK_ENTER)
+        this.game.reset()
 
 
     def updateInfo(info: String) =

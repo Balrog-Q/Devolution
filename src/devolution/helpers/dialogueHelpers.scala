@@ -1,8 +1,8 @@
 package devolution.helpers
 
 
-class KnowledgeDialogues(val misc: Map[String, String], val abilitiesDesc: Vector[AbilityDialogues]):
-  def desc(name: String) = this.abilitiesDesc.map(_.name).find(_ == name).getOrElse(misc("invalidAbility"))
+class KnowledgeDialogues(val misc: Map[String, String], val abilitiesDesc: Map[String, String]):
+  def desc(name: String) = this.abilitiesDesc.getOrElse(name, misc("invalidAbility"))
   def apply(key: String) = this.misc(key)
 
 class AbilityDialogues(val name: String, val desc: String)
@@ -10,7 +10,7 @@ class AbilityDialogues(val name: String, val desc: String)
 /**
   * Text-related info of a timeline to easily access dialogues of it and its areas.
   */
-class TimelineDialogues(val word: String, val question: String, val answer: String, val areaDialogues: Map[String, AreaDialogues]):
+class TimelineDialogues(val word: String, val question: String, val answer: String, val tought: String, val areaDialogues: Map[String, AreaDialogues]):
 
   var misc = Map[String, String]()
 

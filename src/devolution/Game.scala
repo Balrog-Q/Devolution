@@ -34,6 +34,7 @@ class Game:
 
   overflow    .setNeighbors(Vector(                       "future" -> bbVacuum))
   bbVacuum    .setNeighbors(Vector("past" -> overflow,    "future" -> psCenter))
+  bbVacuum.deadly = true
   psCenter    .setNeighbors(Vector("past" -> bbVacuum,    "future" -> olSurface))
   olSurface   .setNeighbors(Vector("past" -> psCenter,    "future" -> phForest))
   phForest    .setNeighbors(Vector("past" -> olSurface,   "future" -> maPath))
@@ -118,7 +119,7 @@ class Game:
   /** Determines if the adventure is complete, that is, if the player has won. */
   //private val destination = bb
   /** The character who is the protagonist of the adventure and whom the real-life player controls. */
-  val player = Player(geWhiteRoom)
+  val player = Player(psCenter)
   def isComplete = false
     //this.player.location == this.destination && this.player.has("battery") && this.player.has("remote")
   /** Determines whether the player has won, lost, or quit, thereby ending the game. */
@@ -150,9 +151,9 @@ class Game:
       return D.misc("accepted")
     //game start
     //D.zones.map((k,v) => v.question).zipWithIndex.filter((v,k) => v == input)
-    println("deadly? "+player.location.isDeadly)
-    if player.location.isDeadly || player.location == bbVacuum then
+    if player.location.isDeadly then
       player.die()
+      return player.location.desc.phaseDesc(0)
 
     //if action.verb == D.actionNames("evolve") || action.verb == D.actionNames("devolve") then
     //  timelineDiscovered = false
@@ -161,69 +162,92 @@ class Game:
 
     //check for a timeline question guess
     //the following if will take care of the return output
-    println(input+" "+ D.zones(player.location.timeline).question)
     if isQuestionRight(input, D.zones(player.location.timeline).question)
       && this.isInRightTimeline then
       player.phase += 1
       this.commandSuccess = true
       //return D.zones.get(lastExcpectedTimeline).answer
 
+    if player.phase == 1 && !player.remembers then
+      outcome += player.learn(D.possibleAbilities("memory"))
+    else if player.phase == 8 then
+      outcome += D.zones(player.location.timeline).tought//+ "\n" + player.learn(D.possibleAbilities("curious"))
+
     //println(entryPoints(player.phase-1).timeline)
     //show old answer as a hint
     if player.location.timeline == lastExcpectedTimeline || isQuestionRight(input, D.zones.get(lastExcpectedTimeline).map(_.question).getOrElse("")) then
       //println(D.zones("Globalization era").answer + " " + D.areas(entryPoints.get(player.phase - 1).map(_.timeline).getOrElse("")))
       this.commandSuccess = true
-      return D.zones(lastExcpectedTimeline).answer
+      return outcome + D.zones(lastExcpectedTimeline).answer
 
-    player.phase match
-      case 0 =>
-        if player.location == startingPoint then
-          if isQuestionRight(input, D.ge.question) then
-            player.phase += 1
-            outcome = D.ge.answer
-            commandSuccess = true
+    if isInRightTimeline && player.timelineChosen then
+      player.phase match
+        case 0 =>
+          if player.remembers then
+            return D.ge("intro2")
           else
-            outcome += D.misc("intro1")
-            if !player.remembers then
-              outcome += "\n" + D.misc("intro2")
+            return D.ge("intro")
+          //if player.location == startingPoint then
+            /*if isQuestionRight(input, D.ge.question) then
+              player.phase += 1
+              outcome = D.ge.answer
+              commandSuccess = true
+            else
+              outcome += D.misc("intro1")
+              if !player.remembers then
+                outcome += "\n" + D.misc("intro2")*/
 
-          //first question guessed
-      case 1 if isInRightTimeline =>
-        if player.location == psCenter then
-          if player.location.interactables.values.head.completed && action.commandText == D.ps("leave") then
-            player.location.interactables = player.location.interactables.tail
-            D.ps("left")
+            //first question guessed
+        case 1 =>
+          //if player.location == psCenter then
+          //println(":::"+player.location.interactables.values.map(_.completed).mkString(","))
+          if player.location.interactables.values.headOption.exists(_.completed) then //&& action.verb == D.ps("leave") then
+            //player.location.interactables = player.location.interactables.tail
+            //D.ps("left")
+
+          //println("?"+player.location.interactables.values.count(_.completed))
           player.location.interactables.values.count(_.completed) match
             case 0 => player.location.interactables
-            case 1 => D.ps("star1")
-            case 2 => D.ps("move")
-        if player.location == psPeriphery then
-          //Exception in thread "AWT-EventQueue-0" scala.MatchError: 0 (of class java.lang.Integer)
-          player.location.interactables.values.count(_.completed) match
-            case 1 => D.ps("less")
-            case 2 => D.ps("move")
+            case 1 =>
+              this.commandSuccess = true
+              return D.ps("star1")
+            case 2 =>
+              this.commandSuccess = true
+              return D.ps("move")
+            case _ => ""
+          if player.location == psPeriphery then
+            println(player.location.interactables.values)
+            println(player.location.interactables.values.count(_.completed))
+            player.location.interactables.values.count(_.completed) match
+              case 1 =>
+                this.commandSuccess = true
+                return D.ps("less")
+              case 2 =>
+                this.commandSuccess = true
+                return D.ps("move")
+              case _ => ""
 
-        //if player.timeline == D.areas("bb") && action.verb == D.actions("go") then
-          //timelineDiscovered = true
-        /*if player.timeline == D.areas("bb") && isQuestionRight(input, D.ps.question)  then
-          outcome = D.ps.answer
-          player.phase += 1
+          //if player.timeline == D.areas("bb") && action.verb == D.actions("go") then
+            //timelineDiscovered = true
+          /*if player.timeline == D.areas("bb") && isQuestionRight(input, D.ps.question)  then
+            outcome = D.ps.answer
+            player.phase += 1
+              commandSuccess = true*/
+        case 2 =>
+          /*if player.timeline == D.areas("hd") && isQuestionRight(input, D.hd.question)  then
+            outcome = D.hd.answer
+            player.phase += 1
+              commandSuccess = true*/
+        case 3 =>
+          /*if player.timeline == D.areas("ma") && isQuestionRight(input, D.ma.question) then
+            outcome = D.ma.answer
+            player.phase += 1
             commandSuccess = true*/
-      case 2 =>
-        /*if player.timeline == D.areas("hd") && isQuestionRight(input, D.hd.question)  then
-          outcome = D.hd.answer
-          player.phase += 1
-            commandSuccess = true*/
-      case 3 =>
-        /*if player.timeline == D.areas("ma") && isQuestionRight(input, D.ma.question) then
-          outcome = D.ma.answer
-          player.phase += 1
-          commandSuccess = true*/
 
 
-      case _ =>
-        D.debug("noPhase")
-      //ALL THE LOGIC ABOUT GAME PROGRESSION GOES HERE
+        case _ =>
+          D.debug("noPhase")
+        //ALL THE LOGIC ABOUT GAME PROGRESSION GOES HERE
     outcome
 
   def isQuestionRight(input: String, question: String) =
@@ -240,7 +264,7 @@ class Game:
   def reset() =
     player.phase = 0
     //timelineDiscovered = false
-    this.playTurn("")
+    //this.playTurn("")
     Thread.sleep(1000)
     this.player.dead = false
 

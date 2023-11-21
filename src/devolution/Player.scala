@@ -17,6 +17,8 @@ class Player(startingArea: Area):
   var abilities = Vector[String]()     // container of all the abilities that the player has
   var dead = false
   var lastEntryPoint = startingArea
+  var invincible = false
+  var timelineChosen = false
 
   /* The phase the player is currently in. It allows to select the right dialogues. */
   var phase = 0
@@ -47,7 +49,7 @@ class Player(startingArea: Area):
     this.quitCommandGiven = true
     ""
   /** Returns a brief description of the player’s state, for debugging purposes. */
-  override def toString = "Now at: " + this.location.name
+  override def toString = "Now at: " + this.location.name + " with last EP " + this.lastEntryPoint
   /** Tries to pick up an ability of the given name. This is successful if such an ability is
     * located in the player’s current location. If so, the ability is added to the player’s
     * knowledge and removed from the location. Returns a description of the result:
@@ -93,6 +95,9 @@ class Player(startingArea: Area):
     else
       D.knowledge("missingAbility")
 
+  def interact(action: String, element: String) =
+    this.location.interactables.get(element).map(_.execute(action)).getOrElse("")
+
 
   /** Causes the player to list what they are carrying. Returns a listing of the player’s
     * abilities or a statement indicating that the player is carrying nothing. The return
@@ -105,28 +110,29 @@ class Player(startingArea: Area):
       D.knowledge("knowledgeIntro") + "\n" + this.abilities.map(name => s"$name: ${D.knowledge(name)}").mkString("\n")
 
   def devolve() =
-    if this.phase > 0 then
-      this.currentLocation = this.lastEntryPoint
-      this.go("past")
-      this.lastEntryPoint = this.currentLocation
-      D.actions("devolveAction")
-    else
-      ""
+    timeTravelTo("past")
 
   def evolve() =
+    timeTravelTo("future")
+
+  def timeTravelTo(direction: String) =
     if this.phase > 0 then
+      timelineChosen = false
       this.currentLocation = this.lastEntryPoint
-      this.go("future")
+      this.go(direction)
       this.lastEntryPoint = this.currentLocation
-      D.actions("evolveAction")
+      D.actions(direction)
     else
       ""
 
   def die() =
-    this.dead = true
-    this.phase = 0
-    this.currentLocation = startingArea
+    if !this.invincible then
+      this.dead = true
+      this.phase = 0
+      this.currentLocation = startingArea
+      this.lastEntryPoint = startingArea
 
   def isDead = this.dead
+
 
 end Player

@@ -11,7 +11,12 @@ class AbilityDialogues(val name: String, val desc: String)
   * Text-related info of a timeline to easily access dialogues of it and its areas.
   */
 class TimelineDialogues(val word: String, val question: String, val answer: String, val areaDialogues: Map[String, AreaDialogues]):
+
+  var misc = Map[String, String]()
+
   def area(name: String) = areaDialogues(name)
+
+  def apply(key: String) = misc.getOrElse(key, "")
 
 /**
   * Text-related info of an area to easily access dialogues of it.
@@ -36,6 +41,8 @@ class AreaDialogues(phaseDescriptions: Vector[String], abilityDescriptions: Map[
   //val soundDesc = abilityDescriptions.lift(1).getOrElse("")
   //val physicalDesc = abilityDescriptions.lift(2).getOrElse("")
 
-  override def toString = phaseDescriptions.headOption.find(_ != "").getOrElse(Dialogues.debug("noAreaDesc"))
+  override def toString = phaseDescriptions.find(_ != "").getOrElse(Dialogues.debug("noAreaDesc"))
 
 //val timeDesc = abilityDescriptions.lift(2).getOrElse("")
+
+class ElementDialogues(val name: String, val action: String, val output: String)

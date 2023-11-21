@@ -32,6 +32,7 @@ class Game:
   private val elTower = Area(D.areas("tower"), D.areas("el"))
   private val hdVacuum = Area(D.areas("vacuum"), D.areas("hd"))
 
+  overflow    .setNeighbors(Vector(                       "future" -> bbVacuum))
   bbVacuum    .setNeighbors(Vector("past" -> overflow,    "future" -> psCenter))
   psCenter    .setNeighbors(Vector("past" -> bbVacuum,    "future" -> olSurface))
   olSurface   .setNeighbors(Vector("past" -> psCenter,    "future" -> phForest))
@@ -53,6 +54,18 @@ class Game:
   psVoid.deadly = true
   psCenter.setNeighbors(Vector(D.movements("forward") -> psPeriphery))
   psPeriphery.setNeighbors(Vector(D.movements("back") -> psCenter, D.movements("forward") -> psVoid))
+
+  //future celestial bodies
+  psCenter.interactables ++= Map(
+    "dust1" -> Element(D.interactables("dust1"), 1),
+    "dust2" -> Element(D.interactables("dust2"), 3)
+  )
+  psPeriphery.interactables ++= Map(
+    "dust3" -> Element(D.interactables("dust3"), 5),
+    "dust4" -> Element(D.interactables("dust4"), 2),
+    "dust5" -> Element(D.interactables("dust5"), 2)
+  )
+
 
   private val maCastle1 = Area(D.areas("castle1"), D.areas("ma"))
   private val maCastle2 = Area(D.areas("castle2"), D.areas("ma"))
@@ -130,32 +143,44 @@ class Game:
     val input = action.commandText
     var outcome = ""
     commandSuccess = false
+
+    //bonus cheat mode
+    if player.location == overflow then
+      player.invincible = action.verb == D.misc("accept")
+      return D.misc("accepted")
     //game start
     //D.zones.map((k,v) => v.question).zipWithIndex.filter((v,k) => v == input)
+    println("deadly? "+player.location.isDeadly)
     if player.location.isDeadly || player.location == bbVacuum then
       player.die()
-
-      //show a death message only if the user can see where he went
-      if player.abilities.contains(D.knowledge("vision")) then
-        return D.misc("dead") + player.location.name
-      else
-        return ""
 
     //if action.verb == D.actionNames("evolve") || action.verb == D.actionNames("devolve") then
     //  timelineDiscovered = false
 
     //if player.phase == 1 then outcome = D.ge.answer
+
+    //check for a timeline question guess
+    //the following if will take care of the return output
+    println(input+" "+ D.zones(player.location.timeline).question)
+    if isQuestionRight(input, D.zones(player.location.timeline).question)
+      && this.isInRightTimeline then
+      player.phase += 1
+      this.commandSuccess = true
+      //return D.zones.get(lastExcpectedTimeline).answer
+
+    //println(entryPoints(player.phase-1).timeline)
     //show old answer as a hint
-    println(entryPoints.get(player.phase-1).map(_.timeline).getOrElse(""))
-    if player.location.timeline == entryPoints.get(player.phase-1).map(_.timeline).getOrElse("") then
+    if player.location.timeline == lastExcpectedTimeline || isQuestionRight(input, D.zones.get(lastExcpectedTimeline).map(_.question).getOrElse("")) then
       //println(D.zones("Globalization era").answer + " " + D.areas(entryPoints.get(player.phase - 1).map(_.timeline).getOrElse("")))
-      return D.zones.get(entryPoints.get(player.phase-1).map(_.timeline).getOrElse("")).map(_.answer).getOrElse("non!")
+      this.commandSuccess = true
+      return D.zones(lastExcpectedTimeline).answer
 
     player.phase match
       case 0 =>
         if player.location == startingPoint then
           if isQuestionRight(input, D.ge.question) then
             player.phase += 1
+            outcome = D.ge.answer
             commandSuccess = true
           else
             outcome += D.misc("intro1")
@@ -163,23 +188,37 @@ class Game:
               outcome += "\n" + D.misc("intro2")
 
           //first question guessed
-      case 1 =>
+      case 1 if isInRightTimeline =>
+        if player.location == psCenter then
+          if player.location.interactables.values.head.completed && action.commandText == D.ps("leave") then
+            player.location.interactables = player.location.interactables.tail
+            D.ps("left")
+          player.location.interactables.values.count(_.completed) match
+            case 0 => player.location.interactables
+            case 1 => D.ps("star1")
+            case 2 => D.ps("move")
+        if player.location == psPeriphery then
+          //Exception in thread "AWT-EventQueue-0" scala.MatchError: 0 (of class java.lang.Integer)
+          player.location.interactables.values.count(_.completed) match
+            case 1 => D.ps("less")
+            case 2 => D.ps("move")
+
         //if player.timeline == D.areas("bb") && action.verb == D.actions("go") then
           //timelineDiscovered = true
-        if player.timeline == D.areas("bb") && isQuestionRight(input, D.ps.question)  then
+        /*if player.timeline == D.areas("bb") && isQuestionRight(input, D.ps.question)  then
           outcome = D.ps.answer
           player.phase += 1
-            commandSuccess = true
+            commandSuccess = true*/
       case 2 =>
-        if player.timeline == D.areas("hd") && isQuestionRight(input, D.hd.question)  then
+        /*if player.timeline == D.areas("hd") && isQuestionRight(input, D.hd.question)  then
           outcome = D.hd.answer
           player.phase += 1
-            commandSuccess = true
+            commandSuccess = true*/
       case 3 =>
-        if player.timeline == D.areas("ma") && isQuestionRight(input, D.ma.question) then
+        /*if player.timeline == D.areas("ma") && isQuestionRight(input, D.ma.question) then
           outcome = D.ma.answer
           player.phase += 1
-          commandSuccess = true
+          commandSuccess = true*/
 
 
       case _ =>
@@ -188,7 +227,11 @@ class Game:
     outcome
 
   def isQuestionRight(input: String, question: String) =
-    !input.isBlank && input.contains("?") && question.toLowerCase().contains(input.toLowerCase())
+    !input.isBlank && input.contains("?") && question.toLowerCase.contains(input.toLowerCase())
+
+  def lastExcpectedTimeline = entryPoints.get(player.phase-1).map(_.timeline).getOrElse("")
+
+  def isInRightTimeline = player.location.timeline == entryPoints(player.phase).timeline
 
   /**
     * Handle the dead of the player and the reset options/state changes.
@@ -209,8 +252,8 @@ class Game:
     * case, no turns elapse. */
   def playTurn(command: String): String =
     val action = Action(command)
-    var storyReport = parseStoryCommand(action)
     var outcomeReport = action.execute(this.player).getOrElse("")
+    var storyReport = parseStoryCommand(action)
 
     if !this.commandSuccess && outcomeReport.isBlank && !action.verb.isBlank && !player.isDead then //&& outcomeReport.isBlank && storyReport.isBlank then // needs to hide "command not found" error during successful output
       //check if the verb could still be meaningfull
@@ -220,7 +263,9 @@ class Game:
 
       //default "unknown" output text
       //if action.verb.isEmpty then
-      if action.modifiers.isBlank then
+      if action.commandText.endsWith("?") then
+        s"$storyReport\n\n${action.commandText} ${D.misc("wrongQuestion")}"
+      else if action.modifiers.isBlank then
         s"$storyReport\n\n${D.misc("unknownCommand")} ${action.verb}!"
         //if !action.verb.isBlank then
         //else

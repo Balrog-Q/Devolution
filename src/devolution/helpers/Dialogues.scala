@@ -12,10 +12,13 @@ object Dialogues:
     "intro2" -> "You are here. But where?\nAnd is someone else also?",
     "unknownCommand" -> "It’s not the right time to",
     "unknownParameter" -> "It doesn’t sound like a good idea to",
+    "wrongQuestion" -> "That surely something to think about, but not quite what you are looking for...",
     "undefinedArea" -> "You can't distinguish anything useful",
     "noArea" -> "There is nothing particularly interesting in that direction",
     "dead" -> "You took one step too close to the ",
-    "moved" -> "You tried to move "
+    "moved" -> "You tried to move ",
+    "accept" -> "yes",
+    "accepted" -> "Relizing your condition, from now on you refuse to die"
   )
 
   val actionNames = Map[String, String](
@@ -23,13 +26,16 @@ object Dialogues:
     "evolve" -> "evolve",
     "devolve" -> "devolve",
     "examine" -> "examine",
-    "quit" -> "quit",
-    "" -> "",
-    "" -> ""
+    "see" -> "watch",
+    "hear" -> "listen",
+    "fear" -> "",
+    "sad" -> "",
+    "explore" -> "",
+    "quit" -> "quit"
   )
   val actions = Map[String, String](
-    "evolveAction" -> "You wait",
-    "devolveAction" -> "You make a hard choice",
+    "future" -> "You wait",
+    "past" -> "You make a hard choice",
   )
 
   val movements = Map[String, String](
@@ -50,7 +56,8 @@ object Dialogues:
     "noOutput" -> "Wow, you certainly did something by trying to ",
     "noAreaDesc" -> "Wow, you ceraintly are somewhere now",
     "noPhase" -> "Wow, you certainly progressed until some point",
-    "noAbility" -> "Wow, you certainly got some broken unknown ability")
+    "noAbility" -> "Wow, you certainly got some broken unknown ability",
+    "noElement" -> "Wow, you certainly acted on something")
 
   //val story = Map[String, String]("")
 
@@ -92,7 +99,24 @@ object Dialogues:
 
   val knowledge = KnowledgeDialogues(abilityMisc, abilitiesDesc)
 
-
+  val interactables = Map[String, ElementDialogues](
+    "dust1" -> ElementDialogues("Dust", "collect", "Point"),
+    "dust2" -> ElementDialogues("Dust", "collect", "This"),
+    "dust3" -> ElementDialogues("Dust", "collect", "What"),
+    "dust4" -> ElementDialogues("Dust", "collect", "Of"),
+    "dust5" -> ElementDialogues("Dust", "collect", "Is"),
+    "cell1" -> ElementDialogues("Prokaryote cell", "eat", "This"),
+    "cell2" -> ElementDialogues("Eukaryote cell", "eat", "The"),
+    "rock" -> ElementDialogues("Rock","watch", "Is"),
+    "mollusk" -> ElementDialogues("Mollusk", "eat", "There"),
+    "plankton" -> ElementDialogues("Mollusk", "eat", "A"),
+    "fish1" -> ElementDialogues("Small fish", "eat", "In"),
+    "fish2" -> ElementDialogues("Big fish", "eat", "Peak"),
+    "thermalRock" -> ElementDialogues("Porous rock", "settle", "Chain"),
+    "" -> ElementDialogues("", "", ""),
+    "" -> ElementDialogues("", "", ""),
+    "" -> ElementDialogues("", "", "")
+  )
 
 
 
@@ -103,7 +127,7 @@ object Dialogues:
   //overflow dialogues
   val bonus = TimelineDialogues("", "", "", Map(
     areas("bonus") -> AreaDialogues(
-      Vector(""),
+      Vector("No, I’m not eating from a paw anymore. No matter which kind of being or entity I am, I’m now free. But do I really desire freedom?"),
       Map[String, String](
         possibleAbilities("vision") -> "",
         possibleAbilities("proprio") -> "",
@@ -118,7 +142,7 @@ object Dialogues:
   //big bang dialogues
   val bb = TimelineDialogues("", "", "", Map(
     areas("vacuum") -> AreaDialogues(
-      Vector("Everything here. Unfortunately, -", "Every interesting thing is here. If it wasn’t for -", "It’s not through memory that you get here. But -", "You can’t find something that survives if you don’t do it yourse-", "Everything, but not what you just did. Pretty unexpected to -"),
+      Vector("", "Everything here. Unfortunately, -", "Every interesting thing is here. If it wasn’t for -", "It’s not through memory that you get here. But -", "You can’t find something that survives if you don’t do it yourse-", "Everything, but not what you just did. Pretty unexpected to -"),
       Map[String, String](
         possibleAbilities("vision") -> "Just black, no light to be seen, aside from one singular peculiar point",
         possibleAbilities("proprio") -> "Nothing physical is here, but it will soon be",
@@ -133,7 +157,7 @@ object Dialogues:
   //primordial soup dialogues
   val ps = TimelineDialogues("from", "What is the point of this?", "", Map(
     areas("voidCenter") -> AreaDialogues(
-      Vector("Nothing interesting here", "Seems interesting", "Memory is not yet a thing here", "What you experienced had no effect here", "The place where interesting things just happened", "X Is no danger here, only opportunities", "X Some say this is also a peak, but you are looking for a less abstract one"),
+      Vector("", "Nothing interesting here", "Seems interesting", "Memory is not yet a thing here", "What you experienced had no effect here", "The place where interesting things just happened", "X Is no danger here, only opportunities", "X Some say this is also a peak, but you are looking for a less abstract one"),
       Map[String, String](
         possibleAbilities("vision") -> "Nothing to see really. There is still no source of light",
         possibleAbilities("proprio") -> "You miss a floor between your feets",
@@ -144,7 +168,7 @@ object Dialogues:
       )
     ),
     areas("closeVoid") -> AreaDialogues(
-      Vector("Everything here is alone"),
+      Vector("", "Everything here is alone"),
       Map[String, String](
         possibleAbilities("vision") -> "Nothing but darkness",
         possibleAbilities("proprio") -> "You feel a strange pull from were you arrived, as if something is trying to swallow you whole",
@@ -166,37 +190,46 @@ object Dialogues:
       )
     )
   ))
+  ps.misc = Map[String, String](
+    "star1" -> "Something happened. But you will need to focus on another question to understand. For now it’s time to leave this cluster",
+    "move" -> "You seem also able to go away from here. But feel free to go back if you are loosing your way",
+    "less" -> "Not all the dust wants to be in great number",
+    "more1" -> "More dust is here. It is starting to interact",
+    "more2" -> "Even more dust. Something is happening",
+    "leave" -> "leave cluster",
+    "left" -> "You moved away from the new cluster",
+  )
 
   val ol = TimelineDialogues("eating", "Is there a peak in this chain?", "", Map(
     areas("ocean1") -> AreaDialogues(
-      Vector("Nothing interesting here",""),
+      Vector("", "Nothing interesting here", "It’s too chaotic to keep track of things here", "Something, but still not interesting", "Here lives the origin of the problem. But you had already enough of it"),
       Map[String, String](
-        possibleAbilities("vision") -> "",
-        possibleAbilities("proprio") -> "",
-        possibleAbilities("hear") -> "",
+        possibleAbilities("vision") -> "A sunny day in this gray and blue world",
+        possibleAbilities("proprio") -> "Earthquakes shake the ground and lava river flows in great numbers. The water it's full of energy",
+        possibleAbilities("hear") -> "You hear the gentle splash of the waves, the rhythmic pulse of the tide",
         possibleAbilities("fear") -> "",
         possibleAbilities("sad") -> "",
-        possibleAbilities("curious") -> ""
+        possibleAbilities("curious") -> "You wonder what lies beneath the waves, what secrets they may hide"
       )
     ),
     areas("volcano") -> AreaDialogues(
       Vector(""),
       Map[String, String](
-        possibleAbilities("vision") -> "",
+        possibleAbilities("vision") -> "Clouds of smoke and ash rise from the craters of this volcanic area",
         possibleAbilities("proprio") -> "",
         possibleAbilities("hear") -> "",
         possibleAbilities("fear") -> "",
-        possibleAbilities("sad") -> "",
+        possibleAbilities("sad") -> "The rumbling of the earth and the hissing of the steam are increasingly deafening",
         possibleAbilities("curious") -> ""
       )
     ),
     areas("ocean2") -> AreaDialogues(
       Vector(""),
       Map[String, String](
-        possibleAbilities("vision") -> "",
+        possibleAbilities("vision") -> "Darkness envelops you like a thick blanket",
         possibleAbilities("proprio") -> "",
         possibleAbilities("hear") -> "",
-        possibleAbilities("fear") -> "",
+        possibleAbilities("fear") -> "You feel a surge of fear as you go deeper. You don't know what dangers lurk in the depths. You hesitate, unsure if you should risk it.",
         possibleAbilities("sad") -> "",
         possibleAbilities("curious") -> ""
       )
@@ -204,20 +237,20 @@ object Dialogues:
     areas("ocean3") -> AreaDialogues(
       Vector(""),
       Map[String, String](
-        possibleAbilities("vision") -> "",
-        possibleAbilities("proprio") -> "",
+        possibleAbilities("vision") -> "The darkness can’t get any worse than this",
+        possibleAbilities("proprio") -> "Bubbles of air raise to the surface",
         possibleAbilities("hear") -> "",
-        possibleAbilities("fear") -> "",
-        possibleAbilities("sad") -> "",
+        possibleAbilities("fear") -> "Every part of you screams in panic. You’re not supposed to be here. Better go away",
+        possibleAbilities("sad") -> "You feel a pang of sadness as you realize how lonely this place is",
         possibleAbilities("curious") -> ""
       )
     ),
     areas("ocean4") -> AreaDialogues(
       Vector(""),
       Map[String, String](
-        possibleAbilities("vision") -> "",
-        possibleAbilities("proprio") -> "",
-        possibleAbilities("hear") -> "",
+        possibleAbilities("vision") -> "Mysterious glimpse of light create intricate patterns",
+        possibleAbilities("proprio") -> "The mass of water around you gets pushed around by some unexplainable current",
+        possibleAbilities("hear") -> "A distant rumble echoes through the water",
         possibleAbilities("fear") -> "",
         possibleAbilities("sad") -> "",
         possibleAbilities("curious") -> ""
@@ -226,12 +259,12 @@ object Dialogues:
     areas("thermal") -> AreaDialogues(
       Vector(""),
       Map[String, String](
-        possibleAbilities("vision") -> "",
+        possibleAbilities("vision") -> "There is a strange formation growing from the seafloor. It looks like a volcanic vent, spewing hot water and minerals",
         possibleAbilities("proprio") -> "",
         possibleAbilities("hear") -> "",
         possibleAbilities("fear") -> "",
         possibleAbilities("sad") -> "",
-        possibleAbilities("curious") -> ""
+        possibleAbilities("curious") -> "You are attracted by the welcoming warmth produced"
       )
     ),
     areas("lava") -> AreaDialogues(
@@ -260,7 +293,7 @@ object Dialogues:
 
   val ph = TimelineDialogues("the", "Why should I escape them?", "", Map(
     areas("clearing") -> AreaDialogues(
-      Vector("Nothing interesting here",""),
+      Vector("Nothing interesting here", ""),
       Map[String, String](
         possibleAbilities("vision") -> "",
         possibleAbilities("proprio") -> "",
@@ -273,12 +306,12 @@ object Dialogues:
     areas("volcano") -> AreaDialogues(
       Vector(""),
       Map[String, String](
-        possibleAbilities("vision") -> "",
+        possibleAbilities("vision") -> "The red glow of lava contrasts with the dark rocks and the green vegetation",
         possibleAbilities("proprio") -> "",
         possibleAbilities("hear") -> "",
         possibleAbilities("fear") -> "",
         possibleAbilities("sad") -> "",
-        possibleAbilities("curious") -> ""
+        possibleAbilities("curious") -> "A false step could mean diving directly into some lava"
       )
     ),
     areas("jungle") -> AreaDialogues(
@@ -351,7 +384,7 @@ object Dialogues:
 
   val ma = TimelineDialogues("straight", "How could someone survive this?", "", Map(
     areas("path") -> AreaDialogues(
-      Vector("Nothing interesting here",""),
+      Vector("", "Nothing interesting here", ""),
       Map[String, String](
         possibleAbilities("vision") -> "",
         possibleAbilities("proprio") -> "",
@@ -459,7 +492,7 @@ object Dialogues:
   //scientific revolution
   val sr = TimelineDialogues("", "", "", Map(
     areas("room") -> AreaDialogues(
-      Vector("Nothing interesting here",""),
+      Vector("", "Nothing interesting here", ""),
       Map[String, String](
         possibleAbilities("vision") -> "",
         possibleAbilities("proprio") -> "",
@@ -474,7 +507,7 @@ object Dialogues:
   //end of life
   val el = TimelineDialogues("", "", "", Map(
     areas("tower") -> AreaDialogues(
-      Vector("Nothing interesting here",""),
+      Vector("", "Nothing interesting here", ""),
       Map[String, String](
         possibleAbilities("vision") -> "",
         possibleAbilities("proprio") -> "",
@@ -489,7 +522,7 @@ object Dialogues:
   //heat death
   val hd = TimelineDialogues("", "", "", Map(
     areas("vacuum") -> AreaDialogues(
-      Vector("Nothing interesting here",""),
+      Vector("", "Nothing interesting here", ""),
       Map[String, String](
         possibleAbilities("vision") -> "",
         possibleAbilities("proprio") -> "",

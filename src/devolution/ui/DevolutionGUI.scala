@@ -96,7 +96,7 @@ object DevolutionGUI extends SimpleSwingApplication:
       println(player.isDead)
       if this.player.isDead then
         //simulate a key press to update the GUI
-        robot.keyPress(KeyEvent.VK_UNDERSCORE)
+        robot.keyPress(KeyEvent.VK_A)
         robot.keyPress(KeyEvent.VK_ENTER)
         this.game.reset()
       if this.player.hasQuit then

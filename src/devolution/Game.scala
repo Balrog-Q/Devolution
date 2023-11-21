@@ -25,7 +25,7 @@ class Game:
   private val bbVacuum = Area(D.areas("vacuum"), D.areas("bb"))
   private val psCenter = Area(D.areas("voidCenter"), D.areas("ps"))
   private val olSurface = Area(D.areas("ocean1"), D.areas("ol"))
-  private val phForest = Area(D.areas("clearing"), D.areas("ph"))
+  private val phClearing = Area(D.areas("clearing"), D.areas("ph"))
   private val maPath = Area(D.areas("path"), D.areas("ma"))
   private val srRoom = Area(D.areas("room"), D.areas("sr"))
   private val geWhiteRoom = Area(D.areas("start"), D.areas("ge"))
@@ -36,15 +36,15 @@ class Game:
   bbVacuum    .setNeighbors(Vector("past" -> overflow,    "future" -> psCenter))
   bbVacuum.deadly = true
   psCenter    .setNeighbors(Vector("past" -> bbVacuum,    "future" -> olSurface))
-  olSurface   .setNeighbors(Vector("past" -> psCenter,    "future" -> phForest))
-  phForest    .setNeighbors(Vector("past" -> olSurface,   "future" -> maPath))
-  maPath      .setNeighbors(Vector("past" -> phForest,    "future" -> srRoom))
+  olSurface   .setNeighbors(Vector("past" -> psCenter,    "future" -> phClearing))
+  phClearing    .setNeighbors(Vector("past" -> olSurface,   "future" -> maPath))
+  maPath      .setNeighbors(Vector("past" -> phClearing,    "future" -> srRoom))
   srRoom      .setNeighbors(Vector("past" -> maPath,      "future" -> geWhiteRoom))
   geWhiteRoom .setNeighbors(Vector("past" -> srRoom,      "future" -> elTower))
   elTower     .setNeighbors(Vector("past" -> geWhiteRoom, "future" -> hdVacuum))
   hdVacuum    .setNeighbors(Vector("past" -> elTower,     "future" -> hdVacuum))
 
-  val entryPoints = Vector(geWhiteRoom, psCenter, hdVacuum, maPath, phForest, olSurface, elTower, srRoom)
+  val entryPoints = Vector(geWhiteRoom, psCenter, hdVacuum, maPath, phClearing, olSurface, elTower, srRoom)
     .zipWithIndex.map(_.swap).toMap
   entryPoints.foreach((k,v) => v.setMovePhase(k))
   //assign the correct move phase based on the order the zone has been added to the entryPoint vector
@@ -53,6 +53,7 @@ class Game:
   private val psPeriphery = Area(D.areas("closeVoid"), D.areas("ps"))
   private val psVoid = Area(D.areas("vacuum"), D.areas("ps"))
   psVoid.deadly = true
+
   psCenter.setNeighbors(Vector(D.movements("forward") -> psPeriphery))
   psPeriphery.setNeighbors(Vector(D.movements("back") -> psCenter, D.movements("forward") -> psVoid))
 
@@ -68,6 +69,44 @@ class Game:
   )
 
 
+  private val olOcean2 = Area(D.areas("ocean2"), D.areas("ol"))
+  private val olOcean3 = Area(D.areas("ocean3"), D.areas("ol"))
+  private val olOcean4 = Area(D.areas("ocean4"), D.areas("ol"))
+  private val olThermal = Area(D.areas("thermal"), D.areas("ol"))
+  private val olVolcano = Area(D.areas("volcano"), D.areas("ol"))
+  private val olVolcano2 = Area(D.areas("volcano2"), D.areas("ol"))
+  private val olLava = Area(D.areas("lava"), D.areas("ol"))
+  olVolcano2.deadly = true
+  olLava.deadly = true
+
+  olSurface   .setNeighbors(Vector(D.movements("forward") -> olVolcano, D.movements("down") -> olOcean2))
+  olOcean2   .setNeighbors(Vector(D.movements("up") -> olSurface, D.movements("down") -> olOcean3))
+  olOcean3   .setNeighbors(Vector(D.movements("up") -> olOcean2, D.movements("down") -> olOcean4))
+  olOcean4   .setNeighbors(Vector(D.movements("up") -> olOcean4, D.movements("down") -> olVolcano2, D.movements("forward") -> olThermal))
+  olThermal  .setNeighbors(Vector(D.movements("up") -> olOcean3, D.movements("down") -> olVolcano2, D.movements("back") -> olOcean4))
+  olVolcano  .setNeighbors(Vector(D.movements("back") -> olSurface, D.movements("forward") -> olLava))
+
+  private val phJungle = Area(D.areas("jungle"), D.areas("ph"))
+  private val phHill = Area(D.areas("hill"), D.areas("ph"))
+  private val phSwamp = Area(D.areas("swamp"), D.areas("ph"))
+  private val phCave1 = Area(D.areas("cave1"), D.areas("ph"))
+  private val phCave2 = Area(D.areas("cave2"), D.areas("ph"))
+  private val phVolcano = Area(D.areas("volcano"), D.areas("ph"))
+  private val phNest = Area(D.areas("nest"), D.areas("ph"))
+  private val phLava = Area(D.areas("lava"), D.areas("ph"))
+  phLava.deadly = true
+  phNest.deadly = true
+
+  phClearing  .setNeighbors(Vector(D.movements("n") -> phJungle, D.movements("s") -> phSwamp, D.movements("e") -> phJungle, D.movements("w") -> phHill))
+  phJungle    .setNeighbors(Vector(D.movements("n") -> phCave1, D.movements("s") -> phClearing, D.movements("e") -> phHill, D.movements("w") -> phNest))
+  phHill      .setNeighbors(Vector(D.movements("n") -> phJungle, D.movements("s") -> phSwamp, D.movements("e") -> phClearing, D.movements("w") -> phVolcano))
+  phVolcano   .setNeighbors(Vector(D.movements("n") -> phJungle, D.movements("s") -> phJungle, D.movements("e") -> phHill, D.movements("w") -> phLava))
+  phSwamp     .setNeighbors(Vector(D.movements("n") -> phClearing, D.movements("s") -> phNest, D.movements("e") -> phHill, D.movements("w") -> phJungle))
+  phCave1     .setNeighbors(Vector(D.movements("in") -> phCave2, D.movements("s") -> phJungle, D.movements("e") -> phJungle, D.movements("w") -> phJungle))
+  phCave2     .setNeighbors(Vector(D.movements("back") -> phCave1,  D.movements("forward") -> phNest))
+
+
+
   private val maCastle1 = Area(D.areas("castle1"), D.areas("ma"))
   private val maCastle2 = Area(D.areas("castle2"), D.areas("ma"))
   private val maField = Area(D.areas("field"), D.areas("ma"))
@@ -80,15 +119,34 @@ class Game:
   maCastle1 .setNeighbors(Vector(D.movements("w") -> maCastle2, D.movements("e") -> maPath, D.movements("s") -> maField))
   maHouse1  .setNeighbors(Vector(D.movements("n") -> maGrave, D.movements("s") -> maField, D.movements("e") -> maStream, D.movements("w") -> maPath, D.movements("in") -> maHouse2))
   maHouse2  .setNeighbors(Vector(D.movements("back") -> maHouse1))
-  maGrave .setNeighbors(Vector(D.movements("s") -> maHouse1, D.movements("w") -> maPath, D.movements("e") -> maStream))
+  maGrave   .setNeighbors(Vector(D.movements("s") -> maHouse1, D.movements("w") -> maPath, D.movements("e") -> maStream))
   maStream  .setNeighbors(Vector(D.movements("w") -> maHouse1))
-  maField .setNeighbors(Vector(D.movements("n") -> maPath))
+  maField   .setNeighbors(Vector(D.movements("n") -> maPath))
+
+
+
+  /*private val geSwitch = Area(D.areas("switch"), D.areas("ge"))
+  private val geServer = Area(D.areas("server"), D.areas("ge"))
+  private val gePC = Area(D.areas("pc"), D.areas("ge"))
+  private val geFirewall = Area(D.areas("firewall"), D.areas("ge"))
+  //private val geWeb = Area(D.areas("web"), D.areas("ge"))
+
+  geSwitch   .setNeighbors(Vector(D.movements("up") -> gePC, D.movements("down") -> geServer, D.movements("forward") -> geFirewall))
+  geServer   .setNeighbors(Vector(D.movements("up") -> geSwitch))
+  gePC       .setNeighbors(Vector(D.movements("forward") -> geSwitch))
+  geFirewall .setNeighbors(Vector(D.movements("back") -> geSwitch))*/
+
+
+  private val elTerrace = Area(D.areas("terrace"), D.areas("el"))
+  elTerrace.deadly = true
+
+  elTower   .setNeighbors(Vector(D.movements("forward") -> elTerrace))
 
   // conditions to move between areas in that timeline
   /*bbVacuum    .setMovePhase(0)
   psCenter    .setMovePhase(1)
   olSurface   .setMovePhase(5)
-  phForest    .setMovePhase(4)
+  phClearing    .setMovePhase(4)
   maPath      .setMovePhase(3)
   srRoom      .setMovePhase(7)
   geWhiteRoom .setMovePhase(9)
@@ -171,7 +229,16 @@ class Game:
     if player.phase == 1 && !player.remembers then
       outcome += player.learn(D.possibleAbilities("memory"))
     else if player.phase == 8 then
-      outcome += D.zones(player.location.timeline).tought//+ "\n" + player.learn(D.possibleAbilities("curious"))
+      outcome += D.zones(player.location.timeline).tought
+      if isQuestionRight(input, D.zones(player.location.timeline).word) then
+        return outcome + D.zones(player.location.timeline).realization
+      if isQuestionRight(input, D.misc("finalQuestion")) then
+        //player.setLocation(Some(gePC))
+        return "final question yey you won" //TO-DO
+
+
+
+    //+ "\n" + player.learn(D.possibleAbilities("curious"))
 
     //println(entryPoints(player.phase-1).timeline)
     //show old answer as a hint

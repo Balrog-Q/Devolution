@@ -10,7 +10,7 @@ class AbilityDialogues(val name: String, val desc: String)
 /**
   * Text-related info of a timeline to easily access dialogues of it and its areas.
   */
-class TimelineDialogues(val word: String, val question: String, val answer: String, val tought: String, val areaDialogues: Map[String, AreaDialogues]):
+class TimelineDialogues(val word: String, val question: String, val answer: String, val tought: String, val realization: String, val areaDialogues: Map[String, AreaDialogues]):
 
   var misc = Map[String, String]()
 

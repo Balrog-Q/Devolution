@@ -18,7 +18,8 @@ object Dialogues:
     "accept" -> "yes",
     "accepted" -> "Relizing your condition, from now on you refuse to die",
     "reminder" -> "Before moving around, you need to be determinated to... explore",
-    "denied" -> "You are unsure if this is the right place..."
+    "denied" -> "You are unsure if this is the right place...",
+    "finalQuestion" -> "Are you still eating straight from the paw?"
   )
 
   val actionNames = Map[String, String](
@@ -127,7 +128,8 @@ object Dialogues:
   val areas = Map[String, String]("bonus" -> "Overflow", "bb" -> "Big Bang", "vacuum" -> "Vacuum", "ps" -> "Primordial Soup", "closeVoid" -> "Periphery of cluster", "voidCenter" -> "Center of cluster", "ol" -> "Origin of life", "ocean1" -> "Ocean surface", "volcano" -> "Volcanic area", "ocean2" -> "Twilight zone", "ocean3" -> "Midnight zone", "ocean4" -> "Hadal zone", "thermal" -> "Thermal source", "lava" -> "Lava river", "volcano2" -> "Underwater volcano", "ph" -> "Prehistory", "jungle" -> "Jungle", "clearing" -> "Jungle clearing", "hill" -> "Hill", "swamp" -> "Swamp", "nest" -> "Dinosaur nest", "cave1" -> "Cave entrance", "cave2" -> "Cave depth", "ma" -> "Middle Ages", "path" -> "Pathway", "castle1" -> "Castle entrance", "castle2" -> "Castle private courtyard", "field" -> "Open field", "house1" -> "House entrance", "grave" -> "Mass grave", "stream" -> "Stream", "house2" -> "House", "sr" -> "Scientific revolution", "room" -> "Meeting room", "terrace" -> "Terrace", "ge" -> "Globalization era", "start" -> "White room", "switch" -> "Switch", "firewall" -> "Firewall", "pc" -> "PC", "server" -> "Servers", "web" -> "Deep web", "el" -> "End of life", "tower" -> "Tower top", "hd" -> "Heat death")
 
   //overflow dialogues
-  val bonus = TimelineDialogues("", "", "", "", Map(
+  val bonus = TimelineDialogues("", "", "", "", "",
+    Map(
     areas("bonus") -> AreaDialogues(
       Vector("No, I'm not eating from a paw anymore. No matter which kind of being or entity I am, I'm now free. But do I really desire freedom?"),
       Map[String, String](
@@ -142,7 +144,7 @@ object Dialogues:
   ))
 
   //big bang dialogues
-  val bb = TimelineDialogues("", "", "", "", Map(
+  val bb = TimelineDialogues("", "", "", "", "", Map(
     areas("vacuum") -> AreaDialogues(
       Vector("", "Everything here. Unfortunately, -", "Every interesting thing is here. If it wasn't for -", "It's not through memory that you get here. But -", "You can't find something that survives if you don't do it yourse-", "Everything, but not what you just did. Pretty unexpected to -"),
       Map[String, String](
@@ -157,7 +159,11 @@ object Dialogues:
   ))
 
   //primordial soup dialogues
-  val ps = TimelineDialogues("from", "What is the point of this?", "", "", Map(
+  val ps = TimelineDialogues("from", "What is the point of this?",
+    "Something happened, and many things will still happen. Where could you go to discover what will be?",
+    "The butterfly effect at its finest. From just dust to a working universe, in just few billion years. From the center to the very edge, things here were free from any kind of purpose.",
+    "We all come from here. But where are headed? What is the arrival point?",
+    Map(
     areas("voidCenter") -> AreaDialogues(
       Vector("", "Nothing interesting here", "Seems interesting", "Memory is not yet a thing here", "What you experienced had no effect here", "The place where interesting things just happened", "X Is no danger here, only opportunities", "X Some say this is also a peak, but you are looking for a less abstract one"),
       Map[String, String](
@@ -205,8 +211,10 @@ object Dialogues:
   )
 
   val ol = TimelineDialogues("eating", "Is there a peak in this chain?",
-    "",
-    "", Map(
+    "This endless cycle is probably bound to repeat itself again and again, unless... where could it lead?",
+    "Consuming and eating was the only point in this uncertain world. By the logic of killed or be killed, a structured food chain is formed as the bigger eat the smaller.",
+    "Will the simple act of eating again and again be somewhat useful? What if something becomes unstoppable at starts at consuming everything around it?",
+    Map(
     areas("ocean1") -> AreaDialogues(
       Vector("", "Nothing interesting here", "It's too chaotic to keep track of things here", "Something, but still not interesting", "Here lives the origin of the problem. But you had already enough of it"),
       Map[String, String](
@@ -302,7 +310,10 @@ object Dialogues:
   )
 
   val ph = TimelineDialogues("the", "Why should I escape them?",
-    "", "", Map(
+    "You felt all kind of emotions by surviving here. But in contrast to the other living being, you had no reason to fear for your safety. Where should you go to become like them?",
+    "The forests, the oceans and even the skies are ruled by monsters. But the true reason to move forward is the unexplainable instinct that resides somewhere in the minds of every living being.",
+    "The thing that everything is trying to preserve is their life. But losing oneself’s body in favor of someone else could benefit both species.",
+    Map(
     areas("clearing") -> AreaDialogues(
       Vector("", "Nothing interesting here", "Something, but still not interesting", "Things happen too quick here to remember them", "A place where something could survive"),
       Map[String, String](
@@ -390,7 +401,18 @@ object Dialogues:
         possibleAbilities("sad") -> "",
         possibleAbilities("curious") -> ""
       )
-    )
+    ),
+    areas("lava") -> AreaDialogues(
+      Vector(""),
+      Map[String, String](
+        possibleAbilities("vision") -> "",
+        possibleAbilities("proprio") -> "",
+        possibleAbilities("hear") -> "",
+        possibleAbilities("fear") -> "",
+        possibleAbilities("sad") -> "",
+        possibleAbilities("curious") -> ""
+      )
+    ),
   ))
   ph.misc = Map[String, String](
     "intro" -> "Wherever you may be, things around here understood why they feel emotions. Become like them.",
@@ -398,7 +420,10 @@ object Dialogues:
   )
 
   val ma = TimelineDialogues("straight", "How could someone survive this?",
-    "", "", Map(
+    "It seems impossible for anything to thrive in this environment. Is there something, somewhere, that doesn't care about dead?",
+    "Life here was pretty straightforward, as long as you didn’t try anything possibly unwanted by some inviolable high institution. But during hard times, when any flicker of hope was lost and laws were no more, people were straight up inventing some pseudo-science to solve their problems.",
+    "If everything is kept straight and stopped from evolving, the only possible outcome is annihilation, either by external or internal factors.",
+    Map(
     areas("path") -> AreaDialogues(
       Vector("", "Nothing interesting here", "Something, but still not interesting","Memory is valued more than any other thing here","The place where you learned through empathy"),
       Map[String, String](
@@ -493,32 +518,12 @@ object Dialogues:
     "" -> ""
   )
 
-  //globalization era
-  val ge = TimelineDialogues("you", "Am I alone?",
-    "Are you alone? Probably yes.\nAnd probably you are all posing the same question.\nTo find something that is also never alone, you'll need to… devolve, and explore.",
-    "",
-    Map(
-    areas("start") -> AreaDialogues(
-      Vector("You are here.", "You are here again", "Not interesting yet", "They have a different concept of memory here", "You can't explain what you feel being here"),
-      Map[String, String](
-        possibleAbilities("vision") -> "A completely empty, white room",
-        possibleAbilities("proprio") -> "Despite apparently missing, the ground is solid",
-        possibleAbilities("hear") -> "A subtle static noise fill the space",
-        possibleAbilities("fear") -> "",
-        possibleAbilities("sad") -> "",
-        possibleAbilities("curious") -> ""
-      )
-    )
-  ))
-  ge.misc = Map[String, String](
-    "intro" -> "But where?\nBut something else is also. But what?\nDespite your best efforts, you can't come to any better conclusion.\nKnowledge gave you life, but now it seems that it all went missing.\nMaybe, if you could think of one precise single question, you would be able to focus…",
-    "intro2" -> "You are here. But where?\nAnd is someone else also?",
-    "" -> ""
-  )
-
   //scientific revolution
   val sr = TimelineDialogues("are", "Am I traveling through time?",
-    "", "", Map(
+    "This is not right. One should not... I am not allowed to wander through time... but where could someone be granted this ability? Where did I receive it?",
+    "Big things are going to happen from here. People are realizing the potential of science. People are thinking in new ways. They are using their minds to discover which  opportunities are still hidden. They are finally, truly, aware of themselves.",
+    "Humanity is acquiring awareness. But no matter their efforts, they are still constrained by the flow of time. Shouldn’t everyone be? How could someone be allowed to travel through it?",
+    Map(
     areas("room") -> AreaDialogues(
       Vector("", "Nothing interesting here","Something, but still not interesting","They don't focus on the past here","Here, they are on the right track to overcome the problem… but they are not quite there yet"),
       Map[String, String](
@@ -536,11 +541,47 @@ object Dialogues:
     "" -> ""
   )
 
+
+  //globalization era
+  val ge = TimelineDialogues("you", "Am I alone?",
+    "Are you alone? Probably yes.\nAnd probably you are all posing the same question.\nTo find something that is also never alone, you'll need to… devolve, and explore.",
+    "???\n?? ?\n???????????????\n? ? ? ?\n?? ??\n??? ? ? ? ???\nI can't focus on anything.\n??? ? ? ? ???\nI don't find any word anymore...\n?\nBut maybe I only need to focus on\n?\none single\n?\nelement\n?\nof my thoughts, one\n?\nfor every time I've been in. Just one element\n?\nBut what could it be?\n?????????????????????????????????????",
+    "Right. This works.\nMy understanding of every time in history is now complete. What I still don't understand is me. I only need to go back everywhere and focus some more. One word for each time should be enough.\nI must return here with all those pieces.",
+    Map(
+    areas("start") -> AreaDialogues(
+      Vector("You are here.", "You are here again", "Not interesting yet", "They have a different concept of memory here", "You can't explain what you feel being here"),
+      Map[String, String](
+        possibleAbilities("vision") -> "A completely empty, white room",
+        possibleAbilities("proprio") -> "Despite apparently missing, the ground is solid",
+        possibleAbilities("hear") -> "A subtle static noise fills the space",
+        possibleAbilities("fear") -> "You have mixed feelings about this",
+        possibleAbilities("sad") -> "You have mixed feelings about this",
+        possibleAbilities("curious") -> "You have mixed feelings about this"
+      )
+    )
+  ))
+  ge.misc = Map[String, String](
+    "intro" -> "But where?\nBut something else is also. But what?\nDespite your best efforts, you can't come to any better conclusion.\nKnowledge gave you life, but now it seems that it all went missing.\nMaybe, if you could think of one precise single question, you would be able to focus…",
+    "intro2" -> "You are here. But where?\nAnd is someone else also?",
+    "" -> ""
+  )
+
   //end of life
   val el = TimelineDialogues("paw", "Why is this so different?",
-    "", "", Map(
+    "", "", "", Map(
     areas("tower") -> AreaDialogues(
       Vector("", "Nothing interesting here", "Something, but still not interesting","Here, memory is meaningless by now","No one will survive here anyway"),
+      Map[String, String](
+        possibleAbilities("vision") -> "",
+        possibleAbilities("proprio") -> "",
+        possibleAbilities("hear") -> "",
+        possibleAbilities("fear") -> "",
+        possibleAbilities("sad") -> "",
+        possibleAbilities("curious") -> ""
+      )
+    ),
+    areas("terrace") -> AreaDialogues(
+      Vector(""),
       Map[String, String](
         possibleAbilities("vision") -> "",
         possibleAbilities("proprio") -> "",
@@ -557,7 +598,7 @@ object Dialogues:
   )
 
   //heat death
-  val hd = TimelineDialogues("", "", "", "", Map(
+  val hd = TimelineDialogues("", "", "", "", "", Map(
     areas("vacuum") -> AreaDialogues(
       Vector("", "Nothing interesting here","Something, but still not interesting","Here, memory is meaningless by now","No one will survive here anyway"),
       Map[String, String](

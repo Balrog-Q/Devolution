@@ -34,7 +34,7 @@ class Player(startingArea: Area):
     if this.timelineChosen || direction == D.movements("past") || direction == D.movements("future") then
       val destination = this.location.neighbor(direction)
       if this.location.movePhase <= this.phase || direction == D.movements("past") || direction == D.movements("future") then
-        this.currentLocation = destination.getOrElse(this.currentLocation)
+        setLocation(destination)
         D.misc("moved") + direction
         //if this.location.isDeadly then
         //  this.die()
@@ -42,6 +42,8 @@ class Player(startingArea: Area):
         ""
     else
       D.misc("reminder")
+
+  def setLocation(destination: Option[Area]) = this.currentLocation = destination.getOrElse(this.currentLocation)
     //if destination.isDefined then "You go " + direction + "." else "You can't go " + direction + "."
   /** Causes the player to rest for a short while (this has no substantial effect in game terms).
     * Returns a description of what happened. */

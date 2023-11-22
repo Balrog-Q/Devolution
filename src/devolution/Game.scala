@@ -22,23 +22,35 @@ class Game:
   private val psVacuum = Area("Vacuum")
   private val psPeriphery = Area("Perifery of cluster")*/
 
-  private val overflow = Area(D.areas("bonus"), D.areas("bonus"))
-  private val bbVacuum = Area(D.areas("vacuum"), D.areas("bb"))
-  private val psCenter = Area(D.areas("voidCenter"), D.areas("ps"))
-  private val olOcean1 = Area(D.areas("ocean1"), D.areas("ol"))
-  private val phClearing = Area(D.areas("clearing"), D.areas("ph"))
-  private val maPath = Area(D.areas("path"), D.areas("ma"))
-  private val srRoom = Area(D.areas("room"), D.areas("sr"))
-  private val geWhiteRoom = Area(D.areas("start"), D.areas("ge"))
-  private val elTower = Area(D.areas("tower"), D.areas("el"))
-  private val hdVacuum = Area(D.areas("vacuum"), D.areas("hd"))
+  // Initialize the areas in the game
+  private val bonus = Timeline("bonus")
+  private val bigBang = Timeline("Big Bang")
+  private val primordialSoup = Timeline("Primordial Soup")
+  private val originOfLife = Timeline("Origin of Life")
+  private val prehistory = Timeline("Prehistory")
+  private val middleAges = Timeline("Middle Ages")
+  private val scientificRevo = Timeline("Scientific Revolution")
+  private val globalization = Timeline("Globalization Era")
+  private val endOfLife = Timeline("End of Life")
+  private val headDead = Timeline("Head Dead")
+
+  private val overflow = Area(D.areas("bonus"), bonus)
+  private val bbVacuum = Area(D.areas("vacuum"), bigBang)
+  private val psCenter = Area(D.areas("voidCenter"), primordialSoup)
+  private val olSurface = Area(D.areas("ocean1"), originOfLife)
+  private val phClearing = Area(D.areas("clearing"), prehistory)
+  private val maPath = Area(D.areas("path"), middleAges)
+  private val srRoom = Area(D.areas("room"), scientificRevo)
+  private val geWhiteRoom = Area(D.areas("start"),globalization)
+  private val elTower = Area(D.areas("tower"), endOfLife)
+  private val hdVacuum = Area(D.areas("vacuum"), headDead)
 
   overflow    .setNeighbors(Vector(                       "future" -> bbVacuum))
   bbVacuum    .setNeighbors(Vector("past" -> overflow,    "future" -> psCenter))
-  bbVacuum.deadly = true
+  bbVacuum.setDeadly()
   psCenter    .setNeighbors(Vector("past" -> bbVacuum,    "future" -> olOcean1))
   olOcean1   .setNeighbors(Vector("past" -> psCenter,    "future" -> phClearing))
-  phClearing    .setNeighbors(Vector("past" -> olOcean1,   "future" -> maPath))
+  phClearing    .setNeighbors(Vector("past" -> olSurface,   "future" -> maPath))
   maPath      .setNeighbors(Vector("past" -> phClearing,    "future" -> srRoom))
   srRoom      .setNeighbors(Vector("past" -> maPath,      "future" -> geWhiteRoom))
   geWhiteRoom .setNeighbors(Vector("past" -> srRoom,      "future" -> elTower))
@@ -51,36 +63,34 @@ class Game:
   //assign the correct move phase based on the order the zone has been added to the entryPoint vector
 
 
-  private val psPeriphery = Area(D.areas("closeVoid"), D.areas("ps"))
-  private val psVoid = Area(D.areas("vacuum"), D.areas("ps"))
-  psVoid.deadly = true
+  private val psPeriphery = Area(D.areas("closeVoid"), primordialSoup)
+  private val psVoid = Area(D.areas("vacuum"), primordialSoup)
+  psVoid.setDeadly()
 
   psCenter.setNeighbors(Vector(D.movements("away") -> psPeriphery))
   psPeriphery.setNeighbors(Vector(D.movements("back") -> psCenter, D.movements("forward") -> psVoid))
 
   //future celestial bodies
-  psCenter.interactables ++= Map(
+  psCenter.setInteractables(Vector(
     "dust1" -> Element(D.interactables("dust1"), 1),
-    "dust2" -> Element(D.interactables("dust2"), 3),
-    //"dust6" -> Element(D.interactables("dust6"), 1)
-  )
-  psPeriphery.interactables ++= Map(
+    "dust2" -> Element(D.interactables("dust2"), 3)
+  ))
+  psPeriphery.setInteractables(Vector(
     "dust3" -> Element(D.interactables("dust3"), 5),
     "dust4" -> Element(D.interactables("dust4"), 2),
-    "dust5" -> Element(D.interactables("dust5"), 2),
-    //"dust7" -> Element(D.interactables("dust7"), 1),
-  )
+    "dust5" -> Element(D.interactables("dust5"), 2)
+  ))
 
 
-  private val olOcean2 = Area(D.areas("ocean2"), D.areas("ol"))
-  private val olOcean3 = Area(D.areas("ocean3"), D.areas("ol"))
-  private val olOcean4 = Area(D.areas("ocean4"), D.areas("ol"))
-  private val olThermal = Area(D.areas("thermal"), D.areas("ol"))
-  private val olSurface = Area(D.areas("surface"), D.areas("ol"))
-  private val olVolcano2 = Area(D.areas("volcano2"), D.areas("ol"))
-  private val olLava = Area(D.areas("lava"), D.areas("ol"))
-  olVolcano2.deadly = true
-  olLava.deadly = true
+  private val olOcean2 = Area(D.areas("ocean2"), originOfLife)
+  private val olOcean3 = Area(D.areas("ocean3"), originOfLife)
+  private val olOcean4 = Area(D.areas("ocean4"), originOfLife)
+  private val olThermal = Area(D.areas("thermal"), originOfLife)
+  private val olSurface = Area(D.areas("surface"), originOfLife)
+  private val olVolcano2 = Area(D.areas("volcano2"), originOfLife)
+  private val olLava = Area(D.areas("lava"), originOfLife)
+  olVolcano2.setDeadly()
+  olLava.setDeadly()
 
   olOcean1   .setNeighbors(Vector(D.movements("forward") -> olSurface, D.movements("down") -> olOcean2))
   olOcean2   .setNeighbors(Vector(D.movements("up") -> olOcean1, D.movements("down") -> olOcean3))
@@ -133,16 +143,16 @@ class Game:
     )
 
 
-  private val phJungle = Area(D.areas("jungle"), D.areas("ph"))
-  private val phHill = Area(D.areas("hill"), D.areas("ph"))
-  private val phSwamp = Area(D.areas("swamp"), D.areas("ph"))
-  private val phCave1 = Area(D.areas("cave1"), D.areas("ph"))
-  private val phCave2 = Area(D.areas("cave2"), D.areas("ph"))
-  private val phVolcano = Area(D.areas("volcano"), D.areas("ph"))
-  private val phNest = Area(D.areas("nest"), D.areas("ph"))
-  private val phLava = Area(D.areas("lava"), D.areas("ph"))
-  phLava.deadly = true
-  phNest.deadly = true
+  private val phJungle = Area(D.areas("jungle"), prehistory)
+  private val phHill = Area(D.areas("hill"), prehistory)
+  private val phSwamp = Area(D.areas("swamp"), prehistory)
+  private val phCave1 = Area(D.areas("cave1"), prehistory)
+  private val phCave2 = Area(D.areas("cave2"), prehistory)
+  private val phVolcano = Area(D.areas("volcano"), prehistory)
+  private val phNest = Area(D.areas("nest"), prehistory)
+  private val phLava = Area(D.areas("lava"), prehistory)
+  phLava.setDeadly()
+  phNest.setDeadly()
 
   phClearing  .setNeighbors(Vector(D.movements("n") -> phJungle, D.movements("s") -> phSwamp, D.movements("e") -> phJungle, D.movements("w") -> phHill))
   phJungle    .setNeighbors(Vector(D.movements("n") -> phCave1, D.movements("s") -> phClearing, D.movements("e") -> phHill, D.movements("w") -> phNest))
@@ -180,15 +190,14 @@ class Game:
   phCave2.foundAbility = D.possibleAbilities("hear")
 
 
-  private val maCastle1 = Area(D.areas("castle1"), D.areas("ma"))
-  private val maCastle2 = Area(D.areas("castle2"), D.areas("ma"))
-  private val maField = Area(D.areas("field"), D.areas("ma"))
-  private val maVillage = Area(D.areas("village"), D.areas("ma"))
-  private val maHouse = Area(D.areas("house"), D.areas("ma"))
-  private val maStream = Area(D.areas("stream"), D.areas("ma"))
-  private val maGrave = Area(D.areas("grave"), D.areas("ma"))
-
-  maCastle2.deadly = true
+  private val maCastle1 = Area(D.areas("castle1"), middleAges)
+  private val maCastle2 = Area(D.areas("castle2"), middleAges)
+  private val maField = Area(D.areas("field"), middleAges)
+  private val maVillage = Area(D.areas("village"), middleAges)
+  private val maHouse = Area(D.areas("house"), middleAges)
+  private val maStream = Area(D.areas("stream"), middleAges)
+  private val maGrave = Area(D.areas("grave"), middleAges)
+  maCastle2.setDeadly()
   maPath    .setNeighbors(Vector(D.movements("n") -> maGrave, D.movements("s") -> maField, D.movements("e") -> maStream, D.movements("w") -> maCastle1))
   maCastle1 .setNeighbors(Vector(D.movements("w") -> maCastle2, D.movements("e") -> maPath, D.movements("s") -> maField))
   maVillage  .setNeighbors(Vector(D.movements("n") -> maGrave, D.movements("s") -> maField, D.movements("e") -> maStream, D.movements("w") -> maPath))
@@ -248,8 +257,8 @@ class Game:
     "memory3" -> Element(D.interactables("memory3"))
   )
 
-  private val elTerrace = Area(D.areas("terrace"), D.areas("el"))
-  elTerrace.deadly = true
+  private val elTerrace = Area(D.areas("terrace"), endOfLife)
+  elTerrace.setDeadly()
 
   elTower   .setNeighbors(Vector(D.movements("forward") -> elTerrace))
 
@@ -284,24 +293,6 @@ class Game:
 
 
   private def startingPoint = geWhiteRoom
-  /*private val middle      = Area("Forest", "You are somewhere in the forest. There are a lot of trees here.\nBirds are singing.")
-  private val northForest = Area("Forest", "You are somewhere in the forest. A tangle of bushes blocks further passage north.\nBirds are singing.")
-  private val southForest = Area("Forest", "The forest just goes on and on.")
-  private val clearing    = Area("Forest Clearing", "You are at a small clearing in the middle of forest.\nNearly invisible, twisted paths lead in many directions.")
-  private val tangle      = Area("Tangle of Bushes", "You are in a dense tangle of bushes. It's hard to see exactly where you're going.")
-  private val home        = Area("Home", "Home sweet home! Now the only thing you need is a working remote control.")
-  middle     .setNeighbors(Vector("north" -> northForest, "east" -> tangle, "south" -> southForest, "west" -> clearing   ))
-  northForest.setNeighbors(Vector(                        "east" -> tangle, "south" -> middle,      "west" -> clearing   ))
-  southForest.setNeighbors(Vector("north" -> middle,      "east" -> tangle, "south" -> southForest, "west" -> clearing   ))
-  clearing   .setNeighbors(Vector("north" -> northForest, "east" -> middle, "south" -> southForest, "west" -> northForest))
-  tangle     .setNeighbors(Vector("north" -> northForest, "east" -> home,   "south" -> southForest, "west" -> northForest))
-  home       .setNeighbors(Vector(                                                                  "west" -> tangle     ))
-  clearing.addAbility(Ability("battery", "It's a small battery cell. Looks new."))
-  southForest.addAbility(Ability("remote", "It's the remote control for your TV.\nWhat it was doing in the forest, you have no idea.\nProblem is, there's no battery."))
-  *//** The number of turns that have passed since the start of the game. */
-  //var turnCount = 0
-  /** The maximum number of turns that this adventure game allows before time runs out. */
-  //val timeLimit = 40
 
   /** Determines if the adventure is complete, that is, if the player has won. */
   //private val destination = bb
@@ -349,13 +340,13 @@ class Game:
 
     //check for a timeline question guess
     //the following if will take care of the return output
-    if isQuestionRight(input, D.zones(player.location.timeline).question)
+    if isQuestionRight(input, D.zones(player.location.timeline.name).question)
       && this.isInRightTimeline then
       player.phase += 1
       this.commandSuccess = true
       //return D.zones.get(lastExcpectedTimeline).answer
 
-    if player.phase == 1 && !player.remembers then
+    if player.phase == 1 && !player.remember then
       outcome += player.learn(D.possibleAbilities("memory"))
     else if player.phase == Endgame then //&& player.has(D.possibleAbilities("tought")) then
       //outcome += D.zones(player.location.timeline).tought
@@ -371,7 +362,7 @@ class Game:
 
     //println(entryPoints(player.phase-1).timeline)
     //show old answer as a hint
-    if player.location.timeline == lastExcpectedTimeline || isQuestionRight(input, D.zones.get(lastExcpectedTimeline).map(_.question).getOrElse("")) then
+    if player.location.timeline.name == lastExpectedTimeline || isQuestionRight(input, D.zones.get(lastExpectedTimeline).map(_.question).getOrElse("")) then
       //println(D.zones("Globalization era").answer + " " + D.areas(entryPoints.get(player.phase - 1).map(_.timeline).getOrElse("")))
       this.commandSuccess = true
       //remove player from actual area to hide useless decriptions
@@ -381,7 +372,7 @@ class Game:
     if isInRightTimeline && player.timelineChosen then
       player.phase match
         case 0 =>
-          if player.remembers then
+          if player.remember then
             return D.ge("intro2")
           else
             return D.ge("intro")
@@ -419,16 +410,16 @@ class Game:
                   return D.ps("move")
                 case _ => ""
           if player.location == psPeriphery then
-            println(player.location.interactables.values)
-            println(player.location.interactables.values.count(_.completed))
-            player.location.interactables.values.count(_.completed) match
+            println(player.location.interactable.values)
+            println(player.location.interactable.values.count(_.completed))
+            player.location.interactable.values.count(_.completed) match
               case 1 =>
                 this.commandSuccess = true
                 return D.ps("less")
               case 2 =>
                 this.commandSuccess = true
                 return D.ps("move")
-              case _ => ""
+              case _ => 
 
           //if player.timeline == D.areas("bb") && action.verb == D.actions("go") then
             //timelineDiscovered = true
@@ -465,7 +456,7 @@ class Game:
             player.phase += 1
               commandSuccess = true*/
         case 3 =>
-          /*if player.timeline == D.areas("ma") && isQuestionRight(input, D.ma.question) then
+          /*if player.timeline == middleAges && isQuestionRight(input, D.ma.question) then
             outcome = D.ma.answer
             player.phase += 1
             commandSuccess = true*/
@@ -490,7 +481,7 @@ class Game:
     * Allows to write the end-timeline hint message again as reminder.
     * @return
     */
-  def lastExcpectedTimeline = entryPoints.get(player.phase-1).map(_.timeline).getOrElse("")
+  def lastExpectedTimeline = entryPoints.get(player.phase-1).map(_.timeline).getOrElse("")
 
   /**
     * Check is the player has something to do in this timeline.

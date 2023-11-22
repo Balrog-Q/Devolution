@@ -35,7 +35,7 @@ class Player(startingArea: Area):
   def go(direction: String) =
     if this.timelineChosen || direction == D.movements("past") || direction == D.movements("future") then
       val destination = this.location.neighbor(direction)
-      if this.location.movePhase <= this.phase || direction == D.movements("past") || direction == D.movements("future") then
+      if this.location.getMovePhase <= this.phase || direction == D.movements("past") || direction == D.movements("future") then
         setLocation(destination)
         D.misc("moved") + direction
         //if this.location.isDeadly then
@@ -88,7 +88,7 @@ class Player(startingArea: Area):
       this.location.addAbility(oldAbility)
     if removed.isDefined then "You drop the " + abilityName + "." else "You don't have that!"
   */
-  def remembers = this.has(D.possibleAbilities("memory"))
+  def remember = this.has(D.possibleAbilities("memory"))
   /** Causes the player to examine the ability of the given name. This is successful if such
     * an ability is currently in the player's possession. Returns a description of the result,
     * which, if the attempt is successful, includes a description of the ability. The description
@@ -135,9 +135,9 @@ class Player(startingArea: Area):
       ""
 
   def enterTimeline() =
-    if this.location.movePhase <= this.phase then
+    if this.location.getMovePhase <= this.phase then
       this.timelineChosen = true
-      D.zones(this.location.timeline)("intro")
+      D.zones(this.location.timeline.name)("intro")
     else
       this.die()
 

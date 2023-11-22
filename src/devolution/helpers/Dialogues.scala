@@ -699,4 +699,14 @@ object Dialogues:
 
 
   //allows to access every possible zone's dialogues though the unique zone name
-  def zones = Map[String, TimelineDialogues](areas("bonus") -> bonus, areas("bb") -> bb, areas("ps") -> ps, areas("ol") -> ol, areas("ph") -> ph, areas("ma") -> ma, areas("sr") -> sr, areas("ge") -> ge, areas("el") -> el, areas("hd") -> hd)
+  def zones = 
+    Map[String, TimelineDialogues](areas("bonus") -> bonus, 
+                                   areas("bb") -> bb, 
+                                   areas("ps") -> ps, 
+                                   areas("ol") -> ol, 
+                                   areas("ph") -> ph, 
+                                   areas("ma") -> ma, 
+                                   areas("sr") -> sr, 
+                                   areas("ge") -> ge, 
+                                   areas("el") -> el, 
+                                   areas("hd") -> hd)

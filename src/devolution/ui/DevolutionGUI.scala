@@ -1,14 +1,16 @@
-package o1.adventure.ui
+package devolution.ui
 
 import scala.swing.*
 import scala.swing.event.*
 import javax.swing.UIManager
-import o1.adventure.Adventure
+import devolution.Game
 import java.awt.{Point, Insets, Dimension}
+import java.awt.Robot
+import java.awt.event.KeyEvent
 import scala.language.adhocExtensions // enable extension of Swing classes
 
 ////////////////// NOTE TO STUDENTS //////////////////////////
-// For the purposes of our course, it’s not necessary
+// For the purposes of our course, it's not necessary
 // that you understand or even look at the code in this file.
 //////////////////////////////////////////////////////////////
 
@@ -18,19 +20,20 @@ import scala.language.adhocExtensions // enable extension of Swing classes
   * its input from a text field and displays information about the game world in uneditable
   * text areas.
   *
-  * **NOTE TO STUDENTS: In this course, you don’t need to understand how this object works
-  * on the inside. It’s enough to know that you can use this file to start the program.**
+  * **NOTE TO STUDENTS: In this course, you don't need to understand how this object works
+  * on the inside. It's enough to know that you can use this file to start the program.**
   *
   * @see [[AdventureTextUI]] */
-object AdventureGUI extends SimpleSwingApplication:
+object DevolutionGUI extends SimpleSwingApplication:
   UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName)
 
   def top = new MainFrame:
 
-    // Access to the application’s internal logic:
+    // Access to the application's internal logic:
 
-    val game = Adventure()
+    val game = Game()
     val player = game.player
+    val robot = new Robot()
 
     // Components:
 
@@ -77,13 +80,15 @@ object AdventureGUI extends SimpleSwingApplication:
         val quitAction = Action("Quit")( dispose() )
         contents += MenuItem(quitAction)
 
-    // Set up the GUI’s initial state:
+    // Set up the GUI's initial state:
     this.title = game.title
     this.updateInfo(this.game.welcomeMessage)
     this.location = Point(50, 50)
     this.minimumSize = Dimension(200, 200)
     this.pack()
     this.input.requestFocusInWindow()
+    // sends an empty command to trigger the story logic
+    this.playTurn("")
 
 
     def playTurn(command: String) =
@@ -93,6 +98,11 @@ object AdventureGUI extends SimpleSwingApplication:
       else
         this.updateInfo(turnReport)
         this.input.enabled = !this.game.isOver
+      if this.player.isDead then
+        //simulate a key press to update the GUI
+        //robot.keyPress(KeyEvent.VK_A)
+        //robot.keyPress(KeyEvent.VK_ENTER)
+        this.game.reset()
 
 
     def updateInfo(info: String) =
@@ -100,8 +110,8 @@ object AdventureGUI extends SimpleSwingApplication:
         this.turnOutput.text = info
       else
         this.turnOutput.text = info + "\n\n" + this.game.goodbyeMessage
-      this.locationInfo.text = this.player.location.fullDescription
-      this.turnCounter.text = "Turns played: " + this.game.turnCount
+      this.locationInfo.text = this.player.location.fullDescription(player.abilities, player.phase)
+      //this.turnCounter.text = "Turns played: " + this.game.turnCount
 
   end top
 
@@ -109,5 +119,5 @@ object AdventureGUI extends SimpleSwingApplication:
   private given CanEqual[Component, Component] = CanEqual.derived
   private given CanEqual[Key.Value, Key.Value] = CanEqual.derived
 
-end AdventureGUI
+end DevolutionGUI
 

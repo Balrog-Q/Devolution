@@ -14,18 +14,19 @@ import scala.collection.mutable.Map
 */
 class Area(val name: String, val timeline: String):
 
-  val desc = D.zones(timeline).area(name)
+  val dialogues = D.zones(timeline).area(name)
   val neighbors = Map[String, Area]()
   var deadly = false
   var interactables = Map[String, Element]()
+  var foundAbility = ""
 
   /**
     * The minimum game phase required to move around from here.
     */
   var movePhase = 0
 
-  val foundWord = D.zones(timeline).area(name)
-  val finalQuestion = ""
+  //val foundWord = D.zones(timeline).word
+  //val finalQuestion = D.zones(timeline)
 
   /** Returns the area that can be reached from this area by moving in the given direction. The result
     * is returned in an `Option`; `None` is returned if there is no exit in the given direction. */
@@ -59,9 +60,11 @@ class Area(val name: String, val timeline: String):
       else
         return ""
 
-    var placeDesc = knowledge.map(desc.abilityDesc(_)).mkString("\n")
+    var placeDesc = knowledge.map(dialogues.abilityDesc(_)).mkString("\n")
     if placeDesc.trim.isEmpty then
-      placeDesc = desc.phaseDesc(phase)
+      placeDesc = dialogues.phaseDesc(phase)
+    if this.interactables.nonEmpty then
+      placeDesc = placeDesc + "\n" + D.misc("aroundYou") + this.interactables.values.map(_.name).mkString("... ")
     //if abilities.contains(D.abilities("proprioception") = "\n\nExits available: " + this.neighbors.keys.mkString(", ")
     //val abilityList = "\nYou see here: " + this.abilities.keys.mkString(" ")
     /*if this.knowledge.nonEmpty then
@@ -70,11 +73,11 @@ class Area(val name: String, val timeline: String):
       this.description + exitList*/
     placeDesc
 
-  def shortDescription(knowledge: Vector[String]) =
-    if knowledge.contains(D.knowledge("vision")) then
-      this.desc.abilityDesc(D.knowledge("vision"))
-    else
-      D.misc("undefinedArea")
+  def shortDescription(knowledge: Vector[String], phase: Int) =
+    this.dialogues.description(phase, knowledge.contains(D.possibleAbilities("vision")))
+    //if knowledge.contains(D.knowledge("vision")) || phase < VisionUnlock then
+    //else
+    //  D.misc("undefinedArea")
 
   //def learn(ability: Ability) = this.abilities(ability.name) = ability
   //def contains(abilityName: String) = this.abilities.contains(abilityName)
@@ -92,6 +95,11 @@ class Area(val name: String, val timeline: String):
 
   def isDeadly = this.deadly
 
+  def searchInteractables(name: String, action: String) =
+    interactables.filter(t => t._2.name.toLowerCase == name && !t._2.completed)
+      .find(_._2.requiredAction == action)
+
+  def offers(abilityName: String) = this.foundAbility == abilityName
 end Area
 
 /**
@@ -104,11 +112,15 @@ class Element(private val dialogues: ElementDialogues, private val neededInterac
 
   var interactions = 0
 
-  def execute(action: String) =
-    if action == this.dialogues.action && !this.completed then
+  def name = this.dialogues.name
+
+  def requiredAction = this.dialogues.action
+
+  def execute(action: String): Option[String] =
+    if action == requiredAction && !this.completed then
       interactions += 1
-      this.dialogues.output
+      Some(this.dialogues.output)
     else
-      ""
+      None
 
   def completed = interactions == neededInteractions

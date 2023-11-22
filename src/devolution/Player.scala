@@ -19,6 +19,8 @@ class Player(startingArea: Area):
   var lastEntryPoint = startingArea
   var invincible = false
   var timelineChosen = true
+  //used to keep track of the right order of eating in the Origin of Life timeline
+  var currentTier = -1
 
   /* The phase the player is currently in. It allows to select the right dialogues. */
   var phase = 1
@@ -68,9 +70,11 @@ class Player(startingArea: Area):
     else
       "There is no " + abilityName + " here to pick up."*/
   def learn(abilityName: String) =
-    this.abilities = this.abilities :+ abilityName
-    D.knowledge("new") + abilityName + ".\n" + D.knowledge.desc(abilityName)
-
+    if this.currentLocation.offers(abilityName) then
+      this.abilities = this.abilities :+ abilityName
+      D.knowledge("new") + abilityName + ".\n" + D.knowledge.desc(abilityName)
+    else
+      ""
 
   /** Determines whether the player is carrying an ability of the given name. */
   def has(abilityName: String) = this.abilities.contains(abilityName)
@@ -96,14 +100,14 @@ class Player(startingArea: Area):
     //this.abilities.get(abilityName).map(lookText).getOrElse(D.ability.misc("missingAbility"))
     //this.abilities.get(abilityName).map(D.ability("desc")).getOrElse(D.ability.misc("missingAbility"))
     if abilities.contains(D.possibleAbilities("proprio")) then
-      s"\n\nYou survey $direction: " + this.location.neighbor(direction).map(_.shortDescription(this.abilities)).getOrElse(D.misc("noArea"))
+      s"\n\nYou survey $direction: " + this.location.neighbor(direction).map(_.shortDescription(this.abilities, this.phase)).getOrElse(D.misc("noArea"))
     else
       D.knowledge("missingAbility")
 
-  def interact(action: String, name: String) =
-    this.location.interactables.find(t => t._1.contains(name) && !t._2.completed).map(_._2.execute(action)).getOrElse("")
-
-
+  def interact(action: String, name: String): String =
+    //this.location.interactables.find(t => t._1.contains(name) && !t._2.completed).map(_._2.execute(action)).getOrElse(D.misc("wrongAction") + name)
+    //first filters objects with right name, then with right action required
+    this.location.searchInteractables(name, action).map(_._2.execute(action)).filter(_.isDefined).map(_.getOrElse(D.misc("wrongAction") + name)).getOrElse("")
   /** Causes the player to list what they are carrying. Returns a listing of the player's
     * abilities or a statement indicating that the player is carrying nothing. The return
     * value has the form "You are carrying:\nABILITIES ON SEPARATE LINES" or "You are empty-handed."
@@ -131,11 +135,11 @@ class Player(startingArea: Area):
       ""
 
   def enterTimeline() =
-    if this.location.movePhase >= this.phase then
+    if this.location.movePhase <= this.phase then
       this.timelineChosen = true
       D.zones(this.location.timeline)("intro")
     else
-      D.misc("denied")
+      this.die()
 
   def die() =
     if !this.invincible then
@@ -143,6 +147,15 @@ class Player(startingArea: Area):
       this.phase = 0
       this.currentLocation = startingArea
       this.lastEntryPoint = startingArea
+      D.misc("denied")
+    else
+      ""
+
+  def contemplate() =
+    if this.has(D.possibleAbilities("thought")) && this.phase == Endgame then
+      D.zones(this.location.timeline).tought
+    else
+      ""
 
   def isDead = this.dead
 
@@ -151,6 +164,7 @@ class Player(startingArea: Area):
     this.phase = phase.toIntOption.getOrElse(0)
     ""
     //this.currentLocation =
+
 
 
 end Player

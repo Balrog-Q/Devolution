@@ -59,6 +59,26 @@ object DevolutionGUI extends SimpleSwingApplication:
           if command.nonEmpty then
             this.input.text = ""
             this.playTurn(command)
+            //TO-DO: shows a dead message for some time and then resets the GUI
+            if game.player.isDead then
+              game.player.dead = false
+              this.playTurn("-")
+              Thread.sleep(1000)
+              /*Thread.sleep(1000)
+              this.locationInfo.repaint()
+              this.turnOutput.repaint()
+              Thread.sleep(1000)
+              //this.peer.repaint()
+              Thread.sleep(1000)
+              robot.keyPress(KeyEvent.VK_MINUS)
+              robot.keyPress(KeyEvent.VK_ENTER)
+              Thread.sleep(1000)
+              this.locationInfo.repaint()
+              this.turnOutput.repaint()
+              this.locationInfo.repaint()
+              this.turnOutput.repaint()*/
+              game.reset()
+              this.playTurn("")
     }
 
     // Layout:
@@ -98,11 +118,7 @@ object DevolutionGUI extends SimpleSwingApplication:
       else
         this.updateInfo(turnReport)
         this.input.enabled = !this.game.isOver
-      if this.player.isDead then
-        //simulate a key press to update the GUI
-        //robot.keyPress(KeyEvent.VK_A)
-        //robot.keyPress(KeyEvent.VK_ENTER)
-        this.game.reset()
+      //if this.player.isDead then
 
 
     def updateInfo(info: String) =
@@ -110,7 +126,11 @@ object DevolutionGUI extends SimpleSwingApplication:
         this.turnOutput.text = info
       else
         this.turnOutput.text = info + "\n\n" + this.game.goodbyeMessage
-      this.locationInfo.text = this.player.location.fullDescription(player.abilities, player.phase)
+      if player.timelineChosen then
+        this.locationInfo.text = this.player.location.fullDescription(player.abilities, player.phase)
+      else
+        this.locationInfo.text = this.player.location.shortDescription(player.abilities, player.phase)
+
       //this.turnCounter.text = "Turns played: " + this.game.turnCount
 
   end top

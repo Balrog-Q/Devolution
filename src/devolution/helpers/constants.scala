@@ -7,3 +7,6 @@ import devolution.helpers.*
   */
 
 val D = Dialogues
+
+val VisionUnlock = 5
+val Endgame = 8

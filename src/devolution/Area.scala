@@ -12,36 +12,38 @@ import scala.collection.mutable.Map
   * other, neighboring areas. An area also has a name and a description.
   * @param name         the name of the area
 */
-class Area(val name: String, val timeline: String):
+class Area(val name: String, val timeline: Timeline) extends Zone[Area]:
 
-  val desc = D.zones(timeline).area(name)
-  val neighbors = Map[String, Area]()
-  var deadly = false
-  var interactables = Map[String, Element]()
+  private val descriptions = D.zones(timeline.name).area(name)
+  private val foundWord = D.zones(timeline.name).area(name)
+  private val interactables = Map[String, Element]()
+  private val finalQuestion = ""
+
+  private var deadly = false
+
+  /** * The minimum game phase required to move around from here. */
+  private var movePhase = 0
+
+  def interactable = this.interactables
+
+  def setInteractables(interacts: Vector[(String, Element)]) =
+    this.interactables ++= interacts
+
+  def getMovePhase = this.movePhase
 
   /**
-    * The minimum game phase required to move around from here.
+    * Changes the default minimum move phase.
+    * Only the entry points have different move phases:
+    * they are the only areas where movement is constrained,
+    * but once that restriction is overcome, the movement becomes free in that timeline.
     */
-  var movePhase = 0
+  def setMovePhase(phase: Int) = this.movePhase = phase
 
-  val foundWord = D.zones(timeline).area(name)
-  val finalQuestion = ""
+  def setDeadly() = this.deadly = true
 
-  /** Returns the area that can be reached from this area by moving in the given direction. The result
-    * is returned in an `Option`; `None` is returned if there is no exit in the given direction. */
-  def neighbor(direction: String) = this.neighbors.get(direction)
+  def isDeadly = this.deadly
 
-  /** Adds an exit from this area to the given area. The neighboring area is reached by moving in
-    * the specified direction from this area. */
-  def setNeighbor(direction: String, neighbor: Area) =
-    this.neighbors += direction -> neighbor
-
-  /** Adds exits from this area to the given areas. Calling this method is equivalent to calling
-    * the `setNeighbor` method on each of the given direction–area pairs.
-    * @param exits  contains pairs consisting of a direction and the neighboring area in that direction
-    * @see [[setNeighbor]] */
-  def setNeighbors(exits: Vector[(String, Area)]) =
-    this.neighbors ++= exits
+  def description = this.descriptions
 
   /** Returns a multi-line description of the area as a player sees it. This includes a basic
     * description of the area as well as information about exits and abilities. If there are no
@@ -59,9 +61,9 @@ class Area(val name: String, val timeline: String):
       else
         return ""
 
-    var placeDesc = knowledge.map(desc.abilityDesc(_)).mkString("\n")
+    var placeDesc = knowledge.map(descriptions.abilityDesc(_)).mkString("\n")
     if placeDesc.trim.isEmpty then
-      placeDesc = desc.phaseDesc(phase)
+      placeDesc = descriptions.phaseDesc(phase)
     //if abilities.contains(D.abilities("proprioception") = "\n\nExits available: " + this.neighbors.keys.mkString(", ")
     //val abilityList = "\nYou see here: " + this.abilities.keys.mkString(" ")
     /*if this.knowledge.nonEmpty then
@@ -72,7 +74,7 @@ class Area(val name: String, val timeline: String):
 
   def shortDescription(knowledge: Vector[String]) =
     if knowledge.contains(D.knowledge("vision")) then
-      this.desc.abilityDesc(D.knowledge("vision"))
+      this.descriptions.abilityDesc(D.knowledge("vision"))
     else
       D.misc("undefinedArea")
 
@@ -81,16 +83,6 @@ class Area(val name: String, val timeline: String):
   //def removeAbility(abilityName: String) = this.abilities.remove(abilityName)
   /** Returns a single-line description of the area for debugging purposes. */
   override def toString = this.name + ": " + this.timeline + ", " + D.movements.map((k,m) => k + " " + this.neighbor(m).map(_.name)).mkString(" ")// + ", " + this.neighbor("west").name + ", " + this.neighbor("up").name + ", " + this.neighbor("down").name + ", " + this.neighbor("back").name + ", " + this.neighbor("forward").name + " " + this.neighbor("past").map(_.name) + " " + this.neighbor("future").map(_.name)
-
-  /**
-    * Changes the default minimum move phase.
-    * Only the entry points have different move phases:
-    * they are the only areas where movement is constrained,
-    * but once that restriction is overcome, the movement becomes free in that timeline.
-    */
-  def setMovePhase(phase: Int) = this.movePhase = phase
-
-  def isDeadly = this.deadly
 
 end Area
 

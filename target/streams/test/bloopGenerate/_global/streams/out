@@ -1,0 +1,4 @@
+[debug] [devolution-test] Classpath dependencies List()
+[debug] [devolution-test] Dependencies from configurations List(devolution)
+[debug] Bloop wrote the configuration of project 'devolution-test' to '/Users/khatran/Documents/Aalto-yliopisto/Programming1/Devolution/.bloop/devolution-test.json'
+[success] Generated .bloop/devolution-test.json

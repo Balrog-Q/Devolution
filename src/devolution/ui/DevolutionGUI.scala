@@ -108,7 +108,7 @@ object DevolutionGUI extends SimpleSwingApplication:
     this.pack()
     this.input.requestFocusInWindow()
     // sends an empty command to trigger the story logic
-    this.playTurn("")
+    //this.playTurn("")
 
 
     def playTurn(command: String) =
@@ -127,9 +127,9 @@ object DevolutionGUI extends SimpleSwingApplication:
       else
         this.turnOutput.text = info + "\n\n" + this.game.goodbyeMessage
       if player.timelineChosen then
-        this.locationInfo.text = this.player.location.fullDescription(player.abilities, player.phase)
+        this.locationInfo.text = this.player.location.fullDescription(player.abilities, player.canSee, player.phase)
       else
-        this.locationInfo.text = this.player.location.shortDescription(player.abilities, player.phase)
+        this.locationInfo.text = this.player.location.shortDescription(player.abilities, player.canSee, player.phase)
 
       //this.turnCounter.text = "Turns played: " + this.game.turnCount
 

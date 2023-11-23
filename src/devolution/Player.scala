@@ -19,11 +19,15 @@ class Player(startingArea: Area):
   var lastEntryPoint = startingArea
   var invincible = false
   var timelineChosen = true
-  //used to keep track of the right order of eating in the Origin of Life timeline
-  var currentTier = -1
+
+  /**
+    * Multifunctional variable used to keep track of various timeline progress status
+    * Must be reset at every change of timeline
+    */
+  var progression = -1
 
   /* The phase the player is currently in. It allows to select the right dialogues. */
-  var phase = 1
+  var phase = 0
   /** Determines if the player has indicated a desire to quit the game. */
   def hasQuit = this.quitCommandGiven
   /** Returns the player's current location. */
@@ -70,14 +74,14 @@ class Player(startingArea: Area):
     else
       "There is no " + abilityName + " here to pick up."*/
   def learn(abilityName: String) =
-    if this.currentLocation.offers(abilityName) then
+    if this.currentLocation.offers(abilityName) && !this.has(abilityName) then
       this.abilities = this.abilities :+ abilityName
-      D.knowledge("new") + abilityName + ".\n" + D.knowledge.desc(abilityName)
+      "\n"+D.knowledge("new") + abilityName + ".\n" + D.knowledge.desc(abilityName)
     else
       ""
 
   /** Determines whether the player is carrying an ability of the given name. */
-  def has(abilityName: String) = this.abilities.contains(abilityName)
+  def has(abilityName: String) = this.abilities.contains(abilityName.toLowerCase)
   /** Tries to drop an ability of the given name. This is successful if such an ability is
     * currently in the player's possession. If so, the ability is removed from the
     * player's knowledge and placed in the area. Returns a description of the result
@@ -88,7 +92,9 @@ class Player(startingArea: Area):
       this.location.addAbility(oldAbility)
     if removed.isDefined then "You drop the " + abilityName + "." else "You don't have that!"
   */
-  def remember = this.has(D.possibleAbilities("memory"))
+  def remembers = this.has(D.possibleAbilities("memory"))
+
+  def canSee = this.has(D.possibleAbilities("vision"))
   /** Causes the player to examine the ability of the given name. This is successful if such
     * an ability is currently in the player's possession. Returns a description of the result,
     * which, if the attempt is successful, includes a description of the ability. The description
@@ -100,14 +106,18 @@ class Player(startingArea: Area):
     //this.abilities.get(abilityName).map(lookText).getOrElse(D.ability.misc("missingAbility"))
     //this.abilities.get(abilityName).map(D.ability("desc")).getOrElse(D.ability.misc("missingAbility"))
     if abilities.contains(D.possibleAbilities("proprio")) then
-      s"\n\nYou survey $direction: " + this.location.neighbor(direction).map(_.shortDescription(this.abilities, this.phase)).getOrElse(D.misc("noArea"))
+      s"\nYou survey $direction: " + this.location.neighbor(direction).map(_.shortDescription(this.abilities, this.canSee, this.phase)).getOrElse(D.misc("noArea"))
     else
       D.knowledge("missingAbility")
 
   def interact(action: String, name: String): String =
     //this.location.interactables.find(t => t._1.contains(name) && !t._2.completed).map(_._2.execute(action)).getOrElse(D.misc("wrongAction") + name)
+    //set the first element in the interactable list as default if the player can't see its name
+    var effectiveName = name
+    if !this.canSee then
+      effectiveName = this.location.interactable.values.toVector.headOption.map(_.name).getOrElse("")
     //first filters objects with right name, then with right action required
-    this.location.searchInteractables(name, action).map(_._2.execute(action)).filter(_.isDefined).map(_.getOrElse(D.misc("wrongAction") + name)).getOrElse("")
+    this.location.searchInteractables(effectiveName, action).map(_._2.execute(action)).filter(_.isDefined).map(_.getOrElse(D.misc("wrongAction") + name)).getOrElse("")
   /** Causes the player to list what they are carrying. Returns a listing of the player's
     * abilities or a statement indicating that the player is carrying nothing. The return
     * value has the form "You are carrying:\nABILITIES ON SEPARATE LINES" or "You are empty-handed."
@@ -116,7 +126,11 @@ class Player(startingArea: Area):
     if this.abilities.isEmpty then
       D.knowledge("noAbility")
     else
-      D.knowledge("knowledgeIntro") + "\n" + this.abilities.map(name => s"$name: ${D.knowledge(name)}").mkString("\n")
+      D.knowledge("knowledgeIntro") + "\n" + this.abilities.map(name => s"$name: ${D.knowledge.desc(name)}").mkString("\n")
+
+
+  def isInCompletedTimeline = this.phase > this.lastEntryPoint.getMovePhase // entryPoints.get(player.phase-1).map(_.timeline.name).getOrElse("")
+
 
   def devolve() =
     timeTravelTo("past")
@@ -126,18 +140,30 @@ class Player(startingArea: Area):
 
   def timeTravelTo(direction: String) =
     if this.phase > 0 then
-      timelineChosen = false
+      this.timelineChosen = false
+      this.progression = -1
       this.currentLocation = this.lastEntryPoint
       this.go(direction)
       this.lastEntryPoint = this.currentLocation
-      D.actions(direction)
+      D.misc(direction)
     else
       ""
 
   def enterTimeline() =
     if this.location.getMovePhase <= this.phase then
-      this.timelineChosen = true
-      D.zones(this.location.timeline.name)("intro")
+      if !this.timelineChosen then
+        this.timelineChosen = true
+        D.misc("welcome") + {
+          if this.has(D.possibleAbilities("thought")) then
+            this.location.timeline.name
+          else if this.canSee then
+            this.location.name
+          else
+            D.misc("unknownTimeline")
+        }
+      else
+        ""
+        //D.zones(this.location.timeline.name)("intro") //shows the intro when not needed; after re-entering the same just completed timeline
     else
       this.die()
 
@@ -145,6 +171,8 @@ class Player(startingArea: Area):
     if !this.invincible then
       this.dead = true
       this.phase = 0
+      this.timelineChosen = true
+      this.progression = -1
       this.currentLocation = startingArea
       this.lastEntryPoint = startingArea
       D.misc("denied")
@@ -162,6 +190,8 @@ class Player(startingArea: Area):
   // DEBUG FUNCTION TO QUICKLY MOVE AROUND PHASES
   def tp(phase: String): String =
     this.phase = phase.toIntOption.getOrElse(0)
+    this.abilities ++= Vector("Curiosity", "Memory")
+    if phase.toIntOption.getOrElse(0) > 4 then this.abilities ++= Vector("vision","hearing", "fear", "sad")
     ""
     //this.currentLocation =
 

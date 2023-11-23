@@ -48,7 +48,7 @@ class Game:
   overflow    .setNeighbors(Vector(                       "future" -> bbVacuum))
   bbVacuum    .setNeighbors(Vector("past" -> overflow,    "future" -> psCenter))
   bbVacuum.setDeadly()
-  psCenter    .setNeighbors(Vector("past" -> bbVacuum,    "future" -> olOcean1))
+  psCenter    .setNeighbors(Vector("past" -> bbVacuum,    "future" -> olOcean1, "outside this" -> overflow))
   olOcean1   .setNeighbors(Vector("past" -> psCenter,    "future" -> phClearing))
   phClearing    .setNeighbors(Vector("past" -> olOcean1,   "future" -> maPath))
   maPath      .setNeighbors(Vector("past" -> phClearing,    "future" -> srRoom))
@@ -73,14 +73,14 @@ class Game:
   //future celestial bodies
   psCenter.setInteractables(Vector(
     "dust1" -> Element(D.interactables("dust1"), 1),
-    "dust2" -> Element(D.interactables("dust2"), 3)
+    "dust2" -> Element(D.interactables("dust2"), 3),
+    "dust3" -> Element(D.interactables("dust3"), 7)
   ))
   psPeriphery.setInteractables(Vector(
-    "dust3" -> Element(D.interactables("dust3"), 5),
-    "dust4" -> Element(D.interactables("dust4"), 2),
-    "dust5" -> Element(D.interactables("dust5"), 2)
+    "dust4" -> Element(D.interactables("dust4"), 1),
+    "dust5" -> Element(D.interactables("dust5"), 3)
   ))
-
+  geWhiteRoom.foundAbility = D.possibleAbilities("curious")
 
   private val olOcean2 = Area(D.areas("ocean2"), originOfLife)
   private val olOcean3 = Area(D.areas("ocean3"), originOfLife)
@@ -101,7 +101,7 @@ class Game:
 
 
   private var tierlist = Vector("cell1", "cell2", "plankton", "mollusk", "fish1", "fish2")
-  private var currentTier = 0
+  private var progression = 0
   olThermal.setInteractables(Vector(
     "thermalRock" -> Element(D.interactables("thermalRock"))
   ))
@@ -164,8 +164,8 @@ class Game:
 
 
   phJungle.setInteractables(Vector(
-    "step" -> Element(D.interactables("step")),
-    "tree" -> Element(D.interactables("tree"))
+    "step" -> Element(D.interactables("step"), 4),
+    "tree" -> Element(D.interactables("tree"), -1)
   ))
   phJungle.foundAbility = D.possibleAbilities("hear")
   phHill.setInteractables(Vector(
@@ -180,12 +180,12 @@ class Game:
   phVolcano.foundAbility = D.possibleAbilities("proprio")
 
   phSwamp.setInteractables(Vector(
-    "sand" -> Element(D.interactables("sand"))
+    "sand" -> Element(D.interactables("sand"), -1)
   ))
   phSwamp.foundAbility = D.possibleAbilities("proprio")
 
   phCave2.setInteractables(Vector(
-    "droplet" -> Element(D.interactables("droplet"))
+    "droplet" -> Element(D.interactables("droplet"), -1)
   ))
   phCave2.foundAbility = D.possibleAbilities("hear")
 
@@ -198,13 +198,13 @@ class Game:
   private val maStream = Area(D.areas("stream"), middleAges)
   private val maGrave = Area(D.areas("grave"), middleAges)
   maCastle2.setDeadly()
-  maPath    .setNeighbors(Vector(D.movements("n") -> maGrave, D.movements("s") -> maField, D.movements("e") -> maStream, D.movements("w") -> maCastle1))
+  maPath    .setNeighbors(Vector(D.movements("s") -> maField, D.movements("e") -> maVillage, D.movements("w") -> maCastle1))
   maCastle1 .setNeighbors(Vector(D.movements("w") -> maCastle2, D.movements("e") -> maPath, D.movements("s") -> maField))
-  maVillage  .setNeighbors(Vector(D.movements("n") -> maGrave, D.movements("s") -> maField, D.movements("e") -> maStream, D.movements("w") -> maPath))
+  maVillage  .setNeighbors(Vector(D.movements("n") -> maGrave, D.movements("s") -> maHouse, D.movements("e") -> maStream, D.movements("w") -> maPath))
   maHouse  .setNeighbors(Vector(D.movements("back") -> maVillage))
   maGrave   .setNeighbors(Vector(D.movements("s") -> maVillage, D.movements("w") -> maPath, D.movements("e") -> maStream))
-  maStream  .setNeighbors(Vector(D.movements("w") -> maVillage))
-  maField   .setNeighbors(Vector(D.movements("n") -> maPath))
+  maStream  .setNeighbors(Vector(D.movements("s") -> maField, D.movements("w") -> maVillage))
+  maField   .setNeighbors(Vector(D.movements("n") -> maPath, D.movements("w") -> maCastle1))
 
   maCastle1.setInteractables(Vector(
     "guard" -> Element(D.interactables("guard"))
@@ -224,6 +224,8 @@ class Game:
   maStream.setInteractables(Vector(
     "rat" -> Element(D.interactables("rat"))
   ))
+  maVillage.foundAbility = D.possibleAbilities("fear")
+
   maVillage.setInteractables(Vector(
     "strappado" -> Element(D.interactables("strappado"))
   ))
@@ -297,7 +299,7 @@ class Game:
   /** Determines if the adventure is complete, that is, if the player has won. */
   //private val destination = bb
   /** The character who is the protagonist of the adventure and whom the real-life player controls. */
-  val player = Player(psCenter)
+  val player = Player(geWhiteRoom)
   def isComplete = false
     //this.player.location == this.destination && this.player.has("battery") && this.player.has("remote")
   /** Determines whether the player has won, lost, or quit, thereby ending the game. */
@@ -321,7 +323,7 @@ class Game:
   def parseStoryCommand(action: Action): String =
     val input = action.commandText
     var outcome = ""
-    commandSuccess = false
+    commandSuccess = true
 
     //bonus cheat mode
     if player.location == overflow then
@@ -330,10 +332,9 @@ class Game:
     //game start
     //D.zones.map((k,v) => v.question).zipWithIndex.filter((v,k) => v == input)
     if player.location.isDeadly then
-      this.commandSuccess = true
       return player.die()
 
-    //if action.verb == D.actionNames("evolve") || action.verb == D.actionNames("devolve") then
+    //if action.verb == D.action("evolve") || action.verb == D.action("devolve") then
     //  timelineDiscovered = false
 
     //if player.phase == 1 then outcome = D.ge.answer
@@ -342,12 +343,13 @@ class Game:
     //the following if will take care of the return output
     if isQuestionRight(input, D.zones(player.location.timeline.name).question)
       && this.isInRightTimeline then
+      player.setLocation(Some(this.entryPoints(player.phase)))
       player.phase += 1
-      this.commandSuccess = true
       //return D.zones.get(lastExpectedTimeline).answer
 
-    if player.phase == 1 && !player.remember then
-      outcome += player.learn(D.possibleAbilities("memory"))
+    //if player.phase == 1 && !player.remembers then
+      //outcome += player.learn(D.possibleAbilities("memory"))
+
     else if player.phase == Endgame then //&& player.has(D.possibleAbilities("tought")) then
       //outcome += D.zones(player.location.timeline).tought
       if isQuestionRight(input, D.zones(player.location.timeline.name).word) then
@@ -362,20 +364,31 @@ class Game:
 
     //println(entryPoints(player.phase-1).timeline)
     //show old answer as a hint
-    if player.location.timeline.name == lastExpectedTimeline || isQuestionRight(input, D.zones.get(lastExpectedTimeline).map(_.question).getOrElse("")) then
+    if player.location.timeline.name == lastExpectedTimeline /*this showed old answers player.isInCompletedTimeline*/ || isQuestionRight(input, D.zones.get(lastExpectedTimeline).map(_.question).getOrElse("")) then
       //println(D.zones("Globalization era").answer + " " + D.areas(entryPoints.get(player.phase - 1).map(_.timeline).getOrElse("")))
-      this.commandSuccess = true
       //remove player from actual area to hide useless decriptions
       player.timelineChosen = false
-      return outcome + D.zones(lastExpectedTimeline).answer
+      outcome += D.zones(lastExpectedTimeline).answer //player.location.timeline.name).answer
+    if player.phase == 1 && player.location == geWhiteRoom && !player.has(D.possibleAbilities("curious")) then
+      return outcome + "\n" + D.ge.misc("learn")
 
     if isInRightTimeline && player.timelineChosen then
       player.phase match
         case 0 =>
-          if player.remember then
+          //print a random word from the question if the user is trying without success
+          if action.commandText.contains("?") then
+            progression += 1
+            if progression > 3 && progression % 2 == 0 then
+              //commandSuccess = true
+              return Random.shuffle(D.ge.question.split(" ")).head
+
+          if player.remembers then
+            this.commandSuccess = false
             return D.ge("intro2")
           else
-            return D.ge("intro")
+            this.commandSuccess = false
+            return D.ge("intro") + "\n" + D.ge("intro2")
+
           //if player.location == startingPoint then
             /*if isQuestionRight(input, D.ge.question) then
               player.phase += 1
@@ -388,8 +401,7 @@ class Game:
 
             //first question guessed
         case 1 =>
-          //if player.location == geWhiteRoom then
-          //  return D.ge.misc("learn")
+
           //if player.location == psCenter then
           //println(":::"+player.location.interactable.values.map(_.completed).mkString(","))
           //if player.location.interactable.values.headOption.exists(_.completed) then //&& action.verb == D.ps("leave") then
@@ -398,27 +410,30 @@ class Game:
 
           //println("?"+player.location.interactable.values.count(_.completed))
 
+          this.commandSuccess = false
           if player.location == psCenter then
             player.location.interactable.values.count(_.completed) match
-                case 0 => "hello?"+player.location.interactable
+                case 0 =>
+                  return D.ps("intro")
+
                 //shows hint only if the first cluster just ot created
-                case 1 if player.location.interactable.values.count(e => e.interactions == 0 && !e.completed) == 1 =>
-                  this.commandSuccess = true
+                case 1 if player.location.interactable.values.count(e => e.interactions != 0 && !e.completed) == 0 =>
                   return D.ps("star1")
-                case 2 =>
-                  this.commandSuccess = true
+                case 2 if player.location.interactable.values.exists(e => e.interactions > 2 && !e.completed) =>
+                  return D.ps("more2")
+                case 2 if psPeriphery.interactable.count(_._2.completed) < 2 =>
                   return D.ps("move")
-                case _ => ""
+                case 3 =>
+                  return D.ps("right")
+                case _ =>
           if player.location == psPeriphery then
             println(player.location.interactable.values)
             println(player.location.interactable.values.count(_.completed))
             player.location.interactable.values.count(_.completed) match
               case 1 =>
-                this.commandSuccess = true
-                return D.ps("less")
+                return D.ps("more1")
               case 2 =>
-                this.commandSuccess = true
-                return D.ps("move")
+                return D.ps("big")
               case _ => 
 
           //if player.timeline == D.areas("bb") && action.verb == D.actions("go") then
@@ -427,35 +442,52 @@ class Game:
             outcome = D.ps.answer
             player.phase += 1
               commandSuccess = true*/
+        case 2 =>
+          //if player.location == hdVacuum then
+          outcome += D.hd("intro")
+          if action.verb == D.action("go") then
+            return Random.shuffle(D.hd.question.split(" ")).head
+          if hdVacuum.interactable.exists(_._2.completed) then
+            return D.hd("annihilated")
+          else
+            return outcome + "\n\n" + D.hd("particle")
+
         case 3 =>
-          if player.location == hdVacuum then
-            if action.verb == D.actionNames("go") then
-              return Random.shuffle(D.hd.question.split(" ")).head
-            return D.hd("intro")
+          //spawns random pieces of commands (2 letters)
+          if action.verb == D.action("go") then
+            return Random.shuffle(((D.action("fear") + D.action("sad")).sliding(2,2).toVector)).head
+
         case 4 =>
+          //spawns random pieces of commands (3 letters)
+          if action.verb == D.action("go") then
+            return Random.shuffle(((D.action("see") + "." + D.action("hear") + D.action("touch")).sliding(3,3).toVector)).head
+          if phJungle.interactable("step").completed then
+            player.die()
+
+        case 5 =>
           //if the player got the body, spawn all other creatures
-          if olThermal.interactable("thermalRock").completed && player.currentTier == -1 then
+          if olThermal.interactable("thermalRock").completed && player.progression == -1 then
             showOlInteractables()
-            player.currentTier += 1
+            player.progression += 1
             return D.ol("body")
-          if action.verb == D.actionNames("eat") && action.modifiers.nonEmpty then
+          if action.verb == D.action("eat") && action.modifiers.nonEmpty then
             // interactables.get(action.modifiers)
             val focusedElement = player.location.searchInteractables(action.modifiers, action.verb).map(_._2.name).getOrElse("")
             if tierlist.indexOf(focusedElement) > -1 then
-              if tierlist.indexOf(focusedElement) == player.currentTier then
+              if tierlist.indexOf(focusedElement) == player.progression then
                 return player.die()
               else
-                player.currentTier += 1
+                player.progression += 1
 
-          if player.currentTier == tierlist.size-1 then
-            player.currentTier += 1
+          if player.progression == tierlist.size-1 then
+            player.progression += 1
             return D.ol.misc("done")
 
           /*if player.timeline == D.areas("hd") && isQuestionRight(input, D.hd.question)  then
             outcome = D.hd.answer
             player.phase += 1
               commandSuccess = true*/
-        case 3 =>
+        case 6 =>
           /*if player.timeline == middleAges && isQuestionRight(input, D.ma.question) then
             outcome = D.ma.answer
             player.phase += 1
@@ -463,8 +495,9 @@ class Game:
 
 
         case _ =>
-          D.debug("noPhase")
+          //D.debug("noPhase")
         //ALL THE LOGIC ABOUT GAME PROGRESSION GOES HERE
+    this.commandSuccess = !outcome.isBlank
     outcome
 
   /**
@@ -474,7 +507,7 @@ class Game:
     * @return
     */
   def isQuestionRight(input: String, question: String) =
-    !input.isBlank && question.toLowerCase.contains(input.toLowerCase())
+    !input.isBlank && question.toLowerCase == input.toLowerCase
 
   /**
     * Check if user went back to the last completed timeline.
@@ -494,10 +527,8 @@ class Game:
     * The program freeze for some instants to let the player read the output, then automatically reset.
     */
   def reset() =
-    player.phase = 0
-    player.timelineChosen = true
-    player.currentTier = -1
-    this.areas.foreach(_.interactable.foreach(_._2.interactions = 0))
+    if !player.invincible then
+      this.areas.foreach(_.interactable.foreach(_._2.interactions = 0))
 
 
   var commandSuccess = false
@@ -531,6 +562,6 @@ class Game:
       //else //this.turnCount += 1
       //  outcomeReport.getOrElse(s"""${D.debug("noOutput")} "$command"""")
     else
-      storyReport + outcomeReport + "\nDEBUG: " + Action("$").execute(this.player).getOrElse("No desc?")
+      storyReport + {if storyReport.nonEmpty then "\n" else ""} + outcomeReport + "\nDEBUG: " + Action("$").execute(this.player).getOrElse("No desc?")
 
 end Game

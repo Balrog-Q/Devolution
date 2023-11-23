@@ -2,7 +2,7 @@ package devolution.helpers
 
 
 class KnowledgeDialogues(val misc: Map[String, String], val abilitiesDesc: Map[String, String]):
-  def desc(name: String) = this.abilitiesDesc.getOrElse(name, misc("invalidAbility"))
+  def desc(name: String) = this.abilitiesDesc.find(_._1.toLowerCase == name).map(_._2).getOrElse(misc("invalidAbility"))
   def apply(key: String) = this.misc(key)
 
 class AbilityDialogues(val name: String, val desc: String)
@@ -33,7 +33,7 @@ class AreaDialogues(phaseDescriptions: Vector[String], abilityDescriptions: Map[
 
   def abilityDesc(abilityName: String) = abilityDescriptions.getOrElse(abilityName, "")
 
-  def description(phase: Int, canSee: Boolean) = if canSee then abilityDesc(D.knowledge.desc("vision")) else this.phaseDesc(phase)
+  def description(phase: Int, canSee: Boolean) = if canSee then abilityDesc(D.knowledge.desc(D.possibleAbilities("vision"))) else this.phaseDesc(phase)
 
   /**
     * Feelings don't need alternative texts if not defined.

@@ -17,11 +17,11 @@ class Action(input: String):
     * of the action (such as “You go west.”). The description is returned in an Option
     * wrapper; if the command was not recognized, None is returned. */
   def execute(actor: Player) =
-    println(D.actionNames("learn")+ " "+ this.verb + " " + (D.actionNames("learn") == this.verb)+ " " + (D.actionNames("thought") ==this.verb))
+    //println(D.action("learn")+ " "+ this.verb + " " + (D.action("learn") == this.verb)+ " " + (D.action("thought") ==this.verb))
     /*this.verb match
     //doesn't work
-      case D.actionNames("learn") => println("1")
-      case D.actionNames("thought") => println("2")
+      case D.action("learn") => println("1")
+      case D.action("thought") => println("2")
       case _ => println("3")
     this.verb match
     //doesn't work
@@ -34,25 +34,43 @@ class Action(input: String):
       case D.c => println("2")
       case _ => println("3")*/
 
-
+    /*val TestMap = Map[String, String](
+      "thought" -> "contemplate",
+      "learn" -> "acquire")
+    val TestConst = "contemplate"*/
 
     this.verb match
-      case D.actionNames("go")        => Some(actor.go(this.modifiers))
-      case D.actionNames("examine")   => Some(actor.examine(this.modifiers))
-      //case D.actionNames("eat")       => Some("no")
-      case D.actionNames("devolve")   => Some(actor.devolve())
-      case D.actionNames("evolve")    => Some(actor.evolve())
+      /*case D.action("go")        => Some("works fine")
+      case D.action("examine")   => Some("works fine")
+
+      case D.action("thought")   => Some("never works")
+      case D.action("learn")     => Some("never works")
+      case TestMap("thought")         => Some("never works")
+      case `TestMap`("learn")           => Some("never works")
+
+      case TestConst                  => Some("works fine")
+      case other if this.verb == TestMap("thought") => Some("works fine")*/
+
+      //case "contemplate"
+      //case D.action("eat")       => Some("no")
+      case D.action("go")        => Some(actor.go(this.modifiers))
+      case D.action("examine")   => Some(actor.examine(this.modifiers))
+
+      case D.action("devolve")   => Some(actor.devolve())
+      case D.action("evolve")    => Some(actor.evolve())
       //case "knowledge" => Some(actor.knowledge)
-      case D.actionNames("quit")      => Some(actor.quit())
-      case D.actionNames("explore")   => Some(actor.enterTimeline())
-      //case D.actionNames("see")       => Some(actor.interact(this.modifiers))
-      //BROKEN: RANDOMLY DOESN'T WORK
-      case D.actionNames("learn")     => Some(actor.learn(this.modifiers))
-      //BROKEN: RANDOMLY DOESN'T WORK
-      case D.actionNames("thought")   => Some(actor.contemplate())
-      case "$"                        => Some("phase " + actor.phase + " " + actor.location.toString) // FOR DEBUG
+      case D.action("quit")      => Some(actor.quit())
+      case D.action("explore")   => Some(actor.enterTimeline())
+      case D.action("knowledge")   => Some(actor.knowledge)
+      //case D.action("feel")      => Some(actor.feel(this.modifiers))
+      //case D.action("see")       => Some(actor.interact(this.modifiers))
+
+      //these two are arbitrairly ignored by the match statement if implemented normally.
+      case other if this.verb == D.action("learn")     => Some(actor.learn(this.modifiers))
+      case other if this.verb == D.action("thought")   => Some(actor.contemplate())
       case "tp"                       => Some(actor.tp(this.modifiers))
       case other if !this.modifiers.isBlank => Some(actor.interact(this.verb, this.modifiers))
+      case "$"                        => Some("phase " + actor.phase + " " + actor.location.toString) // FOR DEBUG
       case other                      => None
     //case "drop"      => Some(actor.drop(this.modifiers))
     //case "get"       => Some(actor.get(this.modifiers))

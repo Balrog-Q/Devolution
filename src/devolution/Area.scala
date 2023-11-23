@@ -52,12 +52,12 @@ class Area(val name: String, val timeline: Timeline) extends Zone[Area]:
     * DIRECTIONS SEPARATED BY SPACES". If there are one or more abilities present, the return
     * value has the form "DESCRIPTION\nYou see here: ABILITIES SEPARATED BY SPACES\n\nExits available:
     * DIRECTIONS SEPARATED BY SPACES". The abilities and directions are listed in an arbitrary order. */
-  def fullDescription(knowledge: Vector[String], phase: Int): String =
+  def fullDescription(knowledge: Vector[String], canSee: Boolean, phase: Int): String =
     //this.shortDescription(knowledge) +
 
     //show a death message only if the user can see where he went
     if this.isDeadly then
-      if knowledge.contains(D.knowledge("vision")) then
+      if canSee then
         return D.misc("dead") + this.name
       else
         return ""
@@ -66,7 +66,10 @@ class Area(val name: String, val timeline: Timeline) extends Zone[Area]:
     if placeDesc.trim.isEmpty then
       placeDesc = descriptions.phaseDesc(phase)
     if this.interactables.nonEmpty then
-      placeDesc = placeDesc + "\n" + D.misc("aroundYou") + this.interactables.values.map(_.name).mkString("... ")
+      placeDesc = placeDesc + "\n" + D.misc("aroundYou")
+        + this.interactables.values.map(e => {
+          if canSee then e.name else D.misc("unknownObject")
+        }).mkString("... ")
     //if abilities.contains(D.abilities("proprioception") = "\n\nExits available: " + this.neighbors.keys.mkString(", ")
     //val abilityList = "\nYou see here: " + this.abilities.keys.mkString(" ")
     /*if this.knowledge.nonEmpty then
@@ -75,8 +78,8 @@ class Area(val name: String, val timeline: Timeline) extends Zone[Area]:
       this.description + exitList*/
     placeDesc
 
-  def shortDescription(knowledge: Vector[String], phase: Int) =
-    this.descriptions.description(phase, knowledge.contains(D.possibleAbilities("vision")))
+  def shortDescription(knowledge: Vector[String], canSee: Boolean, phase: Int) =
+    this.descriptions.description(phase, canSee)
     //if knowledge.contains(D.knowledge("vision")) || phase < VisionUnlock then
     //else
     //  D.misc("undefinedArea")
@@ -88,17 +91,17 @@ class Area(val name: String, val timeline: Timeline) extends Zone[Area]:
   override def toString = this.name + ": " + this.timeline + ", " + D.movements.map((k,m) => k + " " + this.neighbor(m).map(_.name)).mkString(" ")// + ", " + this.neighbor("west").name + ", " + this.neighbor("up").name + ", " + this.neighbor("down").name + ", " + this.neighbor("back").name + ", " + this.neighbor("forward").name + " " + this.neighbor("past").map(_.name) + " " + this.neighbor("future").map(_.name)
 
   def searchInteractables(name: String, action: String) =
-    interactables.filter(t => t._2.name.toLowerCase == name && !t._2.completed)
+    interactables.filter(t => t._2.name.toLowerCase == name.toLowerCase && !t._2.completed)
       .find(_._2.requiredAction == action)
 
-  def offers(abilityName: String) = this.foundAbility == abilityName
+  def offers(abilityName: String) = this.foundAbility.toLowerCase == abilityName.toLowerCase
 end Area
 
 /**
   * An interactable element found in an area.
   * Requires a specific action and return some text if acted on the right way.
   * @param dialogues
-  * @param neededInteractions
+  * @param neededInteractions When has value -1, the object never reaches completeness
   */
 class Element(private val dialogues: ElementDialogues, private val neededInteractions: Int = 1): // private val requiredAction: String, private val output: String):
 
@@ -108,11 +111,15 @@ class Element(private val dialogues: ElementDialogues, private val neededInterac
 
   def requiredAction = this.dialogues.action
 
+  private var description = ""
+
+  def setSpecialDescription(desc: String) = this.description = desc
+
   def execute(action: String): Option[String] =
     if action == requiredAction && !this.completed then
       interactions += 1
-      Some(this.dialogues.output)
+      Some("\n"+this.description+"\n~"+this.dialogues.output+"~")
     else
       None
 
-  def completed = interactions == neededInteractions
+  def completed = interactions == neededInteractions && neededInteractions > -1

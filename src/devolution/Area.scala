@@ -19,6 +19,7 @@ class Area(val name: String, val timeline: Timeline) extends Zone[Area]:
   private val finalQuestion = ""
 
   private var deadly = false
+  var foundAbility = ""
 
   /** * The minimum game phase required to move around from here. */
   private var movePhase = 0
@@ -27,6 +28,7 @@ class Area(val name: String, val timeline: Timeline) extends Zone[Area]:
 
   def setInteractables(interacts: Vector[(String, Element)]) =
     this.interactables ++= interacts
+
 
   def getMovePhase = this.movePhase
 
@@ -74,7 +76,7 @@ class Area(val name: String, val timeline: Timeline) extends Zone[Area]:
     placeDesc
 
   def shortDescription(knowledge: Vector[String], phase: Int) =
-    this.descriptions(phase, knowledge.contains(D.possibleAbilities("vision")))
+    this.descriptions.description(phase, knowledge.contains(D.possibleAbilities("vision")))
     //if knowledge.contains(D.knowledge("vision")) || phase < VisionUnlock then
     //else
     //  D.misc("undefinedArea")
@@ -84,16 +86,6 @@ class Area(val name: String, val timeline: Timeline) extends Zone[Area]:
   //def removeAbility(abilityName: String) = this.abilities.remove(abilityName)
   /** Returns a single-line description of the area for debugging purposes. */
   override def toString = this.name + ": " + this.timeline + ", " + D.movements.map((k,m) => k + " " + this.neighbor(m).map(_.name)).mkString(" ")// + ", " + this.neighbor("west").name + ", " + this.neighbor("up").name + ", " + this.neighbor("down").name + ", " + this.neighbor("back").name + ", " + this.neighbor("forward").name + " " + this.neighbor("past").map(_.name) + " " + this.neighbor("future").map(_.name)
-
-  /**
-    * Changes the default minimum move phase.
-    * Only the entry points have different move phases:
-    * they are the only areas where movement is constrained,
-    * but once that restriction is overcome, the movement becomes free in that timeline.
-    */
-  def setMovePhase(phase: Int) = this.movePhase = phase
-
-  def isDeadly = this.deadly
 
   def searchInteractables(name: String, action: String) =
     interactables.filter(t => t._2.name.toLowerCase == name && !t._2.completed)

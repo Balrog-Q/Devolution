@@ -21,4 +21,5 @@ class Timeline(val name: String) extends Zone[Timeline]:
   
   def getMap = this.areas
 
+
 end Timeline

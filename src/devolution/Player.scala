@@ -153,7 +153,7 @@ class Player(startingArea: Area):
 
   def contemplate() =
     if this.has(D.possibleAbilities("thought")) && this.phase == Endgame then
-      D.zones(this.location.timeline).tought
+      D.zones(this.location.timeline.name).tought
     else
       ""
 

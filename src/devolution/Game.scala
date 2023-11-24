@@ -92,15 +92,15 @@ class Game:
   olVolcano2.setDeadly()
   olLava.setDeadly()
 
-  olOcean1   .setNeighbors(Vector(D.movements("forward") -> olSurface, D.movements("down") -> olOcean2))
+  olOcean1   .setNeighbors(Vector(D.movements("away") -> olSurface, D.movements("down") -> olOcean2))
   olOcean2   .setNeighbors(Vector(D.movements("up") -> olOcean1, D.movements("down") -> olOcean3))
   olOcean3   .setNeighbors(Vector(D.movements("up") -> olOcean2, D.movements("down") -> olOcean4))
-  olOcean4   .setNeighbors(Vector(D.movements("up") -> olOcean4, D.movements("down") -> olVolcano2, D.movements("forward") -> olThermal))
+  olOcean4   .setNeighbors(Vector(D.movements("up") -> olOcean3, D.movements("down") -> olVolcano2, D.movements("away") -> olThermal))
   olThermal  .setNeighbors(Vector(D.movements("up") -> olOcean3, D.movements("down") -> olVolcano2, D.movements("back") -> olOcean4))
   olSurface  .setNeighbors(Vector(D.movements("back") -> olOcean1, D.movements("forward") -> olLava))
 
 
-  private var tierlist = Vector("cell1", "cell2", "plankton", "mollusk", "fish1", "fish2")
+  private var tierlist = Vector(D.interactables("cell1").lowerName, D.interactables("cell2").lowerName, D.interactables("plankton").lowerName, D.interactables("mollusk").lowerName, D.interactables("fish1").lowerName, D.interactables("fish2").lowerName)
   private var progression = 0
   olThermal.setInteractables(Vector(
     "thermalRock" -> Element(D.interactables("thermalRock"))
@@ -112,34 +112,32 @@ class Game:
 
   def showOlInteractables() =
     olOcean1.setInteractables(Vector(
-      "cell2" -> Element(D.interactables("cell2")),
-      "plankton" -> Element(D.interactables("plankton")),
-      "mollusk" -> Element(D.interactables("mollusk")),
-      "fish1" -> Element(D.interactables("fish1"))
+      "cell2" -> Element(D.interactables("cell2"), -1),
+      "plankton" -> Element(D.interactables("plankton"), -1),
+      "fish1" -> Element(D.interactables("fish1"), -1)
     ))
 
     olOcean2.setInteractables(Vector(
-      "mollusk" -> Element(D.interactables("mollusk")),
-      "plankton" -> Element(D.interactables("plankton")),
-      "fish1" -> Element(D.interactables("fish1")),
-      "cell1" -> Element(D.interactables("fish1")),
+      "mollusk" -> Element(D.interactables("mollusk"), -1),
+      "plankton" -> Element(D.interactables("plankton"), -1),
+      "fish1" -> Element(D.interactables("fish1"), -1),
+      "cell1" -> Element(D.interactables("cell1"), -1),
     ))
 
     olOcean3.setInteractables(Vector(
-      "fish2" -> Element(D.interactables("fish2")),
-      "fish1" -> Element(D.interactables("fish1")),
-      "cell1" -> Element(D.interactables("fish1")),
+      "fish2" -> Element(D.interactables("fish2"), -1),
+      "fish1" -> Element(D.interactables("fish1"), -1),
+      "cell1" -> Element(D.interactables("fish1"), -1),
     ))
 
     olOcean4.setInteractables(Vector(
-      "fish2" -> Element(D.interactables("fish2")),
-      "mollusk" -> Element(D.interactables("mollusk")),
-      "cell1" -> Element(D.interactables("fish1")),
+      "fish2" -> Element(D.interactables("fish2"), -1),
+      "mollusk" -> Element(D.interactables("mollusk"), -1),
+      "cell1" -> Element(D.interactables("fish1"), -1),
     ))
 
     olThermal.setInteractables(Vector(
-      "thermalRock" -> Element(D.interactables("thermalRock")),
-      "cell2" -> Element(D.interactables("cell2"))
+      "cell1" -> Element(D.interactables("cell1"), -1)
     ))
 
 
@@ -155,10 +153,10 @@ class Game:
   phNest.setDeadly()
 
   phClearing  .setNeighbors(Vector(D.movements("n") -> phJungle, D.movements("s") -> phSwamp, D.movements("e") -> phJungle, D.movements("w") -> phHill))
-  phJungle    .setNeighbors(Vector(D.movements("n") -> phCave1, D.movements("s") -> phClearing, D.movements("e") -> phHill, D.movements("w") -> phNest))
+  phJungle    .setNeighbors(Vector(D.movements("n") -> phCave1, D.movements("s") -> phClearing, D.movements("w") -> phHill, D.movements("e") -> phNest))
   phHill      .setNeighbors(Vector(D.movements("n") -> phJungle, D.movements("s") -> phSwamp, D.movements("e") -> phClearing, D.movements("w") -> phVolcano))
   phVolcano   .setNeighbors(Vector(D.movements("n") -> phJungle, D.movements("s") -> phJungle, D.movements("e") -> phHill, D.movements("w") -> phLava))
-  phSwamp     .setNeighbors(Vector(D.movements("n") -> phClearing, D.movements("s") -> phNest, D.movements("e") -> phHill, D.movements("w") -> phJungle))
+  phSwamp     .setNeighbors(Vector(D.movements("n") -> phClearing, D.movements("s") -> phNest, D.movements("w") -> phHill, D.movements("e") -> phJungle))
   phCave1     .setNeighbors(Vector(D.movements("in") -> phCave2, D.movements("s") -> phJungle, D.movements("e") -> phJungle, D.movements("w") -> phJungle))
   phCave2     .setNeighbors(Vector(D.movements("back") -> phCave1,  D.movements("forward") -> phNest))
 
@@ -299,7 +297,9 @@ class Game:
   /** Determines if the adventure is complete, that is, if the player has won. */
   //private val destination = bb
   /** The character who is the protagonist of the adventure and whom the real-life player controls. */
-  val player = Player(geWhiteRoom)
+  val player = Player(startingPoint)
+  //player.tp("5")
+
   def isComplete = false
     //this.player.location == this.destination && this.player.has("battery") && this.player.has("remote")
   /** Determines whether the player has won, lost, or quit, thereby ending the game. */
@@ -367,7 +367,7 @@ class Game:
     if player.location.timeline.name == lastExpectedTimeline /*this showed old answers player.isInCompletedTimeline*/ || isQuestionRight(input, D.zones.get(lastExpectedTimeline).map(_.question).getOrElse("")) then
       //println(D.zones("Globalization era").answer + " " + D.areas(entryPoints.get(player.phase - 1).map(_.timeline).getOrElse("")))
       //remove player from actual area to hide useless decriptions
-      player.timelineChosen = false
+      player.timelineChosen = action.verb == D.action("explore") || action.verb == D.action("go")
       outcome += D.zones(lastExpectedTimeline).answer //player.location.timeline.name).answer
     if player.phase == 1 && player.location == geWhiteRoom && !player.has(D.possibleAbilities("curious")) then
       return outcome + "\n" + D.ge.misc("learn")
@@ -466,37 +466,40 @@ class Game:
 
         case 5 =>
           //if the player got the body, spawn all other creatures
-          if olThermal.interactable("thermalRock").completed && player.progression == -1 then
-            showOlInteractables()
-            player.progression += 1
-            return D.ol("body")
+          if olThermal.interactable("thermalRock").completed then
+            if player.progression == -1 then
+              showOlInteractables()
+              player.progression += 1
+              return D.ol("body")
+          else if action.modifiers == D.interactables("thermalRock").name.toLowerCase then
+             return Random.shuffle(((D.action("colonize")).sliding(2,2).toVector)).head
+          else if player.location == olSurface then
+            return D.ol("intro")
+
           if action.verb == D.action("eat") && action.modifiers.nonEmpty then
             // interactables.get(action.modifiers)
-            val focusedElement = player.location.searchInteractables(action.modifiers, action.verb).map(_._2.name).getOrElse("")
-            if tierlist.indexOf(focusedElement) > -1 then
-              if tierlist.indexOf(focusedElement) == player.progression then
-                return player.die()
-              else
-                player.progression += 1
 
-          if player.progression == tierlist.size-1 then
+            val elementTier = tierlist.indexOf(player.location.searchInteractables(action.modifiers, action.verb).map(_._2.name.toLowerCase).getOrElse(""))
+            //println(focusedElement)
+            if elementTier == player.progression then
+              player.progression += 1
+            else if elementTier >= player.progression then
+              return player.die()
+
+          //all eaten
+          if player.progression == tierlist.size then
             player.progression += 1
             return D.ol.misc("done")
 
-          /*if player.timeline == D.areas("hd") && isQuestionRight(input, D.hd.question)  then
-            outcome = D.hd.answer
-            player.phase += 1
-              commandSuccess = true*/
         case 6 =>
-          /*if player.timeline == middleAges && isQuestionRight(input, D.ma.question) then
-            outcome = D.ma.answer
-            player.phase += 1
-            commandSuccess = true*/
+          if player.progression == -1 then
+            return D.el("intro")
+
+
 
 
         case _ =>
           //D.debug("noPhase")
-        //ALL THE LOGIC ABOUT GAME PROGRESSION GOES HERE
     this.commandSuccess = !outcome.isBlank
     outcome
 
@@ -562,6 +565,6 @@ class Game:
       //else //this.turnCount += 1
       //  outcomeReport.getOrElse(s"""${D.debug("noOutput")} "$command"""")
     else
-      storyReport + {if storyReport.nonEmpty then "\n" else ""} + outcomeReport + "\nDEBUG: " + Action("$").execute(this.player).getOrElse("No desc?")
+      (storyReport + {if storyReport.nonEmpty then "\n" else ""} + outcomeReport + "\nDEBUG: " + "phase " + player.phase + " " +player.timelineChosen + " " + player.location.toString).trim
 
 end Game

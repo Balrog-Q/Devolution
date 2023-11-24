@@ -3,6 +3,8 @@ package devolution
 import scala.collection.mutable.Map
 import devolution.helpers.*
 
+import scala.collection.mutable.Buffer
+
 /** A `Player` object represents a player character controlled by the real-life user
   * of the program.
   *
@@ -14,7 +16,13 @@ class Player(startingArea: Area):
 
   private var currentLocation = startingArea        // gatherer: changes in relation to the previous location
   private var quitCommandGiven = false              // one-way flag
-  var abilities = Vector[String]()     // container of all the abilities that the player has
+  //private var possibleAbilities = D.possibleAbilities.values.toVector
+  /**
+    * Container of all the abilities that the player has.
+    * Starts with fixed length to put abilities in the right place (as defined in the possibleAbilities dialogue vector).
+    * This allows to show their descriptions in a nice order.
+    */
+  var abilitiesStatus = D.possibleAbilities.values.map(_ -> false).toMap
   var dead = false
   var lastEntryPoint = startingArea
   var invincible = false
@@ -49,6 +57,7 @@ class Player(startingArea: Area):
     else
       D.misc("reminder")
 
+  def abilities = abilitiesStatus.filter(_._2).keys.toVector
   def setLocation(destination: Option[Area]) = this.currentLocation = destination.getOrElse(this.currentLocation)
     //if destination.isDefined then "You go " + direction + "." else "You can't go " + direction + "."
   /** Causes the player to rest for a short while (this has no substantial effect in game terms).
@@ -75,13 +84,14 @@ class Player(startingArea: Area):
       "There is no " + abilityName + " here to pick up."*/
   def learn(abilityName: String) =
     if this.currentLocation.offers(abilityName) && !this.has(abilityName) then
-      this.abilities = this.abilities :+ abilityName
+      //abilities are placed in specific spots, to show their description in a nice order
+      this.abilitiesStatus = this.abilitiesStatus.updated(abilityName, true)
       "\n"+D.knowledge("new") + abilityName + ".\n" + D.knowledge.desc(abilityName)
     else
       ""
 
   /** Determines whether the player is carrying an ability of the given name. */
-  def has(abilityName: String) = this.abilities.contains(abilityName.toLowerCase)
+  def has(abilityName: String) = this.abilities.contains(abilityName)
   /** Tries to drop an ability of the given name. This is successful if such an ability is
     * currently in the player's possession. If so, the ability is removed from the
     * player's knowledge and placed in the area. Returns a description of the result
@@ -117,7 +127,7 @@ class Player(startingArea: Area):
     if !this.canSee then
       effectiveName = this.location.interactable.values.toVector.headOption.map(_.name).getOrElse("")
     //first filters objects with right name, then with right action required
-    this.location.searchInteractables(effectiveName, action).map(_._2.execute(action)).filter(_.isDefined).map(_.getOrElse(D.misc("wrongAction") + name)).getOrElse("")
+    this.location.searchInteractables(effectiveName, action).map(_._2.execute(action)).filter(_.isDefined).map(_.getOrElse(D.misc("wrongAction") + name)).getOrElse("").trim
   /** Causes the player to list what they are carrying. Returns a listing of the player's
     * abilities or a statement indicating that the player is carrying nothing. The return
     * value has the form "You are carrying:\nABILITIES ON SEPARATE LINES" or "You are empty-handed."
@@ -155,9 +165,9 @@ class Player(startingArea: Area):
         this.timelineChosen = true
         D.misc("welcome") + {
           if this.has(D.possibleAbilities("thought")) then
-            this.location.timeline.name
+            this.location.timeline.name.toLowerCase
           else if this.canSee then
-            this.location.name
+            this.location.name.toLowerCase
           else
             D.misc("unknownTimeline")
         }
@@ -190,8 +200,14 @@ class Player(startingArea: Area):
   // DEBUG FUNCTION TO QUICKLY MOVE AROUND PHASES
   def tp(phase: String): String =
     this.phase = phase.toIntOption.getOrElse(0)
-    this.abilities ++= Vector("Curiosity", "Memory")
-    if phase.toIntOption.getOrElse(0) > 4 then this.abilities ++= Vector("vision","hearing", "fear", "sad")
+    this.abilitiesStatus = this.abilitiesStatus.updated(D.possibleAbilities("curious"), true)
+    this.abilitiesStatus = this.abilitiesStatus.updated(D.possibleAbilities("memory"), true)
+    if phase.toIntOption.getOrElse(0) > 4 then
+      this.abilitiesStatus = this.abilitiesStatus.updated(D.possibleAbilities("vision"), true)
+      this.abilitiesStatus = this.abilitiesStatus.updated(D.possibleAbilities("hear"), true)
+      this.abilitiesStatus = this.abilitiesStatus.updated(D.possibleAbilities("proprio"), true)
+      this.abilitiesStatus = this.abilitiesStatus.updated(D.possibleAbilities("fear"), true)
+      this.abilitiesStatus = this.abilitiesStatus.updated(D.possibleAbilities("sad"), true)
     ""
     //this.currentLocation =
 

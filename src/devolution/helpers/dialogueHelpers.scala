@@ -2,7 +2,7 @@ package devolution.helpers
 
 
 class KnowledgeDialogues(val misc: Map[String, String], val abilitiesDesc: Map[String, String]):
-  def desc(name: String) = this.abilitiesDesc.find(_._1.toLowerCase == name).map(_._2).getOrElse(misc("invalidAbility"))
+  def desc(name: String) = this.abilitiesDesc.find(_._1.toLowerCase == name.toLowerCase).map(_._2).getOrElse(misc("invalidAbility"))
   def apply(key: String) = this.misc(key)
 
 class AbilityDialogues(val name: String, val desc: String)
@@ -33,7 +33,7 @@ class AreaDialogues(phaseDescriptions: Vector[String], abilityDescriptions: Map[
 
   def abilityDesc(abilityName: String) = abilityDescriptions.getOrElse(abilityName, "")
 
-  def description(phase: Int, canSee: Boolean) = if canSee then abilityDesc(D.knowledge.desc(D.possibleAbilities("vision"))) else this.phaseDesc(phase)
+  def description(phase: Int, canSee: Boolean) = if canSee then abilityDesc(D.possibleAbilities("vision")) else this.phaseDesc(phase)
 
   /**
     * Feelings don't need alternative texts if not defined.
@@ -46,4 +46,9 @@ class AreaDialogues(phaseDescriptions: Vector[String], abilityDescriptions: Map[
 
 //val timeDesc = abilityDescriptions.lift(2).getOrElse("")
 
-class ElementDialogues(val name: String, val action: String, val output: String)
+class ElementDialogues(val name: String, val action: String, val output: String):
+  /**
+    * The value is set to lowercase to match the possible user input
+    * @return
+    */
+  def lowerName = this.name.toLowerCase

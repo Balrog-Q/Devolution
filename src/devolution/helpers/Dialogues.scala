@@ -24,8 +24,8 @@ object Dialogues:
     "deadCommand" -> "-",
     "wrongAction" -> "A questionable idea to ",
     "unknownObject" -> "???",
-    "welcome" -> "You begin to explore the",
-    "unknownTimeline" -> " ...whatever this is",
+    "welcome" -> "You begin to explore the ",
+    "unknownTimeline" -> "...whatever this is",
     "future" -> "You waited",
     "past" -> "You make a hard choice",
   )
@@ -48,7 +48,7 @@ object Dialogues:
     "knowledge" -> "knowledge",
     "collect" -> "collect",
     "analyze" -> "analyze",
-    "settle" -> "settle"
+    "colonize" -> "colonize"
   )
   /*val a = Map[String, String](
     "thought" -> "contemplate",
@@ -90,14 +90,14 @@ object Dialogues:
 
   //list of abilities to associate easy names to in-game names
   val possibleAbilities = Map[String, String](
-    "memory" -> "Memory",
-    "thought" -> "Critical thinking",
-    "curious" -> "Curiosity",
     "vision" -> "Vision",
-    "sad" -> "Sadness",
-    "fear" -> "Fear",
     "hear" -> "Hearing",
-    "proprio" -> "Proprioception"
+    "proprio" -> "Proprioception",
+    "fear" -> "Fear",
+    "sad" -> "Sadness",
+    "curious" -> "Curiosity",
+    "thought" -> "Critical thinking",
+    "memory" -> "Memory"
   )
 
   //associate in-game names to descriptions
@@ -109,7 +109,7 @@ object Dialogues:
     possibleAbilities("vision") -> "Your immediate surroundings give you way to interpret reality",
     possibleAbilities("sad") -> "Lets you grieve on objects and events",
     possibleAbilities("fear") -> "Allows you to safeguard yourself by feeling fear",
-    possibleAbilities("hear") -> "Reveals a new dimension of reality",
+    possibleAbilities("hear") -> "Comes into help when other senses can't do it",
     possibleAbilities("proprio") -> "You can survery every direction as if it was a part of your own body"
   )
 
@@ -137,18 +137,18 @@ object Dialogues:
     "cell2" -> ElementDialogues("Eukaryote", action("eat"), "There"),
     "rock" -> ElementDialogues("Rock", action("see"), "A"),
     "mollusk" -> ElementDialogues("Mollusk", action("eat"), "Peak"),
-    "plankton" -> ElementDialogues("Mollusk", action("eat"), "In"),
+    "plankton" -> ElementDialogues("Plankton", action("eat"), "In"),
     "fish1" -> ElementDialogues("Small fish", action("eat"), "This"),
     "fish2" -> ElementDialogues("Big fish", action("eat"), "Chain"),
-    "thermalRock" -> ElementDialogues("Porous rock", action("settle"), "Chain"),
+    "thermalRock" -> ElementDialogues("Porous rock", action("colonize"), "Chain"),
 
     "rock" -> ElementDialogues("Rock", action("touch"), "I"),
     "escrement" -> ElementDialogues("Escrements", action("touch"), "why"),
     "sand" -> ElementDialogues("Quicksand", action("touch"), "*proprioception*"),
     "step" -> ElementDialogues("Heavy steps", action("hear"), "them"),
-    "tree" -> ElementDialogues("Tall tree", action("see"), "*vision*"),
+    "tree" -> ElementDialogues("Tall tree", action("see"), "should"),
     "egg" -> ElementDialogues("Giant egg", action("eat"), "escape"),
-    "horn" -> ElementDialogues("Broken horn", action("see"), "should"),
+    "horn" -> ElementDialogues("Broken horn", action("see"), "*vision*"),
     "droplet" -> ElementDialogues("Droplet", action("hear"), "*hearing*"),
 
     "guard" -> ElementDialogues("Armed guard", action("fear"), "how"),
@@ -278,7 +278,7 @@ object Dialogues:
         possibleAbilities("hear") -> "You hear the gentle splash of the waves, the rhythmic pulse of the tide",
         possibleAbilities("fear") -> "",
         possibleAbilities("sad") -> "",
-        possibleAbilities("curious") -> "You wonder what lies beneath the waves..."
+        possibleAbilities("curious") -> "You wonder what lies beneath the waves... but also on solid ground, located away from here. Don't go too far away: when you are satisfied, go back"
       )
     ),
     areas("surface") -> AreaDialogues(
@@ -307,7 +307,7 @@ object Dialogues:
       Vector(""),
       Map[String, String](
         possibleAbilities("vision") -> "The darkness can't get any worse than this",
-        possibleAbilities("proprio") -> "Bubbles of air raise to the surface",
+        possibleAbilities("proprio") -> "Bubbles of air raise to the surface. The water is warmer here.",
         possibleAbilities("hear") -> "",
         possibleAbilities("fear") -> "Every part of you screams in panic. You're not supposed to be here. Better go away",
         possibleAbilities("sad") -> "You feel a pang of sadness as you realize how lonely this place is",
@@ -317,18 +317,18 @@ object Dialogues:
     areas("ocean4") -> AreaDialogues(
       Vector(""),
       Map[String, String](
-        possibleAbilities("vision") -> "Mysterious glimpse of light create intricate patterns",
-        possibleAbilities("proprio") -> "The mass of water around you gets pushed around by some unexplainable current",
+        possibleAbilities("vision") -> "Mysterious glimpses of light create intricate patterns, but they are far... away",
+        possibleAbilities("proprio") -> "This place is almost unsustainably hot. Better not proceed further down",
         possibleAbilities("hear") -> "A distant rumble echoes through the water",
         possibleAbilities("fear") -> "",
         possibleAbilities("sad") -> "",
-        possibleAbilities("curious") -> ""
+        possibleAbilities("curious") -> "The mass of water around you gets pushed around by some unexplainable current"
       )
     ),
     areas("thermal") -> AreaDialogues(
       Vector(""),
       Map[String, String](
-        possibleAbilities("vision") -> "There is a strange formation growing from the seafloor. It looks like a volcanic vent, spewing hot water and minerals",
+        possibleAbilities("vision") -> "There is a strange formation growing from the seafloor. It looks like a volcanic vent, spewing hot water and minerals...",
         possibleAbilities("proprio") -> "",
         possibleAbilities("hear") -> "",
         possibleAbilities("fear") -> "",
@@ -590,8 +590,8 @@ object Dialogues:
         possibleAbilities("proprio") -> "Despite apparently missing, the ground is solid",
         possibleAbilities("hear") -> "A subtle static noise fills the space",
         possibleAbilities("fear") -> "You have mixed feelings about this",
-        possibleAbilities("sad") -> "You have mixed feelings about this",
-        possibleAbilities("curious") -> "You have mixed feelings about this"
+        possibleAbilities("sad") -> "You have... mixed feelings about this",
+        possibleAbilities("curious") -> "You have mixed feelings about this..."
       )
     ),
     areas("switch") -> AreaDialogues(

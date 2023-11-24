@@ -62,7 +62,7 @@ class Area(val name: String, val timeline: Timeline) extends Zone[Area]:
       else
         return ""
 
-    var placeDesc = knowledge.map(descriptions.abilityDesc(_)).mkString("\n")
+    var placeDesc = knowledge.map(descriptions.abilityDesc(_)).filter(_.nonEmpty).mkString(".\n").trim
     if placeDesc.trim.isEmpty then
       placeDesc = descriptions.phaseDesc(phase)
     if this.interactables.nonEmpty then

@@ -567,7 +567,7 @@ class Game:
             player.setLocation(Some(geSwitch))
             return D.ge.misc("finalTutorial")
           if this.isComplete then
-            outcome = D.ge.areaDialogues(player.location.name).abilityDesc(action.verb) + " " + outcome
+            outcome = D.ge.areaDialogues(player.location.name).abilityDesc(D.possibleAbilities(D.action.find(_._2 == action.verb).map(_._1).getOrElse(""))) + " " + outcome
 
 
 
@@ -620,7 +620,7 @@ class Game:
     var storyReport = parseStoryCommand(action)
 
     if this.isComplete then
-      return outcomeReport
+      return storyReport + "\n" + outcomeReport
 
     if !this.commandSuccess && outcomeReport.isBlank && !action.verb.isBlank && action.verb != D("deadCommand") then //&& outcomeReport.isBlank && storyReport.isBlank then // needs to hide "command not found" error during successful output
       //check if the verb could still be meaningfull

@@ -10,7 +10,7 @@ class AbilityDialogues(val name: String, val desc: String)
 /**
   * Text-related info of a timeline to easily access dialogues of it and its areas.
   */
-class TimelineDialogues(val word: String, val question: String, val answer: String, val tought: String, val realization: String, val areaDialogues: Map[String, AreaDialogues]):
+class TimelineDialogues(val word: String, val question: String, val answer: String, val thought: String, val realization: String, val areaDialogues: Map[String, AreaDialogues]):
 
   var misc = Map[String, String]()
 
@@ -21,19 +21,19 @@ class TimelineDialogues(val word: String, val question: String, val answer: Stri
 /**
   * Text-related info of an area to easily access dialogues of it.
  */
-class AreaDialogues(phaseDescriptions: Vector[String], abilityDescriptions: Map[String, String]):
+class AreaDialogues(phaseDescriptions: Vector[String], abilityDescriptions: Map[String, String] = Map[String, String]()):
   /**
-    * Return the right phase-description if existent,
-    * otherwise the phase 0 description if existent,
-    * otherwise the "no area description" error text.
+    * Return the right phase-description if existent
     * @param i The phase number.
     */
   def phaseDesc(i: Int) =
-    phaseDescriptions.lift(i).find(_ != "").getOrElse(this.toString)
+    phaseDescriptions.lift(i).getOrElse(this.getNonEmpty)
 
-  def abilityDesc(abilityName: String) = abilityDescriptions.getOrElse(abilityName, "")
+  def abilityDesc(abilityName: String) =
+    abilityDescriptions.getOrElse(abilityName, "")
 
-  def description(phase: Int, canSee: Boolean) = if canSee then abilityDesc(D.possibleAbilities("vision")) else this.phaseDesc(phase)
+  def description(phase: Int, canSee: Boolean) = if canSee then
+    abilityDesc(D.possibleAbilities("vision")) else this.phaseDesc(phase)
 
   /**
     * Feelings don't need alternative texts if not defined.
@@ -42,7 +42,12 @@ class AreaDialogues(phaseDescriptions: Vector[String], abilityDescriptions: Map[
   //val soundDesc = abilityDescriptions.lift(1).getOrElse("")
   //val physicalDesc = abilityDescriptions.lift(2).getOrElse("")
 
-  override def toString = phaseDescriptions.find(_ != "").getOrElse(Dialogues.debug("noAreaDesc"))
+  /**
+    * Search for a non-empty phase description if existent,
+    * otherwise returns the "no area description" error text.
+    * @return
+    */
+  def getNonEmpty = phaseDescriptions.find(_ != "").getOrElse(D.debug("noAreaDesc"))
 
 //val timeDesc = abilityDescriptions.lift(2).getOrElse("")
 

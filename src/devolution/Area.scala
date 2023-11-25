@@ -58,17 +58,17 @@ class Area(val name: String, val timeline: Timeline) extends Zone[Area]:
     //show a death message only if the user can see where he went
     if this.isDeadly then
       if canSee then
-        return D.misc("dead") + this.name
+        return D("dead") + this.name
       else
         return ""
 
-    var placeDesc = knowledge.map(descriptions.abilityDesc(_)).filter(_.nonEmpty).mkString(".\n").trim
-    if placeDesc.trim.isEmpty then
+    var placeDesc = knowledge.map(this.descriptions.abilityDesc(_)).filter(_.nonEmpty).mkString("", ".\n", "...").trim
+    if placeDesc.length < 4 then
       placeDesc = descriptions.phaseDesc(phase)
     if this.interactables.nonEmpty then
-      placeDesc = placeDesc + "\n" + D.misc("aroundYou")
-        + this.interactables.values.map(e => {
-          if canSee then e.name else D.misc("unknownObject")
+      placeDesc = placeDesc + "\n\n" + D("aroundYou")
+        + this.interactables.values.filterNot(_.completed).map(e => {
+          if canSee then e.name else D("unknownObject")
         }).mkString("... ")
     //if abilities.contains(D.abilities("proprioception") = "\n\nExits available: " + this.neighbors.keys.mkString(", ")
     //val abilityList = "\nYou see here: " + this.abilities.keys.mkString(" ")
@@ -79,22 +79,22 @@ class Area(val name: String, val timeline: Timeline) extends Zone[Area]:
     placeDesc
 
   def shortDescription(knowledge: Vector[String], canSee: Boolean, phase: Int) =
-    this.descriptions.description(phase, canSee)
+    this.descriptions.description(phase, canSee) + "..."
     //if knowledge.contains(D.knowledge("vision")) || phase < VisionUnlock then
     //else
-    //  D.misc("undefinedArea")
+    //  D("undefinedArea")
 
   //def learn(ability: Ability) = this.abilities(ability.name) = ability
   //def contains(abilityName: String) = this.abilities.contains(abilityName)
   //def removeAbility(abilityName: String) = this.abilities.remove(abilityName)
   /** Returns a single-line description of the area for debugging purposes. */
-  override def toString = this.name + ": " + this.timeline + ", " + D.movements.map((k,m) => k + " " + this.neighbor(m).map(_.name)).mkString(" ")// + ", " + this.neighbor("west").name + ", " + this.neighbor("up").name + ", " + this.neighbor("down").name + ", " + this.neighbor("back").name + ", " + this.neighbor("forward").name + " " + this.neighbor("past").map(_.name) + " " + this.neighbor("future").map(_.name)
+  override def toString = this.name + ": " + this.timeline + ", " + D.direction.map((k,m) => k + " " + this.neighbor(m).map(_.name)).mkString(" ")// + ", " + this.neighbor("west").name + ", " + this.neighbor("up").name + ", " + this.neighbor("down").name + ", " + this.neighbor("back").name + ", " + this.neighbor("forward").name + " " + this.neighbor("past").map(_.name) + " " + this.neighbor("future").map(_.name)
 
   def searchInteractables(name: String, action: String) =
     interactables.filter(t => t._2.name.toLowerCase == name.toLowerCase && !t._2.completed)
       .find(_._2.requiredAction == action)
 
-  def offers(abilityName: String) = this.foundAbility.toLowerCase == abilityName.toLowerCase
+  def offers(abilityName: String) = this.foundAbility == abilityName
 end Area
 
 /**
@@ -107,7 +107,7 @@ class Element(private val dialogues: ElementDialogues, private val neededInterac
 
   var interactions = 0
 
-  def name = this.dialogues.name
+  def name = this.dialogues.lowerName
 
   def requiredAction = this.dialogues.action
 
@@ -116,9 +116,14 @@ class Element(private val dialogues: ElementDialogues, private val neededInterac
   def setSpecialDescription(desc: String) = this.description = desc
 
   def execute(action: String): Option[String] =
-    if action == requiredAction && !this.completed then
+    if action == requiredAction && !this.completed && this.dialogues.output.nonEmpty then
       interactions += 1
-      Some("\n"+this.description+"\n~"+this.dialogues.output+"~")
+      Some("\n" + this.description + "\n" + {
+        if this.dialogues.output.split(" ").length == 1 then
+          "~" + this.dialogues.output + "~"
+        else
+          this.dialogues.output
+      })
     else
       None
 

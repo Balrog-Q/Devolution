@@ -4,6 +4,7 @@ import scala.collection.mutable.Map
 import devolution.helpers.*
 
 import scala.collection.mutable.Buffer
+import scala.collection.mutable.LinkedHashMap
 
 /** A `Player` object represents a player character controlled by the real-life user
   * of the program.
@@ -22,7 +23,7 @@ class Player(startingArea: Area):
     * Starts with fixed length to put abilities in the right place (as defined in the possibleAbilities dialogue vector).
     * This allows to show their descriptions in a nice order.
     */
-  var abilitiesStatus = D.possibleAbilities.values.map(_ -> false).toMap
+  var abilitiesStatus = D.possibleAbilities.map((k,v) => v -> false)
   var dead = false
   var lastEntryPoint = startingArea
   var invincible = false
@@ -45,17 +46,17 @@ class Player(startingArea: Area):
     * is an exit from the player's current location towards the direction name. Returns
     * a description of the result: "You go DIRECTION." or "You can't go DIRECTION." */
   def go(direction: String) =
-    if this.timelineChosen || direction == D.movements("past") || direction == D.movements("future") then
+    if this.timelineChosen || D.specialDirection.values.toVector.contains(direction) then
       val destination = this.location.neighbor(direction)
-      if this.location.getMovePhase <= this.phase || direction == D.movements("past") || direction == D.movements("future") then
+      if this.location.getMovePhase <= this.phase || D.specialDirection.values.toVector.contains(direction) then
         setLocation(destination)
-        D.misc("moved") + direction
+        D("moved") + direction
         //if this.location.isDeadly then
         //  this.die()
       else
         ""
     else
-      D.misc("reminder")
+      D("reminder")
 
   def abilities = abilitiesStatus.filter(_._2).keys.toVector
   def setLocation(destination: Option[Area]) = this.currentLocation = destination.getOrElse(this.currentLocation)
@@ -85,7 +86,7 @@ class Player(startingArea: Area):
   def learn(abilityName: String) =
     if this.currentLocation.offers(abilityName) && !this.has(abilityName) then
       //abilities are placed in specific spots, to show their description in a nice order
-      this.abilitiesStatus = this.abilitiesStatus.updated(abilityName, true)
+      this.abilitiesStatus.update(abilityName, true)
       "\n"+D.knowledge("new") + abilityName + ".\n" + D.knowledge.desc(abilityName)
     else
       ""
@@ -105,6 +106,7 @@ class Player(startingArea: Area):
   def remembers = this.has(D.possibleAbilities("memory"))
 
   def canSee = this.has(D.possibleAbilities("vision"))
+  def canThink = this.has(D.possibleAbilities("thought"))
   /** Causes the player to examine the ability of the given name. This is successful if such
     * an ability is currently in the player's possession. Returns a description of the result,
     * which, if the attempt is successful, includes a description of the ability. The description
@@ -115,19 +117,19 @@ class Player(startingArea: Area):
     //val failText = "If you want to examine something, you need to pick it up first."
     //this.abilities.get(abilityName).map(lookText).getOrElse(D.ability.misc("missingAbility"))
     //this.abilities.get(abilityName).map(D.ability("desc")).getOrElse(D.ability.misc("missingAbility"))
-    if abilities.contains(D.possibleAbilities("proprio")) then
-      s"\nYou survey $direction: " + this.location.neighbor(direction).map(_.shortDescription(this.abilities, this.canSee, this.phase)).getOrElse(D.misc("noArea"))
+    if this.has(D.possibleAbilities("proprio")) && this.has(D.possibleAbilities("vision")) && !D.specialDirection.contains(direction) then
+      D("survey") + direction + "...\n" + this.location.neighbor(direction).map(_.shortDescription(this.abilities, this.canSee, this.phase)).getOrElse(D("noArea"))
     else
       D.knowledge("missingAbility")
 
   def interact(action: String, name: String): String =
-    //this.location.interactables.find(t => t._1.contains(name) && !t._2.completed).map(_._2.execute(action)).getOrElse(D.misc("wrongAction") + name)
+    //this.location.interactables.find(t => t._1.contains(name) && !t._2.completed).map(_._2.execute(action)).getOrElse(D("wrongAction") + name)
     //set the first element in the interactable list as default if the player can't see its name
     var effectiveName = name
     if !this.canSee then
       effectiveName = this.location.interactable.values.toVector.headOption.map(_.name).getOrElse("")
     //first filters objects with right name, then with right action required
-    this.location.searchInteractables(effectiveName, action).map(_._2.execute(action)).filter(_.isDefined).map(_.getOrElse(D.misc("wrongAction") + name)).getOrElse("").trim
+    this.location.searchInteractables(effectiveName, action).map(_._2.execute(action)).filter(_.isDefined).map(_.getOrElse(D("wrongAction") + name)).getOrElse("").trim
   /** Causes the player to list what they are carrying. Returns a listing of the player's
     * abilities or a statement indicating that the player is carrying nothing. The return
     * value has the form "You are carrying:\nABILITIES ON SEPARATE LINES" or "You are empty-handed."
@@ -136,7 +138,7 @@ class Player(startingArea: Area):
     if this.abilities.isEmpty then
       D.knowledge("noAbility")
     else
-      D.knowledge("knowledgeIntro") + "\n" + this.abilities.map(name => s"$name: ${D.knowledge.desc(name)}").mkString("\n")
+      this.abilities.map(name => s"$name: ${D.knowledge.desc(name)}".capitalize).mkString(D.knowledge("knowledgeIntro"), ".\n- ", ".")
 
 
   def isInCompletedTimeline = this.phase > this.lastEntryPoint.getMovePhase // entryPoints.get(player.phase-1).map(_.timeline.name).getOrElse("")
@@ -163,13 +165,13 @@ class Player(startingArea: Area):
     if this.location.getMovePhase <= this.phase then
       if !this.timelineChosen then
         this.timelineChosen = true
-        D.misc("welcome") + {
-          if this.has(D.possibleAbilities("thought")) then
+        D("welcome") + {
+          if this.canThink then
             this.location.timeline.name.toLowerCase
           else if this.canSee then
             this.location.name.toLowerCase
           else
-            D.misc("unknownTimeline")
+            D("unknownTimeline")
         }
       else
         ""
@@ -185,29 +187,36 @@ class Player(startingArea: Area):
       this.progression = -1
       this.currentLocation = startingArea
       this.lastEntryPoint = startingArea
-      D.misc("denied")
+      D("denied")
     else
       ""
 
+  /**
+    * This function only flags the main program to show the thought.
+    * This allows to keep the message visible despite the user's multiple tries.
+    * @return
+    */
   def contemplate() =
-    if this.has(D.possibleAbilities("thought")) && this.phase == Endgame then
-      D.zones(this.location.timeline.name).tought
-    else
-      ""
+    if this.canThink && this.phase >= Endgame then
+      this.progression += 1
+    ""
 
   def isDead = this.dead
 
   // DEBUG FUNCTION TO QUICKLY MOVE AROUND PHASES
   def tp(phase: String): String =
     this.phase = phase.toIntOption.getOrElse(0)
-    this.abilitiesStatus = this.abilitiesStatus.updated(D.possibleAbilities("curious"), true)
-    this.abilitiesStatus = this.abilitiesStatus.updated(D.possibleAbilities("memory"), true)
+    this.abilitiesStatus.update(D.possibleAbilities("curious").toLowerCase, true)
+    this.abilitiesStatus.update(D.possibleAbilities("memory").toLowerCase, true)
     if phase.toIntOption.getOrElse(0) > 4 then
-      this.abilitiesStatus = this.abilitiesStatus.updated(D.possibleAbilities("vision"), true)
-      this.abilitiesStatus = this.abilitiesStatus.updated(D.possibleAbilities("hear"), true)
-      this.abilitiesStatus = this.abilitiesStatus.updated(D.possibleAbilities("proprio"), true)
-      this.abilitiesStatus = this.abilitiesStatus.updated(D.possibleAbilities("fear"), true)
-      this.abilitiesStatus = this.abilitiesStatus.updated(D.possibleAbilities("sad"), true)
+      this.abilitiesStatus.update(D.possibleAbilities("vision").toLowerCase, true)
+      this.abilitiesStatus.update(D.possibleAbilities("hear").toLowerCase, true)
+      this.abilitiesStatus.update(D.possibleAbilities("proprio").toLowerCase, true)
+      this.abilitiesStatus.update(D.possibleAbilities("fear").toLowerCase, true)
+      this.abilitiesStatus.update(D.possibleAbilities("sad").toLowerCase, true)
+    if phase.toIntOption.getOrElse(0) > 7 then
+      this.abilitiesStatus.update(D.possibleAbilities("thought").toLowerCase, true)
+
     ""
     //this.currentLocation =
 

@@ -9,10 +9,7 @@ import java.awt.Robot
 import java.awt.event.KeyEvent
 import scala.language.adhocExtensions // enable extension of Swing classes
 
-////////////////// NOTE TO STUDENTS //////////////////////////
-// For the purposes of our course, it's not necessary
-// that you understand or even look at the code in this file.
-//////////////////////////////////////////////////////////////
+import devolution.helpers.D
 
 /** The singleton object `AdventureGUI` represents a GUI-based version of the Adventure
   * game application. The object serves as a possible entry point for the game app, and can
@@ -102,9 +99,11 @@ object DevolutionGUI extends SimpleSwingApplication:
 
     // Set up the GUI's initial state:
     this.title = game.title
-    this.updateInfo(this.game.welcomeMessage)
+    //this.updateInfo(this.game.welcomeMessage)
+    this.turnOutput.text = D("begin")
+    this.locationInfo.text = this.game.welcomeMessage
     this.location = Point(50, 50)
-    this.minimumSize = Dimension(200, 200)
+    this.minimumSize = Dimension(500, 400)
     this.pack()
     this.input.requestFocusInWindow()
     // sends an empty command to trigger the story logic

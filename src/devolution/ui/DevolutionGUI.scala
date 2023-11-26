@@ -60,7 +60,7 @@ object DevolutionGUI extends SimpleSwingApplication:
             if game.player.isDead then
               game.player.dead = false
               this.playTurn("-")
-              Thread.sleep(1000)
+              //Thread.sleep(1000)
               /*Thread.sleep(1000)
               this.locationInfo.repaint()
               this.turnOutput.repaint()
@@ -75,7 +75,7 @@ object DevolutionGUI extends SimpleSwingApplication:
               this.locationInfo.repaint()
               this.turnOutput.repaint()*/
               game.reset()
-              this.playTurn("")
+              //this.playTurn("")
     }
 
     // Layout:

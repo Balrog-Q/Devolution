@@ -32,8 +32,9 @@ class AreaDialogues(phaseDescriptions: Vector[String], abilityDescriptions: Map[
   def abilityDesc(abilityName: String) =
     abilityDescriptions.getOrElse(abilityName, "")
 
-  def description(phase: Int, canSee: Boolean) = if canSee then
-    abilityDesc(D.possibleAbilities("vision")) else this.phaseDesc(phase)
+  def description(phase: Int, canSee: Boolean) =
+    if canSee then
+      abilityDesc(D.possibleAbilities("vision")) else this.phaseDesc(phase)
 
   /**
     * Feelings don't need alternative texts if not defined.

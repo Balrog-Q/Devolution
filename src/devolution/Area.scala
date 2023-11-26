@@ -22,7 +22,7 @@ class Area(val name: String, val timeline: Timeline) extends Zone[Area]:
   var foundAbility = ""
 
   /** * The minimum game phase required to move around from here. */
-  private var movePhase = 0
+  private var movePhase = Globalization
 
   def interactable = this.interactables
 
@@ -66,10 +66,12 @@ class Area(val name: String, val timeline: Timeline) extends Zone[Area]:
     if placeDesc.length < 4 then
       placeDesc = descriptions.phaseDesc(phase)
     if this.interactables.nonEmpty then
-      placeDesc = placeDesc + "\n\n" + D("aroundYou")
+      placeDesc += "\n\n" + D("aroundYou")
         + this.interactables.values.filterNot(_.completed).map(e => {
           if canSee then e.name else D("unknownObject")
         }).mkString("... ")
+    else
+      D("noObjects")
     //if abilities.contains(D.abilities("proprioception") = "\n\nExits available: " + this.neighbors.keys.mkString(", ")
     //val abilityList = "\nYou see here: " + this.abilities.keys.mkString(" ")
     /*if this.knowledge.nonEmpty then
@@ -78,8 +80,19 @@ class Area(val name: String, val timeline: Timeline) extends Zone[Area]:
       this.description + exitList*/
     placeDesc
 
+  /**
+    * Return the place visual description, if vision is available.
+    * In case of deadly areas, return the default text.
+    * @param knowledge
+    * @param canSee
+    * @param phase
+    * @return
+    */
   def shortDescription(knowledge: Vector[String], canSee: Boolean, phase: Int) =
-    this.descriptions.description(phase, canSee) + "..."
+    if this.isDeadly && canSee then
+      this.descriptions.phaseDesc(0)
+    else
+      this.descriptions.description(phase, canSee) + "..."
     //if knowledge.contains(D.knowledge("vision")) || phase < VisionUnlock then
     //else
     //  D("undefinedArea")

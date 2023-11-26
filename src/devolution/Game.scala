@@ -1,7 +1,7 @@
 package devolution
 
 import devolution.*
-import devolution.helpers.{D, Endgame, VisionUnlock}
+import devolution.helpers.*
 import scala.util.Random
 /** The class `Adventure` represents text adventure games. An adventure consists of a player and
   * a number of areas that make up the game world. It provides methods for playing the game one
@@ -58,7 +58,7 @@ class Game:
   elTower     .setNeighbors(Vector("past" -> geWhiteRoom, "future" -> hdVacuum))
   hdVacuum    .setNeighbors(Vector("past" -> elTower,     "future" -> hdVacuum))
 
-  val entryPoints = Vector(geWhiteRoom, psCenter, hdVacuum, maPath, phClearing, olOcean1, elTower, srRoom, geWhiteRoom, geWhiteRoom)
+  val entryPoints = Vector(geWhiteRoom, psCenter, hdVacuum, maPath, phClearing, olOcean1, elTower, srRoom)
     .zipWithIndex.map(_.swap).toMap
   entryPoints.foreach((k,v) => v.setMovePhase(k))
   //assign the correct move phase based on the order the zone has been added to the entryPoint vector
@@ -96,7 +96,7 @@ class Game:
   olOcean1   .setNeighbors(Vector(D.direction("away") -> olSurface, D.direction("down") -> olOcean2))
   olOcean2   .setNeighbors(Vector(D.direction("up") -> olOcean1, D.direction("down") -> olOcean3))
   olOcean3   .setNeighbors(Vector(D.direction("up") -> olOcean2, D.direction("down") -> olOcean4))
-  olOcean4   .setNeighbors(Vector(D.direction("up") -> olOcean3, D.direction("down") -> olVolcano2, D.direction("away") -> olThermal))
+  olOcean4   .setNeighbors(Vector(D.direction("up") -> olOcean3, D.direction("down") -> olVolcano2, D.direction("forward") -> olThermal))
   olThermal  .setNeighbors(Vector(D.direction("up") -> olOcean3, D.direction("down") -> olVolcano2, D.direction("back") -> olOcean4))
   olSurface  .setNeighbors(Vector(D.direction("back") -> olOcean1, D.direction("forward") -> olLava))
 
@@ -158,8 +158,8 @@ class Game:
   phHill      .setNeighbors(Vector(D.direction("n") -> phJungle, D.direction("s") -> phSwamp, D.direction("e") -> phClearing, D.direction("w") -> phVolcano))
   phVolcano   .setNeighbors(Vector(D.direction("n") -> phJungle, D.direction("s") -> phJungle, D.direction("e") -> phHill, D.direction("w") -> phLava))
   phSwamp     .setNeighbors(Vector(D.direction("n") -> phClearing, D.direction("s") -> phNest, D.direction("w") -> phHill, D.direction("e") -> phJungle))
-  phCave1     .setNeighbors(Vector(D.direction("in") -> phCave2, D.direction("s") -> phJungle, D.direction("e") -> phJungle, D.direction("w") -> phJungle))
-  phCave2     .setNeighbors(Vector(D.direction("back") -> phCave1,  D.direction("forward") -> phNest))
+  phCave1     .setNeighbors(Vector(D.direction("down") -> phCave2, D.direction("s") -> phJungle, D.direction("e") -> phJungle, D.direction("w") -> phJungle))
+  phCave2     .setNeighbors(Vector(D.direction("back") -> phCave1,  D.direction("down") -> phNest))
 
 
   phJungle.setInteractables(Vector(
@@ -367,6 +367,7 @@ class Game:
       && this.isInRightTimeline then
       player.setLocation(Some(player.lastEntryPoint))//this.entryPoints.getOrElse(player.phase, player.lastEntryPoint)))
       player.phase += 1
+      player.progression = -1
       //return D.zones.get(lastExpectedTimeline).answer
 
     //if player.phase == 1 && !player.remembers then
@@ -399,10 +400,11 @@ class Game:
 
     //println(entryPoints(player.phase-1).timeline)
     //show old answer as a hint
-    if player.phase < Endgame && (player.location.timeline.name == lastExpectedTimeline /*this showed old answers player.isInCompletedTimeline*/
+    if player.phase <= Endgame && (player.location.timeline.name == lastExpectedTimeline /*this showed old answers player.isInCompletedTimeline*/
       || isQuestionRight(input, D.zones.get(lastExpectedTimeline).map(_.question).getOrElse(""))) then
       //println(D.zones("Globalization era").answer + " " + D.areas(entryPoints.get(player.phase - 1).map(_.timeline).getOrElse("")))
 
+      this.commandSuccess = player.location.timeline.name != lastExpectedTimeline
       //remove player from actual area to hide useless decriptions, but only if it's not trying to enter the timeline
       player.timelineChosen = action.verb == D.action("explore") || action.verb == D.action("go")
       outcome += this.changeSubject(D.zones(lastExpectedTimeline).question.capitalize) + " " + D.zones(lastExpectedTimeline).answer //player.location.timeline.name).answer
@@ -414,19 +416,20 @@ class Game:
 
     if (isInRightTimeline || player.phase >= Endgame) && player.timelineChosen then
       player.phase match
-        case 0 =>
+        case Globalization =>
           //print a random word from the question if the user is trying without success
           if action.commandText.contains("?") then
             progression += 1
-            if progression > 3 && progression % 3 == 0 then
+            if progression > 2 && progression % 2 == 0 then
               //commandSuccess = true
-              return outcome + Random.shuffle(D.ge.question.split(" ")).head
+              return outcome + this.getHint(D.ge.question.split(" "))
 
           if player.remembers then
             this.commandSuccess = false
             return D.ge("intro2")
           else
-            this.commandSuccess = false
+            this.commandSuccess = player.progression == -1
+            player.progression = 0
             return D.ge("intro") + "\n" + D.ge("intro2")
 
           //if player.location == startingPoint then
@@ -440,7 +443,7 @@ class Game:
                 outcome += "\n" + D("intro2")*/
 
             //first question guessed
-        case 1 =>
+        case PrimoridalSoup =>
 
           //if player.location == psCenter then
           //println(":::"+player.location.interactable.values.map(_.completed).mkString(","))
@@ -451,12 +454,12 @@ class Game:
           //println("?"+player.location.interactable.values.count(_.completed))
 
           this.commandSuccess = false
+
+          //hint on psCenter
           if player.location == psCenter then
             player.location.interactable.values.count(_.completed) match
                 case 0 =>
                   return D.ps("intro")
-
-                //shows hint only if the first cluster just ot created
                 case 1 if player.location.interactable.values.count(e => e.interactions != 0 && !e.completed) == 0 =>
                   return D.ps("star1")
                 case 2 if player.location.interactable.values.exists(e => e.interactions > 2 && !e.completed) =>
@@ -466,6 +469,8 @@ class Game:
                 case 3 =>
                   return D.ps("right")
                 case _ =>
+
+          //hint is psPeriphery
           if player.location == psPeriphery then
             player.location.interactable.values.count(_.completed) match
               case 1 =>
@@ -480,30 +485,39 @@ class Game:
             outcome = D.ps.answer
             player.phase += 1
               commandSuccess = true*/
-        case 2 =>
+        case HeatDead =>
           //if player.location == hdVacuum then
           outcome += D.hd("intro")
+          //spawns random words of the solution-question
           if action.verb == D.action("go") then
-            return Random.shuffle(D.hd.question.split(" ")).head
+            outcome += this.getHint(D.hd.question.split(" "))
+
+          //handle the only interactable text
           if hdVacuum.interactable.exists(_._2.completed) then
             return D.hd("annihilated")
           else
             this.commandSuccess = false
             return outcome + "\n\n" + D.hd("particle")
 
-        case 3 =>
+        case MiddleAges =>
+          if player.progression == -1 then
+            return D.ma("intro")
           //spawns random pieces of commands (2 letters)
           if action.verb == D.action("go") then
-            return Random.shuffle(((D.action("fear") + D.action("sad")).sliding(2,2).toVector)).head
+            player.progression == 0
+            return this.getHint(D.action("fear") + D.action("sad"), 2)
 
-        case 4 =>
+        case Prehistory =>
+          if player.progression == -1 then
+            return D.ph("intro")
           //spawns random pieces of commands (3 letters)
           if action.verb == D.action("go") then
-            return Random.shuffle(((D.action("see") + "." + D.action("hear") + D.action("touch")).sliding(3,3).toVector)).head
+            player.progression == 0
+            return this.getHint(D.action("see") + "." + D.action("hear") + D.action("touch"), 3)
           if phJungle.interactable("step").completed then
             player.die()
 
-        case 5 =>
+        case OriginOfLife =>
           //if the player got the body, spawn all other creatures
           if olThermal.interactable("thermalRock").completed then
             if player.progression == -1 then
@@ -511,8 +525,8 @@ class Game:
               player.progression += 1
               return D.ol("body")
           else if action.modifiers == D.interactables("thermalRock").name.toLowerCase then
-             return Random.shuffle(((D.action("colonize")).sliding(2,2).toVector)).head
-          else if player.location == olSurface then
+             return this.getHint(D.action("colonize"), 2)
+          else if player.location == olOcean1 then
             return D.ol("intro")
 
           if action.verb == D.action("eat") && action.modifiers.nonEmpty then
@@ -528,7 +542,7 @@ class Game:
             player.progression += 1
             return D.ol.misc("done")
 
-        case 6 =>
+        case EndOfLife =>
           if action.verb == D.action("examine") then
             player.progression = 0
 
@@ -536,23 +550,30 @@ class Game:
             this.commandSuccess = false
             return D.el("intro")
 
-        case 7 =>
+        case ScientificRevo =>
           if action.verb == D.action("hear") then
             if Math.abs(player.progression) % 2 == 1 && action.modifiers == srRoom.interactable("scientist").name then
               player.progression += 1
               return D.srConversarion(player.progression%D.srConversarion.size)
-                + "\n" + Random.shuffle(D.sr.question.split(" ")).head
+                + "\n" +this.getHint(D.sr.question.split(" "))
 
             else if player.progression % 2 == 0 && action.modifiers == srRoom.interactable("priest").name then
               player.progression += 1
               return D.srConversarion(player.progression%D.srConversarion.size)
-                + "\n" + Random.shuffle(D.sr.question.split(" ")).head
+                + "\n" + this.getHint(D.sr.question.split(" "))
+            return D.sr.misc("other")
 
           if player.progression == -1 then
             this.commandSuccess = false
             return D.sr("intro")
 
+        //TO-DO
         case Endgame =>
+          //first hint in the white room
+          //if player.location == geWhiteRoom then
+          //  return D.ge("tutorial1")
+
+          //BUG: action.verb == D.ge("firstAnswer") RETURNS TRUE EVEN IF != FROM "?"
           if action.verb == D.ge("firstAnswer") || player.progression >= 0 then
             player.progression += 1
             this.commandSuccess = player.progression == 0
@@ -653,5 +674,27 @@ class Game:
     * @return
     */
   def changeSubject(question: String) =
-    question.replaceAll("\\bi\\b", "you").replaceAll("\\bam\\b", "are").replaceAll("\\bme\\b", "you")
+    question.toLowerCase
+      .replaceAll("\\bi\\b", "you")
+      .replaceAll("\\bam\\b", "are")
+      .replaceAll("\\bme\\b", "you").capitalize
+
+  /**
+    * Chooses the logic of the hint and the letters to be given to the user
+    * and adds some decoration to it.
+    * @param hints The number of letters to slide. If 0, shuffle the entire input.
+    * @return Some letters based on randomness and the logic applied.
+    */
+  def getHint(hints: String, letters: Int): String =
+    this.getHint(hints.sliding(letters,letters).toArray)
+
+  /**
+    * Chooses the logic of the hint and the letters to be given to the user
+    * and adds some decoration to it.
+    * @param hints The number of letters to slide. If 0, shuffle the entire input.
+    * @return Some letters based on randomness and the logic applied.
+    */
+  def getHint(hints: Array[String]): String =
+    "\n[" + Random.shuffle(hints).head + "]"
+
 end Game

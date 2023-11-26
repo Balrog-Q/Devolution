@@ -60,8 +60,10 @@ class Action(input: String):
       case D.action("evolve")    => Some(actor.evolve())
       //case "knowledge" => Some(actor.knowledge)
       case D.action("quit")      => Some(actor.quit())
-      case D.action("explore")   => Some(actor.enterTimeline())
-      case D.action("knowledge")   => Some(actor.knowledge)
+      case D.action("knowledge") => Some(actor.knowledge)
+      case D.action("explore")   => Some(actor.exploreTimeline())
+      case D.action("fear")      => Some(actor.fear(this.modifiers))
+      case D.action("sad")       => Some(actor.grieve(this.modifiers))
       //case D.action("feel")      => Some(actor.feel(this.modifiers))
       //case D.action("see")       => Some(actor.interact(this.modifiers))
 

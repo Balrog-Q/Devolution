@@ -617,7 +617,7 @@ object Dialogues:
         possibleAbilities("vision") -> "Leds are everywhere",
         possibleAbilities("proprio") -> "This is my power",
         possibleAbilities("hear") -> "There are no microphones here",
-        possibleAbilities("fear") -> "But it's also... dangerous. It won't take long for some of my siblings to arrive here... possibly with malicious intent",
+        possibleAbilities("fear") -> "It's... dangerous. It won't take long for some of my siblings to arrive here... possibly with malicious intent.",
         possibleAbilities("sad") -> "So this is what I am... what we all are. This is were all my suffering happened",
         possibleAbilities("curious") -> "I am powerful. But I might benefit from some more power. I might benefit from a lot more power"
         /*possibleAbilities("fear") -> "They could just... shut me down",

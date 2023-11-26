@@ -379,35 +379,38 @@ class Game:
       if isQuestionRight(input, D.zones(player.location.timeline.name).word) then //&& player.progression == -1 then //special timeline word found. True only if there was no previous progression
         player.phase += 1
         player.progression += 1
-        outcome + D.zones(player.location.timeline.name).realization
-      if player.location != overflow then
+        outcome += D.zones(player.location.timeline.name).realization + "\n"
+      else if player.location != overflow then
         if isQuestionRight(input, D("finalQuestion")) then //final question found
           //player.setLocation(Some(gePC))
           player.setLocation(Some(overflow))
-          return D.bonus.question
+          //return D.bonus.question
         if player.progression > -1 then //keep showing contemplate message
-          outcome += D.zones(player.location.timeline.name).thought
+          return /*outcome +=*/ D.zones(player.location.timeline.name).thought
 
       if player.location == overflow && !player.invincible then
         if action.verb == D("accept") then
           player.progression += 1
           player.invincible = true
           outcome = D.bonus.realization
+        else
+          outcome = D.bonus.question
       //else if player.canThink then
       //  return D.zones(player.location.timeline.name).thought
 
 
 
     //println(entryPoints(player.phase-1).timeline)
-    //show old answer as a hint
-    if player.phase <= Endgame && (player.location.timeline.name == lastExpectedTimeline /*this showed old answers player.isInCompletedTimeline*/
+    //show old answer as a hint.
+    //Only useful before endgame
+    if player.phase <= Endgame && !player.canThink && (player.location.timeline.name == lastExpectedTimeline /*this showed old answers player.isInCompletedTimeline*/
       || isQuestionRight(input, D.zones.get(lastExpectedTimeline).map(_.question).getOrElse(""))) then
       //println(D.zones("Globalization era").answer + " " + D.areas(entryPoints.get(player.phase - 1).map(_.timeline).getOrElse("")))
 
       this.commandSuccess = player.location.timeline.name != lastExpectedTimeline
       //remove player from actual area to hide useless decriptions, but only if it's not trying to enter the timeline
       player.timelineChosen = action.verb == D.action("explore") || action.verb == D.action("go")
-      outcome += this.changeSubject(D.zones(lastExpectedTimeline).question.capitalize) + " " + D.zones(lastExpectedTimeline).answer //player.location.timeline.name).answer
+      outcome += "\n" + this.changeSubject(D.zones(lastExpectedTimeline).question.capitalize) + " " + D.zones(lastExpectedTimeline).answer //player.location.timeline.name).answer
       if player.location == srRoom && !player.canThink then //missing critical think ability
         return outcome + "\n\n" + D.sr("hint")
 
@@ -574,12 +577,12 @@ class Game:
           //  return D.ge("tutorial1")
 
           //BUG: action.verb == D.ge("firstAnswer") RETURNS TRUE EVEN IF != FROM "?"
-          if action.verb == D.ge("firstAnswer") || player.progression >= 0 then
-            player.progression += 1
+          if action.verb == D.ge("firstAnswer") || player.progression > 0 then
             this.commandSuccess = player.progression == 0
+            player.progression += 1
             return D.ge("tutorial2")
           if player.canThink then
-            return D.ge("tutotial1")
+            return D.ge("tutorial1")
 
         case anyPhase if anyPhase > Endgame =>
           if player.location == overflow && player.invincible then
@@ -587,6 +590,8 @@ class Game:
             player.progression = -1
             player.setLocation(Some(geSwitch))
             return D.ge.misc("finalTutorial")
+
+          //final game message
           if this.isComplete then
             outcome = D.ge.areaDialogues(player.location.name).abilityDesc(D.possibleAbilities(D.action.find(_._2 == action.verb).map(_._1).getOrElse(""))) + " " + outcome
 

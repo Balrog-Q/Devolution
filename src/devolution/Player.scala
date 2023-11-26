@@ -232,7 +232,7 @@ class Player(startingArea: Area):
       ""
 
   /**
-    * This function only flags the main program to show the thought.
+    * This function only flags the main program to show and keep showing the thought.
     * This allows to keep the message visible despite the user's multiple tries.
     * @return
     */

@@ -102,8 +102,9 @@ object DevolutionGUI extends SimpleSwingApplication:
     //this.updateInfo(this.game.welcomeMessage)
     this.turnOutput.text = D("begin")
     this.locationInfo.text = this.game.welcomeMessage
-    this.location = Point(50, 50)
-    this.minimumSize = Dimension(500, 400)
+    this.location = Point(200, 200)
+    this.minimumSize = Dimension(500, 500)
+    this.preferredSize = Dimension(800, 800)
     this.pack()
     this.input.requestFocusInWindow()
     // sends an empty command to trigger the story logic

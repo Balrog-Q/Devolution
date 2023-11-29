@@ -280,7 +280,7 @@ object Dialogues:
     "move" -> "You seem also able to... go away from here. But feel free to go back if you are losing your way",
     "more1" -> "More of that is here. It is starting to interact",
     "more2" -> "Even more. Something is happening",
-    "right" -> "Another thing happened. This place... stars to have a structure, but... questions are still open. It's time to find which one",
+    "right" -> "Another thing happened. This place... starts to have a structure, but... questions are still open. It's time to find which one",
     "big" -> "It's time to do something even bigger. But not here... the place you were before needs it. Don't lose hope. Hopefully, this won't be for nothing. Try going... back",
     //"left" -> "You moved away from the new cluster",
   )

@@ -7,7 +7,7 @@ import devolution.helpers.*
   * @param input  a textual in-game command such as “go east” or “rest” */
 class Action(input: String):
 
-  var success     = false
+  //var success     = false
   val commandText = input.trim.toLowerCase
   val verb        = commandText.takeWhile( _ != ' ' )
   val modifiers   = commandText.drop(verb.length).trim
@@ -17,28 +17,6 @@ class Action(input: String):
     * of the action (such as “You go west.”). The description is returned in an Option
     * wrapper; if the command was not recognized, None is returned. */
   def execute(actor: Player) =
-    //println(D.action("learn")+ " "+ this.verb + " " + (D.action("learn") == this.verb)+ " " + (D.action("thought") ==this.verb))
-    /*this.verb match
-    //doesn't work
-      case D.action("learn") => println("1")
-      case D.action("thought") => println("2")
-      case _ => println("3")
-    this.verb match
-    //doesn't work
-      case D.a("learn") => println("1")
-      case D.a("thought") => println("2")
-      case _ => println("3")
-    //work
-    this.verb match
-      case D.b => println("1")
-      case D.c => println("2")
-      case _ => println("3")*/
-
-    /*val TestMap = Map[String, String](
-      "thought" -> "contemplate",
-      "learn" -> "acquire")
-    val TestConst = "contemplate"*/
-
     this.verb match
       /*case D.action("go")        => Some("works fine")
       case D.action("examine")   => Some("works fine")
@@ -72,12 +50,9 @@ class Action(input: String):
       case other if this.verb == D.action("thought")   => Some(actor.contemplate())
       case "tp"                       => Some(actor.tp(this.modifiers))
       case other if !this.modifiers.isBlank => Some(actor.interact(this.verb, this.modifiers))
-      case "$"                        => Some("phase " + actor.phase + " " + actor.location.toString) // FOR DEBUG
+      //case "$"                        => Some("phase " + actor.phase + " " + actor.location.toString) // FOR DEBUG
       case other                      => None
-    //case "drop"      => Some(actor.drop(this.modifiers))
-    //case "get"       => Some(actor.get(this.modifiers))
-    //case "xyzzy"     => Some("The grue tastes yummy.")
-    //case "rest"      => Some(actor.rest())
+
   /** Returns a textual description of the action object, for debugging purposes. */
   override def toString = s"$verb (modifiers: $modifiers)"
 end Action

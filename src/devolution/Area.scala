@@ -57,10 +57,7 @@ class Area(val name: String, val timeline: Timeline) extends Zone[Area]:
 
     //show a death message only if the user can see where he went
     if this.isDeadly then
-      if canSee then
-        return D("dead") + this.name
-      else
-        return ""
+        return D("dead") + { if canSee then this.name else D("unknownTimeline") }
 
     var placeDesc = knowledge.map(this.descriptions.abilityDesc(_)).filter(_.nonEmpty).mkString("", ".\n", "...").trim
     if placeDesc.length < 4 then
@@ -101,7 +98,7 @@ class Area(val name: String, val timeline: Timeline) extends Zone[Area]:
   //def contains(abilityName: String) = this.abilities.contains(abilityName)
   //def removeAbility(abilityName: String) = this.abilities.remove(abilityName)
   /** Returns a single-line description of the area for debugging purposes. */
-  override def toString = this.name + ": " + this.timeline + ", " + D.direction.map((k,m) => k + " " + this.neighbor(m).map(_.name)).mkString(" ")// + ", " + this.neighbor("west").name + ", " + this.neighbor("up").name + ", " + this.neighbor("down").name + ", " + this.neighbor("back").name + ", " + this.neighbor("forward").name + " " + this.neighbor("past").map(_.name) + " " + this.neighbor("future").map(_.name)
+  override def toString = this.name + ": " + this.timeline + ", " + D.direction.filter((k,m) => this.neighbor(m).map(_.name).nonEmpty).map((k,m) => k + " " + this.neighbor(m).map(_.name)).mkString(" ")// + ", " + this.neighbor("west").name + ", " + this.neighbor("up").name + ", " + this.neighbor("down").name + ", " + this.neighbor("back").name + ", " + this.neighbor("forward").name + " " + this.neighbor("past").map(_.name) + " " + this.neighbor("future").map(_.name)
 
   def searchInteractables(name: String, action: String) =
     interactables.filter(t => t._2.name.toLowerCase == name.toLowerCase && !t._2.completed)
@@ -133,7 +130,7 @@ class Element(private val dialogues: ElementDialogues, private val neededInterac
       interactions += 1
       Some("\n" + this.description + "\n" + {
         if this.dialogues.output.split(" ").length == 1 then
-          "~" + this.dialogues.output + "~"
+          s"~${this.dialogues.output}~"
         else
           this.dialogues.output
       })

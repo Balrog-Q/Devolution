@@ -58,7 +58,7 @@ class Game:
   elTower     .setNeighbors(Vector("past" -> geWhiteRoom, "future" -> hdVacuum))
   hdVacuum    .setNeighbors(Vector("past" -> elTower,     "future" -> hdVacuum))
 
-  val entryPoints = Vector(geWhiteRoom, psCenter, hdVacuum, maPath, phClearing, olOcean1, elTower, srRoom)
+  val entryPoints = Vector(geWhiteRoom, psCenter, hdVacuum, maPath, phClearing, olOcean1, elTower, srRoom, geWhiteRoom)
     .zipWithIndex.map(_.swap).toMap
   entryPoints.foreach((k,v) => v.setMovePhase(k))
   //assign the correct move phase based on the order the zone has been added to the entryPoint vector
@@ -102,7 +102,7 @@ class Game:
 
 
   private var tierlist = Vector(D.interactables("cell1").lowerName, D.interactables("cell2").lowerName, D.interactables("plankton").lowerName, D.interactables("mollusk").lowerName, D.interactables("fish1").lowerName, D.interactables("fish2").lowerName)
-  private var progression = 0
+  //private var progression = 0
   olThermal.setInteractables(Vector(
     "thermalRock" -> Element(D.interactables("thermalRock"))
   ))
@@ -206,27 +206,27 @@ class Game:
   maField   .setNeighbors(Vector(D.direction("n") -> maPath, D.direction("w") -> maCastle1))
 
   maCastle1.setInteractables(Vector(
-    "guard" -> Element(D.interactables("guard"))
+    "guard" -> Element(D.interactables("guard"), -1)
   ))
   maCastle1.foundAbility = D.possibleAbilities("fear")
 
   maHouse.setInteractables(Vector(
-    "ill" -> Element(D.interactables("ill"))
+    "ill" -> Element(D.interactables("ill"), -1)
   ))
   maHouse.foundAbility = D.possibleAbilities("sad")
 
   maGrave.setInteractables(Vector(
-    "corpse" -> Element(D.interactables("corpse"))
+    "corpse" -> Element(D.interactables("corpse"), -1)
   ))
   maGrave.foundAbility = D.possibleAbilities("sad")
 
   maStream.setInteractables(Vector(
-    "rat" -> Element(D.interactables("rat"))
+    "rat" -> Element(D.interactables("rat"), -1)
   ))
   maVillage.foundAbility = D.possibleAbilities("fear")
 
   maVillage.setInteractables(Vector(
-    "strappado" -> Element(D.interactables("strappado"))
+    "strappado" -> Element(D.interactables("strappado"), -1)
   ))
   maVillage.foundAbility = D.possibleAbilities("fear")
 
@@ -351,79 +351,93 @@ class Game:
     if player.location == overflow then
       player.timelineChosen = true
     //game start
-    //D.zones.map((k,v) => v.question).zipWithIndex.filter((v,k) => v == input)
-    if player.location.isDeadly then
-      return player.die()
+    if player.isDead then
+      return ""//D("dead") + player.location.name//player.die()
 
 
-    //if action.verb == D.action("evolve") || action.verb == D.action("devolve") then
-    //  timelineDiscovered = false
+    /* Timeline question guess check */
 
-    //if player.phase == 1 then outcome = D.ge.answer
-
-    //check for a timeline question guess
     //the following "if"s will take care of the return output
     if isQuestionRight(input, D.zones(player.location.timeline.name).question)
       && this.isInRightTimeline then
       player.setLocation(Some(player.lastEntryPoint))//this.entryPoints.getOrElse(player.phase, player.lastEntryPoint)))
       player.phase += 1
       player.progression = -1
-      //return D.zones.get(lastExpectedTimeline).answer
-
-    //if player.phase == 1 && !player.remembers then
-      //outcome += player.learn(D.possibleAbilities("memory"))
-
-    else if player.phase >= Endgame then //&& player.has(D.possibleAbilities("tought")) then
+    else if player.phase > Endgame then //&& player.has(D.possibleAbilities("tought")) then
       //outcome += D.zones(player.location.timeline).tought
+      if player.location != overflow then
+        if isQuestionRight(input, D("finalQuestion")) then //final question found
+          //player.setLocation(Some(gePC))
+          player.setLocation(Some(overflow))
+          //return D.bonus.question
+        if player.progression > -1 && player.canThink then //keep showing contemplate message
+          outcome += D.zones(player.location.timeline.name).thought + "\n"
 
-      if isQuestionRight(input, D.zones(player.location.timeline.name).word) then //&& player.progression == -1 then //special timeline word found. True only if there was no previous progression
+        if isQuestionRight(input, D.zones(player.location.timeline.name).word) then //&& player.progression == -1 then //special timeline word found. True only if there was no previous progression
+          player.phase += 1
+          //player.progression == 0
+          return outcome + D.zones(player.location.timeline.name).realization
+
+      /*if isQuestionRight(input, D.zones(player.location.timeline.name).word) then //&& player.progression == -1 then //special timeline word found. True only if there was no previous progression
         player.phase += 1
-        player.progression += 1
-        outcome += D.zones(player.location.timeline.name).realization + "\n"
+        //player.progression == 0
+        outcome += D.zones(player.location.timeline.name).thought + "\n" + D.zones(player.location.timeline.name).realization + "\n"
       else if player.location != overflow then
         if isQuestionRight(input, D("finalQuestion")) then //final question found
           //player.setLocation(Some(gePC))
           player.setLocation(Some(overflow))
           //return D.bonus.question
-        if player.progression > -1 then //keep showing contemplate message
-          return /*outcome +=*/ D.zones(player.location.timeline.name).thought
+        if player.progression > -1 && player.canThink then //keep showing contemplate message
+          return /*outcome +=*/ D.zones(player.location.timeline.name).thought*/
 
       if player.location == overflow && !player.invincible then
         if action.verb == D("accept") then
           player.progression += 1
           player.invincible = true
+          player.setLocation(Some(geSwitch))
           outcome = D.bonus.realization
+        else if action.verb == D("refuse") then
+          player.setLocation(Some(player.lastEntryPoint))
         else
-          outcome = D.bonus.question
-      //else if player.canThink then
-      //  return D.zones(player.location.timeline.name).thought
+          return D.bonus.question
 
 
+    /* Answer showing logic */
 
-    //println(entryPoints(player.phase-1).timeline)
-    //show old answer as a hint.
     //Only useful before endgame
-    if player.phase <= Endgame && !player.canThink && (player.location.timeline.name == lastExpectedTimeline /*this showed old answers player.isInCompletedTimeline*/
-      || isQuestionRight(input, D.zones.get(lastExpectedTimeline).map(_.question).getOrElse(""))) then
-      //println(D.zones("Globalization era").answer + " " + D.areas(entryPoints.get(player.phase - 1).map(_.timeline).getOrElse("")))
-
-      this.commandSuccess = player.location.timeline.name != lastExpectedTimeline
+    if player.location.timeline.name == lastExpectedTimeline && (player.phase <= Endgame && !player.canThink || isQuestionRight(input, D.zones.get(lastExpectedTimeline).map(_.question).getOrElse(""))) then
+      //success if the guess has just been made or if there are no previous tries (that is, the timeline was already completed)
+      this.commandSuccess = player.progression == -1 || isQuestionRight(input, D.zones.get(lastExpectedTimeline).map(_.question).getOrElse(""))
       //remove player from actual area to hide useless decriptions, but only if it's not trying to enter the timeline
-      player.timelineChosen = action.verb == D.action("explore") || action.verb == D.action("go")
+      player.timelineChosen = player.progression == -1 && (action.verb == D.action("explore") || action.verb == D.action("go"))
+
+      player.progression += 1
       outcome += "\n" + this.changeSubject(D.zones(lastExpectedTimeline).question.capitalize) + " " + D.zones(lastExpectedTimeline).answer //player.location.timeline.name).answer
-      if player.location == srRoom && !player.canThink then //missing critical think ability
-        return outcome + "\n\n" + D.sr("hint")
 
-    if player.phase == 1 && player.location == geWhiteRoom && !player.has(D.possibleAbilities("curious")) then
-      return outcome + "\n" + D.ge.misc("learn")
 
-    if (isInRightTimeline || player.phase >= Endgame) && player.timelineChosen then
+    /* Tmeline specific final conditions */
+
+    //hint to learn critical thinking
+    if player.phase == Endgame && player.location == srRoom && !player.canThink then //missing critical think ability
+      return outcome + "\n\n" + D.sr("hint")
+    //hint to learn the curiosity ability
+    else if player.phase == PrimoridalSoup && player.location == geWhiteRoom then
+      if !player.has(D.possibleAbilities("curious")) then
+        return outcome + "\n" + D.ge.misc("learn")
+      else
+        this.commandSuccess = false
+        return outcome
+    else if player.location.timeline.name == lastExpectedTimeline && !this.commandSuccess then
+      return outcome
+
+    /* Main timeline logic (if the player is in the right place at the right moment */
+    if (isInRightTimeline || player.phase > Endgame) && player.timelineChosen then
       player.phase match
         case Globalization =>
           //print a random word from the question if the user is trying without success
           if action.commandText.contains("?") then
-            progression += 1
-            if progression > 2 && progression % 2 == 0 then
+            player.progression += 1
+            if player.progression > 2 && player.progression % 2 == 0 then
               //commandSuccess = true
               return outcome + this.getHint(D.ge.question.split(" "))
 
@@ -435,26 +449,7 @@ class Game:
             player.progression = 0
             return D.ge("intro") + "\n" + D.ge("intro2")
 
-          //if player.location == startingPoint then
-            /*if isQuestionRight(input, D.ge.question) then
-              player.phase += 1
-              outcome = D.ge.answer
-              commandSuccess = true
-            else
-              outcome += D("intro1")
-              if !player.remembers then
-                outcome += "\n" + D("intro2")*/
-
-            //first question guessed
         case PrimoridalSoup =>
-
-          //if player.location == psCenter then
-          //println(":::"+player.location.interactable.values.map(_.completed).mkString(","))
-          //if player.location.interactable.values.headOption.exists(_.completed) then //&& action.verb == D.ps("leave") then
-            //player.location.interactable = player.location.interactable.tail
-            //D.ps("left")
-
-          //println("?"+player.location.interactable.values.count(_.completed))
 
           this.commandSuccess = false
 
@@ -489,34 +484,47 @@ class Game:
             player.phase += 1
               commandSuccess = true*/
         case HeatDead =>
-          //if player.location == hdVacuum then
-          outcome += D.hd("intro")
+          //the only success in this timeline is achieved by trying to move
+          this.commandSuccess = action.verb == D.action("go") && action.modifiers.nonEmpty
+
           //spawns random words of the solution-question
-          if action.verb == D.action("go") then
-            outcome += this.getHint(D.hd.question.split(" "))
+          if this.commandSuccess then
+            outcome += this.getHint(D.hd.question.split(" ")) + "\n\n"
 
           //handle the only interactable text
           if hdVacuum.interactable.exists(_._2.completed) then
-            return D.hd("annihilated")
+            return outcome + D.hd("annihilated")
           else
-            this.commandSuccess = false
-            return outcome + "\n\n" + D.hd("particle")
+            //this.commandSuccess = false
+            return outcome + D.hd("particle")
 
         case MiddleAges =>
-          if player.progression == -1 then
-            return D.ma("intro")
-          //spawns random pieces of commands (2 letters)
-          if action.verb == D.action("go") then
-            player.progression == 0
+          //spawns random pieces of commands (2 letters) if the direction could be valid
+          if action.verb == D.action("go") && D.direction.exists(_._2 == action.modifiers) then
+            player.progression = 0
             return this.getHint(D.action("fear") + D.action("sad"), 2)
 
+          //if the player guessed the command in the right area, shows the name of the ability to learn
+          else if action.verb == D.action("sad") || action.verb == D.action("fear") then
+            val correspondingAbility = D.possibleAbilities(D.action.find(_._2 == action.verb).map(_._1).getOrElse(""))
+            if !player.has(correspondingAbility) && player.location.offers(correspondingAbility) then
+              return s"*${correspondingAbility}*"
+
+          if player.progression == -1 then
+            return D.ma("intro")
+
         case Prehistory =>
+          this.commandSuccess = action.verb == D.action("go") && D.direction.exists(_._2 == action.modifiers)
+
+          //spawns random pieces of commands (3 letters)
+          if this.commandSuccess then
+            player.progression = 0
+            return this.getHint(D.action("see") + "." + D.action("hear") + D.action("touch"), 3)
+
           if player.progression == -1 then
             return D.ph("intro")
-          //spawns random pieces of commands (3 letters)
-          if action.verb == D.action("go") then
-            player.progression == 0
-            return this.getHint(D.action("see") + "." + D.action("hear") + D.action("touch"), 3)
+
+          //listening to the steps of an approaching creature for too long can be dangerous
           if phJungle.interactable("step").completed then
             player.die()
 
@@ -546,7 +554,10 @@ class Game:
             return D.ol.misc("done")
 
         case EndOfLife =>
-          if action.verb == D.action("examine") then
+          //trying to move kills the player in this timeline
+          if action.verb == D.action("go") then
+            return player.die()
+          else if action.verb == D.action("examine") then
             player.progression = 0
 
           if player.progression == -1 then
@@ -557,49 +568,52 @@ class Game:
           if action.verb == D.action("hear") then
             if Math.abs(player.progression) % 2 == 1 && action.modifiers == srRoom.interactable("scientist").name then
               player.progression += 1
-              return D.srConversarion(player.progression%D.srConversarion.size)
+              return D.srConversarion(player.progression % D.srConversarion.size)
                 + "\n" +this.getHint(D.sr.question.split(" "))
 
             else if player.progression % 2 == 0 && action.modifiers == srRoom.interactable("priest").name then
               player.progression += 1
-              return D.srConversarion(player.progression%D.srConversarion.size)
+              return D.srConversarion(player.progression % D.srConversarion.size)
                 + "\n" + this.getHint(D.sr.question.split(" "))
             return D.sr.misc("other")
 
-          if player.progression == -1 then
+          if player.progression == -1 && !player.location.interactable.exists(_._2.completed) then
             this.commandSuccess = false
             return D.sr("intro")
 
-        //TO-DO
         case Endgame =>
-          //first hint in the white room
-          //if player.location == geWhiteRoom then
-          //  return D.ge("tutorial1")
-
-          //BUG: action.verb == D.ge("firstAnswer") RETURNS TRUE EVEN IF != FROM "?"
-          if action.verb == D.ge("firstAnswer") || player.progression > 0 then
-            this.commandSuccess = player.progression == 0
-            player.progression += 1
+          this.commandSuccess = player.progression == 0
+          //keeps showing the second tutorial
+          if action.verb == D.ge("firstAnswer") then
+            player.progression = -1
+            //player.phase += 1
+            player.phase += 1
+            this.commandSuccess = true
             return D.ge("tutorial2")
           if player.canThink then
             return D.ge("tutorial1")
 
         case anyPhase if anyPhase > Endgame =>
-          if player.location == overflow && player.invincible then
+          if player.invincible && player.location == geSwitch then
             //flag to the thought part not to activate
             player.progression = -1
-            player.setLocation(Some(geSwitch))
+            //if player.location != geSwitch then player.setLocation(Some(geSwitch))
             return D.ge.misc("finalTutorial")
 
           //final game message
           if this.isComplete then
-            outcome = D.ge.areaDialogues(player.location.name).abilityDesc(D.possibleAbilities(D.action.find(_._2 == action.verb).map(_._1).getOrElse(""))) + " " + outcome
+            return D.ge.areaDialogues(player.location.name).abilityDesc(D.possibleAbilities(D.action.find(_._2 == action.verb).map(_._1).getOrElse(""))) + "." + outcome
 
+          //keeps showing previous tutorial
+          if player.progression == -1 && player.location == geWhiteRoom then
+            this.commandSuccess = false
+            return D.ge("tutorial2")
 
 
         case _ =>
+          this.commandSuccess = false
           //D.debug("noPhase")
-    this.commandSuccess = !outcome.isBlank
+    this.commandSuccess = outcome.nonEmpty
     outcome
 
   /**
@@ -632,6 +646,7 @@ class Game:
   def reset() =
     if !player.invincible then
       this.areas.foreach(_.interactable.foreach(_._2.interactions = 0))
+      this.player.dead = false
 
 
   var commandSuccess = false
@@ -648,8 +663,8 @@ class Game:
     if this.isComplete then
       return storyReport + "\n" + outcomeReport
 
-    if !this.commandSuccess && outcomeReport.isBlank && !action.verb.isBlank && action.verb != D("deadCommand") then //&& outcomeReport.isBlank && storyReport.isBlank then // needs to hide "command not found" error during successful output
-      //check if the verb could still be meaningfull
+    if !this.commandSuccess && outcomeReport.isBlank && !action.verb.isBlank && !player.isDead then// && action.verb != D("deathCommand") then //&& outcomeReport.isBlank && storyReport.isBlank then // needs to hide "command not found" error during successful output
+      //check if the verb could still be meaningful
       //if outcomeReport.isEmpty then
         //if !action.verb.isBlank then
         //  outcomeReport = Some(parseStoryCommand(action.commandText))
@@ -657,18 +672,18 @@ class Game:
       //default "unknown" output text
       //if action.verb.isEmpty then
       if action.commandText.endsWith("?") then
-        s"$storyReport\n\n${this.changeSubject(action.commandText)} ${D("wrongQuestion")}"
+        s"$storyReport\n\n${this.changeSubject(action.commandText)} ${D("wrongQuestion")}".trim
       else if action.modifiers.isBlank then
-        s"$storyReport\n\n${D("unknownCommand")} ${action.verb}!"
+        s"$storyReport\n\n${D("unknownCommand")} ${action.verb}!".trim
         //if !action.verb.isBlank then
         //else
         //outcomeReport.getOrElse(s"""${D.debug("noOutput")} "$command"""")
       else
-        s"$storyReport\n\n${D("unknownParameter")} ${action.verb} ${action.modifiers}..."
+        s"$storyReport\n\n${D("unknownParameter")} ${action.verb} ${action.modifiers}...".trim
       //else //this.turnCount += 1
       //  outcomeReport.getOrElse(s"""${D.debug("noOutput")} "$command"""")
     else
-      (storyReport + {if storyReport.nonEmpty then "\n" else ""} + outcomeReport + "\nDEBUG: " + "phase " + player.phase + " " +player.timelineChosen + " " + player.location.toString).trim
+      (storyReport + {if storyReport.nonEmpty then "\n" else ""} + outcomeReport).trim + "\nDEBUG: " + "phase " + player.phase //+ " " +player.timelineChosen + " " + player.location.toString).trim
 
   /**
     * Executes a substitution of some first person-related words
@@ -700,6 +715,6 @@ class Game:
     * @return Some letters based on randomness and the logic applied.
     */
   def getHint(hints: Array[String]): String =
-    "\n[" + Random.shuffle(hints).head + "]"
+    s"\n~${Random.shuffle(hints).head}~"
 
 end Game

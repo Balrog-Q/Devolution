@@ -50,9 +50,10 @@ class Player(startingArea: Area):
       val destination = this.location.neighbor(direction)
       if this.location.getMovePhase <= this.phase || D.specialDirection.values.toVector.contains(direction) then
         setLocation(destination)
-        D("moved") + direction
-        //if this.location.isDeadly then
-        //  this.die()
+        if this.location.isDeadly then
+          this.die()
+        else
+          D("moved") + direction
       else
         ""
     else
@@ -95,7 +96,7 @@ class Player(startingArea: Area):
     else if this.currentLocation.offers(abilityName) then
         //abilities are placed in specific spots, to show their description in a nice order
         this.abilitiesStatus.update(abilityName, true)
-        "\n"+D.knowledge("new") + abilityName + ".\n" + D.knowledge.desc(abilityName)
+        s"\n${D.knowledge("new")} $abilityName.\n${D.knowledge.desc(abilityName)}."
     else
       ""
 
@@ -114,6 +115,7 @@ class Player(startingArea: Area):
   def remembers = this.has(D.possibleAbilities("memory"))
   def canSee = this.has(D.possibleAbilities("vision"))
   def canThink = this.has(D.possibleAbilities("thought"))
+  def feelsSurroundings = this.has(D.possibleAbilities("proprio"))
 
   /** Causes the player to examine the ability of the given name. This is successful if such
     * an ability is currently in the player's possession. Returns a description of the result,
@@ -125,8 +127,8 @@ class Player(startingArea: Area):
     //val failText = "If you want to examine something, you need to pick it up first."
     //this.abilities.get(abilityName).map(lookText).getOrElse(D.ability.misc("missingAbility"))
     //this.abilities.get(abilityName).map(D.ability("desc")).getOrElse(D.ability.misc("missingAbility"))
-    if this.has(D.possibleAbilities("proprio")) && this.has(D.possibleAbilities("vision")) && !D.specialDirection.contains(direction) then
-      D("survey") + direction + "...\n" + this.location.neighbor(direction).map(_.shortDescription(this.abilities, this.canSee, this.phase)).getOrElse(D("noArea"))
+    if this.feelsSurroundings && this.canSee && !D.specialDirection.contains(direction) then
+      s"${D("survey")} $direction...\n${this.location.neighbor(direction).map(_.shortDescription(this.abilities, this.canSee, this.phase)).getOrElse(D("noArea"))}"
     else
       D.knowledge("notFeeling")
 
@@ -155,7 +157,7 @@ class Player(startingArea: Area):
     if this.abilities.isEmpty then
       D.knowledge("noAbility")
     else
-      this.abilities.map(name => s"$name: ${D.knowledge.desc(name)}".capitalize).mkString(D.knowledge("knowledgeIntro")+"\n- ", ".\n- ", ".")
+      this.abilities.map(name => s"$name: ${D.knowledge.desc(name)}".capitalize).mkString(s"\n${D.knowledge("knowledgeIntro")}\n- ", ".\n- ", ".")
 
 
   def isInCompletedTimeline = this.phase > this.lastEntryPoint.getMovePhase // entryPoints.get(player.phase-1).map(_.timeline.name).getOrElse("")
@@ -184,12 +186,13 @@ class Player(startingArea: Area):
       this.lastEntryPoint = this.currentLocation
       D.misc(direction)
     else
-      D("notFeeling")
+      D.knowledge("notFeeling")
 
   def exploreTimeline() =
     if this.location.getMovePhase <= this.phase then
       if !this.timelineChosen then
         this.timelineChosen = true
+        this.progression = -1
         D("welcome") + {
           if this.canThink then
             this.location.timeline.name.toLowerCase
@@ -204,23 +207,28 @@ class Player(startingArea: Area):
     else
       this.die()
 
-  def fear(name: String) =
-    if this.has(D.possibleAbilities("fear")) || this.phase ==  3 then
-      this.interact(D.action("fear"), name)
-    else
-      D("notFeeling")
+  def fear(interactable: String) =
+    this.feel("fear", interactable)
 
-  def grieve(name: String) =
-    if this.has(D.possibleAbilities("sad")) || this.phase ==  3 then
-      this.interact(D.action("sad"), name)
-    else
-      D("notFeeling")
+  def grieve(interactable: String) =
+    this.feel("sad", interactable)
 
-  //def feel(emotion: String) =
-  //  this.interact("", emotion)
+  /**
+    * Check the conditions to interact with an object
+    * @param ability
+    * @param interactable
+    * @return
+    */
+  def feel(ability: String, interactable: String) =
+    if this.timelineChosen && this.has(D.possibleAbilities(ability)) || this.phase == MiddleAges then
+      this.interact(D.action(ability), interactable)
+    else
+      D.knowledge("notFeeling")
 
   def die() =
     if !this.invincible then
+      if !this.remembers then
+        this.abilitiesStatus.foreach((k,v) => this.abilitiesStatus.update(k, false))
       this.dead = true
       this.phase = Globalization
       this.timelineChosen = true
@@ -237,7 +245,7 @@ class Player(startingArea: Area):
     * @return
     */
   def contemplate() =
-    if this.canThink && this.phase >= Endgame then
+    if this.canThink && this.phase > Endgame then
       this.progression += 1
     ""
 
@@ -248,15 +256,15 @@ class Player(startingArea: Area):
     this.phase = phase.toIntOption.getOrElse(Globalization)
     this.abilitiesStatus.update(D.possibleAbilities("curious").toLowerCase, true)
     this.abilitiesStatus.update(D.possibleAbilities("memory").toLowerCase, true)
+    if phase.toIntOption.getOrElse(0) > 3 then
+      this.abilitiesStatus.update(D.possibleAbilities("fear").toLowerCase, true)
+      this.abilitiesStatus.update(D.possibleAbilities("sad").toLowerCase, true)
     if phase.toIntOption.getOrElse(0) > 4 then
       this.abilitiesStatus.update(D.possibleAbilities("vision").toLowerCase, true)
       this.abilitiesStatus.update(D.possibleAbilities("hear").toLowerCase, true)
       this.abilitiesStatus.update(D.possibleAbilities("proprio").toLowerCase, true)
-      this.abilitiesStatus.update(D.possibleAbilities("fear").toLowerCase, true)
-      this.abilitiesStatus.update(D.possibleAbilities("sad").toLowerCase, true)
     if phase.toIntOption.getOrElse(0) > 7 then
       this.abilitiesStatus.update(D.possibleAbilities("thought").toLowerCase, true)
-
     ""
     //this.currentLocation =
 

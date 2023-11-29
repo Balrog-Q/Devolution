@@ -1,6 +1,6 @@
 # Walkthrough - Devolution
-
----
+*By Kha Tran and Filippo Zinetti*
+___
 
 # Introduction
 

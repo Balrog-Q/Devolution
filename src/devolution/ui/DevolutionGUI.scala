@@ -13,22 +13,17 @@ import scala.language.adhocExtensions
 import devolution.helpers.D
 
 /** The singleton object `AdventureGUI` represents a GUI-based version of the Adventure
-  * game application. The object serves as a possible entry point for the game app, and can
+  * game application. The object serves as a entry point for the game app, and can
   * be run to start up a user interface that operates in a separate window. The GUI reads
   * its input from a text field and displays information about the game world in uneditable
   * text areas.
-  *
-  * **NOTE TO STUDENTS: In this course, you don't need to understand how this object works
-  * on the inside. It's enough to know that you can use this file to start the program.**
-  *
-  * @see [[AdventureTextUI]] */
+  */
 object DevolutionGUI extends SimpleSwingApplication:
   UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName)
 
   def top = new MainFrame:
 
     // Access to the application's internal logic:
-
     val game = Game()
     val player = game.player
     val robot = new Robot()
@@ -64,22 +59,6 @@ object DevolutionGUI extends SimpleSwingApplication:
               game.reset()
               game.player.dead = false
     }
-
-    // Background:
-//    private var frame = JFrame()
-//    private var spaceIcon = ImageIcon()
-//    private var myLabel = JLabel()
-//
-//    this.background = Color.red
-//    spaceIcon = new ImageIcon(this.getClass().getResource("/space.jpg"))
-//    myLabel = new JLabel(spaceIcon)
-//    myLabel.setSize(650,450)
-//    frame = new JFrame("Devolution")
-//    frame.add(myLabel)
-//    frame.setSize(650, 450)
-//    frame.setLayout(null)
-//    frame.setLocationRelativeTo(null)
-//    frame.setVisible(true)
 
     // Layout:
 
@@ -133,8 +112,7 @@ object DevolutionGUI extends SimpleSwingApplication:
         this.locationInfo.text = this.game.locationFullDescription
       else
         this.locationInfo.text = this.player.location.shortDescription(player.abilities, player.canSee, player.phase)
-
-        this.timelineInfo.text = this.game.timelineDescription
+      this.timelineInfo.text = this.game.timelineDescription
 
   end top
 

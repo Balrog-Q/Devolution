@@ -2,13 +2,14 @@ package devolution.ui
 
 import scala.swing.*
 import scala.swing.event.*
-import javax.swing.UIManager
+import javax.swing.{JFrame, JLabel, ImageIcon, UIManager}
+//import javax.swing.*
 import devolution.Game
-import java.awt.{Point, Insets, Dimension}
+
+import java.awt.{Dimension, Insets, Point, Color, Image}
 import java.awt.Robot
 import java.awt.event.KeyEvent
-import scala.language.adhocExtensions // enable extension of Swing classes
-
+import scala.language.adhocExtensions
 import devolution.helpers.D
 
 /** The singleton object `AdventureGUI` represents a GUI-based version of the Adventure
@@ -81,6 +82,22 @@ object DevolutionGUI extends SimpleSwingApplication:
               this.turnOutput.repaint()*/
               //this.playTurn("")
     }
+
+    // Background:
+//    private var frame = JFrame()
+//    private var spaceIcon = ImageIcon()
+//    private var myLabel = JLabel()
+//
+//    this.background = Color.red
+//    spaceIcon = new ImageIcon(this.getClass().getResource("/space.jpg"))
+//    myLabel = new JLabel(spaceIcon)
+//    myLabel.setSize(650,450)
+//    frame = new JFrame("Devolution")
+//    frame.add(myLabel)
+//    frame.setSize(650, 450)
+//    frame.setLayout(null)
+//    frame.setLocationRelativeTo(null)
+//    frame.setVisible(true)
 
     // Layout:
 

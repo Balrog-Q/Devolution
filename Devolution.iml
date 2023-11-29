@@ -19,6 +19,5 @@
       </library>
     </orderEntry>
     <orderEntry type="module" module-name="O1Library" exported="" />
-    <orderEntry type="library" name="scala-sdk-3.3.0" level="project" />
   </component>
 </module>

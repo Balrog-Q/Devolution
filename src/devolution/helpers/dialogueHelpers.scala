@@ -34,7 +34,9 @@ class AreaDialogues(phaseDescriptions: Vector[String], abilityDescriptions: Map[
 
   def description(phase: Int, canSee: Boolean) =
     if canSee then
-      abilityDesc(D.possibleAbilities("vision")) else this.phaseDesc(phase)
+      abilityDesc(D.possibleAbilities("vision"))
+    else
+      this.phaseDesc(phase)
 
   /**
     * Feelings don't need alternative texts if not defined.
@@ -45,10 +47,10 @@ class AreaDialogues(phaseDescriptions: Vector[String], abilityDescriptions: Map[
 
   /**
     * Search for a non-empty phase description if existent,
-    * otherwise returns the "no area description" error text.
+    * otherwise returns the "no area description" text.
     * @return
     */
-  def getNonEmpty = phaseDescriptions.find(_ != "").getOrElse(D.debug("noAreaDesc"))
+  def getNonEmpty = phaseDescriptions.find(_ != "").getOrElse(D("noAreaDesc"))
 
 //val timeDesc = abilityDescriptions.lift(2).getOrElse("")
 

@@ -33,7 +33,7 @@ object DevolutionGUI extends SimpleSwingApplication:
     val robot = new Robot()
 
     // Components:
-    val timelineInfo = new TextArea(1, 40):
+    val timelineInfo = new TextArea(1, 80):
       editable = false
       wordWrap = false
       lineWrap = false
@@ -41,7 +41,7 @@ object DevolutionGUI extends SimpleSwingApplication:
       editable = false
       wordWrap = true
       lineWrap = true
-    val turnOutput = new TextArea(4, 80):
+    val turnOutput = new TextArea(6, 80):
       editable = false
       wordWrap = true
       lineWrap = true
@@ -87,7 +87,7 @@ object DevolutionGUI extends SimpleSwingApplication:
     this.contents = new GridBagPanel:
       import scala.swing.GridBagPanel.Anchor.*
       import scala.swing.GridBagPanel.Fill
-      layout += Label("Timeline:") -> Constraints(0, 0, 1, 1, 0, 1, NorthWest.id, Fill.None.id, Insets(8, 5, 5, 5), 0, 0)
+      layout += Label("Timeline:") -> Constraints(0, 0, 1, 1, 0, 0, NorthWest.id, Fill.None.id, Insets(8, 5, 5, 5), 0, 0)
       layout += Label("Location:") -> Constraints(0, 1, 1, 1, 0, 1, NorthWest.id, Fill.None.id, Insets(8, 5, 5, 5), 0, 0)
       layout += Label("Command:")  -> Constraints(0, 2, 1, 1, 0, 0, NorthWest.id, Fill.None.id, Insets(8, 5, 5, 5), 0, 0)
       layout += Label("Events:")   -> Constraints(0, 3, 1, 1, 0, 0, NorthWest.id, Fill.None.id, Insets(8, 5, 5, 5), 0, 0)

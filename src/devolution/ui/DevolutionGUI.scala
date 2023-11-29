@@ -2,13 +2,14 @@ package devolution.ui
 
 import scala.swing.*
 import scala.swing.event.*
-import javax.swing.UIManager
+import javax.swing.{JFrame, JLabel, ImageIcon, UIManager}
+//import javax.swing.*
 import devolution.Game
-import java.awt.{Point, Insets, Dimension}
+
+import java.awt.{Dimension, Insets, Point, Color, Image}
 import java.awt.Robot
 import java.awt.event.KeyEvent
-import scala.language.adhocExtensions // enable extension of Swing classes
-
+import scala.language.adhocExtensions
 import devolution.helpers.D
 
 /** The singleton object `AdventureGUI` represents a GUI-based version of the Adventure
@@ -33,7 +34,7 @@ object DevolutionGUI extends SimpleSwingApplication:
     val robot = new Robot()
 
     // Components:
-    val timelineInfo = new TextArea(1, 40):
+    val timelineInfo = new TextArea(1, 80):
       editable = false
       wordWrap = false
       lineWrap = false
@@ -41,7 +42,7 @@ object DevolutionGUI extends SimpleSwingApplication:
       editable = false
       wordWrap = true
       lineWrap = true
-    val turnOutput = new TextArea(4, 80):
+    val turnOutput = new TextArea(6, 80):
       editable = false
       wordWrap = true
       lineWrap = true
@@ -64,17 +65,33 @@ object DevolutionGUI extends SimpleSwingApplication:
               game.player.dead = false
     }
 
+    // Background:
+//    private var frame = JFrame()
+//    private var spaceIcon = ImageIcon()
+//    private var myLabel = JLabel()
+//
+//    this.background = Color.red
+//    spaceIcon = new ImageIcon(this.getClass().getResource("/space.jpg"))
+//    myLabel = new JLabel(spaceIcon)
+//    myLabel.setSize(650,450)
+//    frame = new JFrame("Devolution")
+//    frame.add(myLabel)
+//    frame.setSize(650, 450)
+//    frame.setLayout(null)
+//    frame.setLocationRelativeTo(null)
+//    frame.setVisible(true)
+
     // Layout:
 
     this.contents = new GridBagPanel:
       import scala.swing.GridBagPanel.Anchor.*
       import scala.swing.GridBagPanel.Fill
-      layout += Label("Timeline:") -> Constraints(0, 0, 1, 1, 0, 1, NorthWest.id, Fill.None.id, Insets(8, 5, 5, 5), 0, 0)
+      layout += Label("Timeline:") -> Constraints(0, 0, 1, 1, 0, 0, NorthWest.id, Fill.None.id, Insets(8, 5, 5, 5), 0, 0)
       layout += Label("Location:") -> Constraints(0, 1, 1, 1, 0, 1, NorthWest.id, Fill.None.id, Insets(8, 5, 5, 5), 0, 0)
       layout += Label("Command:")  -> Constraints(0, 2, 1, 1, 0, 0, NorthWest.id, Fill.None.id, Insets(8, 5, 5, 5), 0, 0)
-      layout += Label("Events:")   -> Constraints(0, 3, 1, 1, 0, 0, NorthWest.id, Fill.None.id, Insets(8, 5, 5, 5), 0, 0)
+      layout += Label("Events:")   -> Constraints(0, 3, 1, 1, 0, 1, NorthWest.id, Fill.None.id, Insets(8, 5, 5, 5), 0, 0)
       layout += turnCounter        -> Constraints(0, 4, 2, 1, 0, 0, NorthWest.id, Fill.None.id, Insets(8, 5, 5, 5), 0, 0)
-      layout += timelineInfo       -> Constraints(1, 0, 1, 1, 1, 1, NorthWest.id, Fill.Both.id, Insets(5, 5, 5, 5), 0, 0)
+      layout += timelineInfo       -> Constraints(1, 0, 1, 1, 1, 0, NorthWest.id, Fill.Both.id, Insets(5, 5, 5, 5), 0, 0)
       layout += locationInfo       -> Constraints(1, 1, 1, 1, 1, 1, NorthWest.id, Fill.Both.id, Insets(5, 5, 5, 5), 0, 0)
       layout += input              -> Constraints(1, 2, 1, 1, 1, 0, NorthWest.id, Fill.None.id, Insets(5, 5, 5, 5), 0, 0)
       layout += turnOutput         -> Constraints(1, 3, 1, 1, 1, 1, SouthWest.id, Fill.Both.id, Insets(5, 5, 5, 5), 0, 0)

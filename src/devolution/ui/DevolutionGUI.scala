@@ -58,9 +58,11 @@ object DevolutionGUI extends SimpleSwingApplication:
             this.playTurn(command)
             //TO-DO: shows a dead message for some time and then resets the GUI
             if game.player.isDead then
+              //this.turnOutput.text = this.game
+
+              //this.playTurn(D("deathCommand"))
+              game.reset()
               game.player.dead = false
-              this.playTurn("-")
-              //Thread.sleep(1000)
               /*Thread.sleep(1000)
               this.locationInfo.repaint()
               this.turnOutput.repaint()
@@ -74,7 +76,6 @@ object DevolutionGUI extends SimpleSwingApplication:
               this.turnOutput.repaint()
               this.locationInfo.repaint()
               this.turnOutput.repaint()*/
-              game.reset()
               //this.playTurn("")
     }
 

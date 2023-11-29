@@ -618,8 +618,8 @@ class Game:
 
   /**
     * Checks if the input correspond to the question/word that the user has to write
-    * @param input
-    * @param question
+    * @param input  The input for the question
+    * @param question The question
     * @return
     */
   def isQuestionRight(input: String, question: String) =

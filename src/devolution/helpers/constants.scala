@@ -8,7 +8,6 @@ import devolution.helpers.*
 
 val D = Dialogues
 
-val Endgame = 8
 
 val Globalization = 0
 val PrimoridalSoup = 1
@@ -18,3 +17,8 @@ val Prehistory = 4
 val OriginOfLife = 5
 val EndOfLife = 6
 val ScientificRevo = 7
+
+//the phase during the return to the initial white room
+val Endgame = 8
+
+//the post-endgame phases don't need to be kept track of

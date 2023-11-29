@@ -3,26 +3,17 @@ package devolution
 import devolution.*
 import devolution.helpers.*
 import scala.util.Random
-/** The class `Adventure` represents text adventure games. An adventure consists of a player and
-  * a number of areas that make up the game world. It provides methods for playing the game one
+/** The class `Game` represents the adventure game. It consists of a player and
+  * a number of areas and timelines that make up the game world. It provides methods for playing the game one
   * turn at a time and for checking the state of the game.
-  *
-  * N.B. This version of the class has a lot of “hard-coded” information that pertains to a very
-  * specific adventure game that involves a small trip through a twisted forest. All newly created
-  * instances of class `Adventure` are identical to each other. To create other kinds of adventure
-  * games, you will need to modify or replace the source code of this class. */
+  */
 class Game:
 
   /** the name of the game */
   val title = "Devolution"
-  //private val timelines = Map[String, String]("Big Bang" -> "")
-  //private val bb = Area("Big Bang", None)
 
-  /*private val ps = Area("Primordial soup")
-  private val psVacuum = Area("Vacuum")
-  private val psPeriphery = Area("Perifery of cluster")*/
 
-  // Initialize the areas in the game
+  //initialize the timelines in the game
   private val bonus = Timeline(D.areas("bonus"))
   private val bigBang = Timeline(D.areas("bb"))
   private val primordialSoup = Timeline(D.areas("ps"))
@@ -33,8 +24,8 @@ class Game:
   private val globalization = Timeline(D.areas("ge"))
   private val endOfLife = Timeline(D.areas("el"))
   private val headDead = Timeline(D.areas("hd"))
-  //private val realWorld = Timeline(D.areas("rw"))
 
+  //initialize the entry points that represents their timelines
   private val overflow = Area(D.areas("bonus"), bonus)
   private val bbVacuum = Area(D.areas("vacuum"), bigBang)
   private val psCenter = Area(D.areas("voidCenter"), primordialSoup)
@@ -46,43 +37,47 @@ class Game:
   private val elTower = Area(D.areas("tower"), endOfLife)
   private val hdVacuum = Area(D.areas("vacuum"), headDead)
 
-  overflow    .setNeighbors(Vector(                       D.specialDirection("future") -> bbVacuum))
+  //basic movement between timelines
+  overflow    .setNeighbors(Vector(                                           D.specialDirection("future") -> bbVacuum))
   bbVacuum    .setNeighbors(Vector(D.specialDirection("past") -> overflow,    D.specialDirection("future") -> psCenter))
   bbVacuum.setDeadly()
   psCenter    .setNeighbors(Vector(D.specialDirection("past") -> bbVacuum,    D.specialDirection("future") -> olOcean1, D.specialDirection("outside") -> overflow))
-  olOcean1   .setNeighbors(Vector(D.specialDirection("past") -> psCenter,    D.specialDirection("future") -> phClearing))
-  phClearing    .setNeighbors(Vector(D.specialDirection("past") -> olOcean1,   D.specialDirection("future") -> maPath))
-  maPath      .setNeighbors(Vector(D.specialDirection("past") -> phClearing,    D.specialDirection("future") -> srRoom))
+  olOcean1    .setNeighbors(Vector(D.specialDirection("past") -> psCenter,    D.specialDirection("future") -> phClearing))
+  phClearing  .setNeighbors(Vector(D.specialDirection("past") -> olOcean1,    D.specialDirection("future") -> maPath))
+  maPath      .setNeighbors(Vector(D.specialDirection("past") -> phClearing,  D.specialDirection("future") -> srRoom))
   srRoom      .setNeighbors(Vector(D.specialDirection("past") -> maPath,      D.specialDirection("future") -> geWhiteRoom))
   geWhiteRoom .setNeighbors(Vector(D.specialDirection("past") -> srRoom,      D.specialDirection("future") -> elTower))
   elTower     .setNeighbors(Vector(D.specialDirection("past") -> geWhiteRoom, D.specialDirection("future") -> hdVacuum))
   hdVacuum    .setNeighbors(Vector(D.specialDirection("past") -> elTower,     D.specialDirection("future") -> hdVacuum))
 
+  //assign the correct move phase based on the order the zone has been added to the entryPoint vector
   val entryPoints = Vector(geWhiteRoom, psCenter, hdVacuum, maPath, phClearing, olOcean1, elTower, srRoom, geWhiteRoom)
     .zipWithIndex.map(_.swap).toMap
   entryPoints.foreach((k,v) => v.setMovePhase(k))
-  //assign the correct move phase based on the order the zone has been added to the entryPoint vector
+
+  /** Areas connections, interactables and death initialization */
 
   overflow.foundAbility = D.possibleAbilities("invincible")
+
 
   private val psPeriphery = Area(D.areas("closeVoid"), primordialSoup)
   private val psVoid = Area(D.areas("vacuum"), primordialSoup)
   psVoid.setDeadly()
 
-  psCenter.setNeighbors(Vector(D.direction("away") -> psPeriphery))
-  psPeriphery.setNeighbors(Vector(D.direction("back") -> psCenter, D.direction("away") -> psVoid))
+  psCenter    .setNeighbors(Vector(D.direction("away") -> psPeriphery))
+  psPeriphery .setNeighbors(Vector(D.direction("back") -> psCenter, D.direction("away") -> psVoid))
 
   //future celestial bodies
   psCenter.setInteractables(Vector(
-    "dust1" -> Element(D.interactables("dust1"), 1),
-    "dust2" -> Element(D.interactables("dust2"), 3),
-    "dust3" -> Element(D.interactables("dust3"), 7)
+    "dust1" -> Interactable(D.interactables("dust1"), 1),
+    "dust2" -> Interactable(D.interactables("dust2"), 3),
+    "dust3" -> Interactable(D.interactables("dust3"), 7)
   ))
   psPeriphery.setInteractables(Vector(
-    "dust4" -> Element(D.interactables("dust4"), 1),
-    "dust5" -> Element(D.interactables("dust5"), 3)
+    "dust4" -> Interactable(D.interactables("dust4"), 1),
+    "dust5" -> Interactable(D.interactables("dust5"), 3)
   ))
-  geWhiteRoom.foundAbility = D.possibleAbilities("curious")
+
 
   private val olOcean2 = Area(D.areas("ocean2"), originOfLife)
   private val olOcean3 = Area(D.areas("ocean3"), originOfLife)
@@ -99,47 +94,42 @@ class Game:
   olOcean3   .setNeighbors(Vector(D.direction("up") -> olOcean2, D.direction("down") -> olOcean4))
   olOcean4   .setNeighbors(Vector(D.direction("up") -> olOcean3, D.direction("down") -> olVolcano2, D.direction("forward") -> olThermal))
   olThermal  .setNeighbors(Vector(D.direction("up") -> olOcean3, D.direction("down") -> olVolcano2, D.direction("back") -> olOcean4))
-  olSurface  .setNeighbors(Vector(D.direction("back") -> olOcean1, D.direction("forward") -> olLava))
-
+  olSurface  .setNeighbors(Vector(D.direction("back") -> olOcean1, D.direction("away") -> olLava))
 
   private var tierlist = Vector(D.interactables("cell1").lowerName, D.interactables("cell2").lowerName, D.interactables("plankton").lowerName, D.interactables("mollusk").lowerName, D.interactables("fish1").lowerName, D.interactables("fish2").lowerName)
-  //private var progression = 0
+
   olThermal.setInteractables(Vector(
-    "thermalRock" -> Element(D.interactables("thermalRock"))
+    "thermalRock" -> Interactable(D.interactables("thermalRock"))
   ))
 
   olSurface.setInteractables(Vector(
-    "rock" -> Element(D.interactables("rock"))
+    "rock" -> Interactable(D.interactables("rock"))
   ))
 
   def showOlInteractables() =
     olOcean1.setInteractables(Vector(
-      "cell2" -> Element(D.interactables("cell2"), -1),
-      "plankton" -> Element(D.interactables("plankton"), -1),
-      "fish1" -> Element(D.interactables("fish1"), -1)
+      "cell2" -> Interactable(D.interactables("cell2"), -1),
+      "plankton" -> Interactable(D.interactables("plankton"), -1),
+      "fish1" -> Interactable(D.interactables("fish1"), -1)
     ))
-
     olOcean2.setInteractables(Vector(
-      "mollusk" -> Element(D.interactables("mollusk"), -1),
-      "plankton" -> Element(D.interactables("plankton"), -1),
-      "fish1" -> Element(D.interactables("fish1"), -1),
-      "cell1" -> Element(D.interactables("cell1"), -1),
+      "mollusk" -> Interactable(D.interactables("mollusk"), -1),
+      "plankton" -> Interactable(D.interactables("plankton"), -1),
+      "fish1" -> Interactable(D.interactables("fish1"), -1),
+      "cell1" -> Interactable(D.interactables("cell1"), -1),
     ))
-
     olOcean3.setInteractables(Vector(
-      "fish2" -> Element(D.interactables("fish2"), -1),
-      "fish1" -> Element(D.interactables("fish1"), -1),
-      "cell1" -> Element(D.interactables("fish1"), -1),
+      "fish2" -> Interactable(D.interactables("fish2"), -1),
+      "fish1" -> Interactable(D.interactables("fish1"), -1),
+      "cell1" -> Interactable(D.interactables("fish1"), -1),
     ))
-
     olOcean4.setInteractables(Vector(
-      "fish2" -> Element(D.interactables("fish2"), -1),
-      "mollusk" -> Element(D.interactables("mollusk"), -1),
-      "cell1" -> Element(D.interactables("fish1"), -1),
+      "fish2" -> Interactable(D.interactables("fish2"), -1),
+      "mollusk" -> Interactable(D.interactables("mollusk"), -1),
+      "cell1" -> Interactable(D.interactables("fish1"), -1),
     ))
-
     olThermal.setInteractables(Vector(
-      "cell1" -> Element(D.interactables("cell1"), -1)
+      "cell1" -> Interactable(D.interactables("cell1"), -1)
     ))
 
 
@@ -156,36 +146,33 @@ class Game:
 
   phClearing  .setNeighbors(Vector(D.direction("n") -> phJungle, D.direction("s") -> phSwamp, D.direction("e") -> phJungle, D.direction("w") -> phHill))
   phJungle    .setNeighbors(Vector(D.direction("n") -> phCave1, D.direction("s") -> phClearing, D.direction("w") -> phHill, D.direction("e") -> phNest))
-  phHill      .setNeighbors(Vector(D.direction("n") -> phJungle, D.direction("s") -> phSwamp, D.direction("e") -> phClearing, D.direction("w") -> phVolcano))
+  phHill      .setNeighbors(Vector(D.direction("n") -> phJungle, D.direction("s") -> phClearing, D.direction("e") -> phJungle, D.direction("w") -> phVolcano))
   phVolcano   .setNeighbors(Vector(D.direction("n") -> phJungle, D.direction("s") -> phJungle, D.direction("e") -> phHill, D.direction("w") -> phLava))
   phSwamp     .setNeighbors(Vector(D.direction("n") -> phClearing, D.direction("s") -> phNest, D.direction("w") -> phHill, D.direction("e") -> phJungle))
   phCave1     .setNeighbors(Vector(D.direction("down") -> phCave2, D.direction("s") -> phJungle, D.direction("e") -> phJungle, D.direction("w") -> phJungle))
   phCave2     .setNeighbors(Vector(D.direction("back") -> phCave1,  D.direction("down") -> phNest))
 
-
   phJungle.setInteractables(Vector(
-    "step" -> Element(D.interactables("step"), 4),
-    "tree" -> Element(D.interactables("tree"), -1)
+    "step" -> Interactable(D.interactables("step"), 4),
+    "tree" -> Interactable(D.interactables("tree"), -1)
   ))
   phJungle.foundAbility = D.possibleAbilities("hear")
   phHill.setInteractables(Vector(
-    "horn" -> Element(D.interactables("horn")),
-    "escrement" -> Element(D.interactables("escrement"))
+    "horn" -> Interactable(D.interactables("horn")),
+    "escrement" -> Interactable(D.interactables("escrement"))
   ))
   phHill.foundAbility = D.possibleAbilities("vision")
   phVolcano.setInteractables(Vector(
-    "egg" -> Element(D.interactables("egg")),
-    "rock" -> Element(D.interactables("rock"))
+    "egg" -> Interactable(D.interactables("egg")),
+    "rock" -> Interactable(D.interactables("rock"))
   ))
   phVolcano.foundAbility = D.possibleAbilities("proprio")
-
   phSwamp.setInteractables(Vector(
-    "sand" -> Element(D.interactables("sand"), -1)
+    "sand" -> Interactable(D.interactables("sand"), -1)
   ))
   phSwamp.foundAbility = D.possibleAbilities("proprio")
-
   phCave2.setInteractables(Vector(
-    "droplet" -> Element(D.interactables("droplet"), -1)
+    "droplet" -> Interactable(D.interactables("droplet"), -1)
   ))
   phCave2.foundAbility = D.possibleAbilities("hear")
 
@@ -201,42 +188,38 @@ class Game:
   maPath    .setNeighbors(Vector(D.direction("s") -> maField, D.direction("e") -> maVillage, D.direction("w") -> maCastle1))
   maCastle1 .setNeighbors(Vector(D.direction("w") -> maCastle2, D.direction("e") -> maPath, D.direction("s") -> maField))
   maVillage  .setNeighbors(Vector(D.direction("n") -> maGrave, D.direction("s") -> maHouse, D.direction("e") -> maStream, D.direction("w") -> maPath))
-  maHouse  .setNeighbors(Vector(D.direction("back") -> maVillage))
+  maHouse  .setNeighbors(Vector(D.direction("s") -> maField, D.direction("back") -> maVillage))
   maGrave   .setNeighbors(Vector(D.direction("s") -> maVillage, D.direction("w") -> maPath, D.direction("e") -> maStream))
   maStream  .setNeighbors(Vector(D.direction("s") -> maField, D.direction("w") -> maVillage))
-  maField   .setNeighbors(Vector(D.direction("n") -> maPath, D.direction("w") -> maCastle1))
+  maField   .setNeighbors(Vector(D.direction("n") -> maPath, D.direction("w") -> maCastle1, D.direction("e") -> maStream))
 
   maCastle1.setInteractables(Vector(
-    "guard" -> Element(D.interactables("guard"), -1)
+    "guard" -> Interactable(D.interactables("guard"), -1)
   ))
   maCastle1.foundAbility = D.possibleAbilities("fear")
-
   maHouse.setInteractables(Vector(
-    "ill" -> Element(D.interactables("ill"), -1)
+    "ill" -> Interactable(D.interactables("ill"), -1)
   ))
   maHouse.foundAbility = D.possibleAbilities("sad")
-
   maGrave.setInteractables(Vector(
-    "corpse" -> Element(D.interactables("corpse"), -1)
+    "corpse" -> Interactable(D.interactables("corpse"), -1)
   ))
   maGrave.foundAbility = D.possibleAbilities("sad")
-
   maStream.setInteractables(Vector(
-    "rat" -> Element(D.interactables("rat"), -1)
+    "rat" -> Interactable(D.interactables("rat"), -1)
   ))
   maVillage.foundAbility = D.possibleAbilities("fear")
-
   maVillage.setInteractables(Vector(
-    "strappado" -> Element(D.interactables("strappado"), -1)
+    "strappado" -> Interactable(D.interactables("strappado"), -1)
   ))
   maVillage.foundAbility = D.possibleAbilities("fear")
 
 
   srRoom.setInteractables(Vector(
-    "scientist" -> Element(D.interactables("scientist"), -1),
-    "priest" -> Element(D.interactables("priest"), -1),
-    "mouse" -> Element(D.interactables("mouse")),
-    "clock" -> Element(D.interactables("clock"))
+    "scientist" -> Interactable(D.interactables("scientist"), -1),
+    "priest" -> Interactable(D.interactables("priest"), -1),
+    "mouse" -> Interactable(D.interactables("mouse")),
+    "clock" -> Interactable(D.interactables("clock"))
   ))
   srRoom.foundAbility = D.possibleAbilities("thought")
 
@@ -245,28 +228,30 @@ class Game:
   private val geServer = Area(D.areas("server"), globalization)
   private val gePC = Area(D.areas("pc"), globalization)
   private val geFirewall = Area(D.areas("firewall"), globalization)
-  //private val geWeb = Area(D.areas("web"), D.areas("ge"))
 
   geSwitch   .setNeighbors(Vector(D.direction("up") -> gePC, D.direction("down") -> geServer, D.direction("forward") -> geFirewall))
   geServer   .setNeighbors(Vector(D.direction("back") -> geSwitch))
   gePC       .setNeighbors(Vector(D.direction("back") -> geSwitch))
   geFirewall .setNeighbors(Vector(D.direction("back") -> geSwitch))
 
+  geWhiteRoom.foundAbility = D.possibleAbilities("curious")
+
   gePC.setInteractables(Vector(
-    "peripheral1" -> Element(D.interactables("peripheral1")),
-    "peripheral2" -> Element(D.interactables("peripheral2")),
-    "peripheral3" -> Element(D.interactables("peripheral3"))
+    "peripheral1" -> Interactable(D.interactables("peripheral1")),
+    "peripheral2" -> Interactable(D.interactables("peripheral2")),
+    "peripheral3" -> Interactable(D.interactables("peripheral3"))
   ))
   geServer.setInteractables(Vector(
-    "memory1" -> Element(D.interactables("memory1")),
-    "memory2" -> Element(D.interactables("memory2")),
-    "memory3" -> Element(D.interactables("memory3"))
+    "memory1" -> Interactable(D.interactables("memory1")),
+    "memory2" -> Interactable(D.interactables("memory2")),
+    "memory3" -> Interactable(D.interactables("memory3"))
   ))
   geFirewall.setInteractables(Vector(
-    "setting1" -> Element(D.interactables("setting1")),
-    "setting2" -> Element(D.interactables("setting2")),
-    "setting3" -> Element(D.interactables("setting3"))
+    "setting1" -> Interactable(D.interactables("setting1")),
+    "setting2" -> Interactable(D.interactables("setting2")),
+    "setting3" -> Interactable(D.interactables("setting3"))
   ))
+
 
   private val elNorth = Area(D.areas("north"), endOfLife)
   private val elSouth = Area(D.areas("south"), endOfLife)
@@ -287,20 +272,10 @@ class Game:
 
 
   hdVacuum.setInteractables(Vector(
-    "particle" -> Element(D.interactables("particle"))
+    "particle" -> Interactable(D.interactables("particle"))
   ))
   hdVacuum.foundAbility = D.possibleAbilities("memory")
 
-  // conditions to move between areas in that timeline
-  /*bbVacuum    .setMovePhase(0)
-  psCenter    .setMovePhase(1)
-  olOcean1   .setMovePhase(5)
-  phClearing    .setMovePhase(4)
-  maPath      .setMovePhase(3)
-  srRoom      .setMovePhase(7)
-  geWhiteRoom .setMovePhase(9)
-  elTower     .setMovePhase(6)
-  hdVacuum    .setMovePhase(2)*/
 
   val areas = Vector(
     overflow,
@@ -317,27 +292,22 @@ class Game:
 
   private def startingPoint = geWhiteRoom
 
-  /** Determines if the adventure is complete, that is, if the player has won. */
-  //private val destination = bb
   /** The character who is the protagonist of the adventure and whom the real-life player controls. */
   val player = Player(startingPoint)
-  //player.tp("5")
 
+  /** Determines if the adventure is complete, that is, if the player has got and ending. */
   def isComplete = (geServer.interactable.values ++ gePC.interactable.values ++ geFirewall.interactable.values).exists(_.completed)
-    //this.player.location == this.destination && this.player.has("battery") && this.player.has("remote")
-  /** Determines whether the player has won, lost, or quit, thereby ending the game. */
-  def isOver = this.isComplete //|| this.player.hasQuit || this.turnCount == this.timeLimit
+
+  /** When false, triggers the "wrong input" logic */
+  var commandSuccess = false
+
   /** Returns a message that is to be displayed to the player at the beginning of the game. */
   def welcomeMessage = D("quote")
-  /** Returns a message that is to be displayed to the player at the end of the game. The message
-    * will be different depending on whether or not the player has completed their quest. */
+
+  /** Returns a message that is to be displayed to the player at the end of the game.
+    * It is also used as quit message.
+    */
   def goodbyeMessage = D("end")
-    /*if this.isComplete then
-      "Home at last... and phew, just in time! Well done!"
-    else if this.turnCount == this.timeLimit then
-      "Oh no! Time's up. Starved of entertainment, you collapse and weep like a child.\nGame over!"
-    else  // game over due to player quitting
-      "Quitter!"*/
 
   /**
     * Manage the story progression and conditions.
@@ -348,13 +318,16 @@ class Game:
     var outcome = ""
     this.commandSuccess = true
 
-    //bonus cheat mode unlocked of the overflow area is accessed for the first time or efter the endgame
+    if player.isDead then
+      return ""
+
+    /** The cheat mode is triggered in any case during the final phase of the game.
+      It is unlocked if the overflow area is accessed for the first time or efter the endgame. */
     if player.location == overflow then
       if (!player.isInvincible || player.phase > Endgame) then
         if action.verb == D("accept") then
           player.progression += 1
 
-          //player.invincible = true
           outcome = player.learn(D.possibleAbilities("invincible"))
 
           //moves the player to the real world if the phase is right
@@ -369,10 +342,6 @@ class Game:
         else
           return D.bonus.question
 
-    //game start
-    if player.isDead then
-      return "a"//D("dead") + player.location.name//player.die()
-
 
     /* Timeline question guess check */
 
@@ -382,64 +351,54 @@ class Game:
       player.setLocation(Some(player.lastEntryPoint))//this.entryPoints.getOrElse(player.phase, player.lastEntryPoint)))
       player.phase += 1
       player.progression = -1
-    else if player.phase > Endgame then //&& player.has(D.possibleAbilities("tought")) then
-      //outcome += D.zones(player.location.timeline).tought
+    else if player.phase > Endgame then
       if player.location != overflow then
         if isQuestionRight(input, D("finalQuestion")) then //final question found
-          //player.setLocation(Some(gePC))
           player.setLocation(Some(overflow))
           return D.bonus.question
         if player.progression > -1 && player.canThink then //keep showing contemplate message
           outcome += "\n" + D.zones(player.location.timeline.name).thought + "\n"
 
-        if isQuestionRight(input, D.zones(player.location.timeline.name).word) then //&& player.progression == -1 then //special timeline word found. True only if there was no previous progression
+        //special timeline word check
+        if isQuestionRight(input, D.zones(player.location.timeline.name).word) then
           player.phase += 1
-          //player.progression == 0
-          return outcome + D.zones(player.location.timeline.name).realization
-
-      /*if isQuestionRight(input, D.zones(player.location.timeline.name).word) then //&& player.progression == -1 then //special timeline word found. True only if there was no previous progression
-        player.phase += 1
-        //player.progression == 0
-        outcome += D.zones(player.location.timeline.name).thought + "\n" + D.zones(player.location.timeline.name).realization + "\n"
-      else if player.location != overflow then
-        if isQuestionRight(input, D("finalQuestion")) then //final question found
-          //player.setLocation(Some(gePC))
-          player.setLocation(Some(overflow))
-          //return D.bonus.question
-        if player.progression > -1 && player.canThink then //keep showing contemplate message
-          return /*outcome +=*/ D.zones(player.location.timeline.name).thought*/
-
+          return outcome + "\n" + D.zones(player.location.timeline.name).realization
 
 
     /* Answer showing logic */
 
-    //Only useful before endgame
+    //before-endgame question guess check
     if player.location.timeline.name == lastExpectedTimeline && (player.phase <= Endgame && !player.canThink || isQuestionRight(input, D.zones.get(lastExpectedTimeline).map(_.question).getOrElse(""))) then
       //success if the guess has just been made or if there are no previous tries (that is, the timeline was already completed)
       this.commandSuccess = player.progression == -1 || isQuestionRight(input, D.zones.get(lastExpectedTimeline).map(_.question).getOrElse(""))
       //remove player from actual area to hide useless decriptions, but only if it's not trying to enter the timeline
       player.timelineChosen = player.progression == -1 && (action.verb == D.action("explore") || action.verb == D.action("go"))
-
       player.progression += 1
       outcome += "\n" + this.changeSubject(D.zones(lastExpectedTimeline).question.capitalize) + " " + D.zones(lastExpectedTimeline).answer //player.location.timeline.name).answer
 
 
     /* Tmeline specific final conditions */
 
-    //hint to learn critical thinking
+    //hints to learn critical thinking
     if player.phase == Endgame && player.location == srRoom && !player.canThink then //missing critical think ability
+      //if the player guess the word without this ability, he's not left outside the timeline
+      this.player.timelineChosen = true
       return outcome + "\n\n" + D.sr("hint")
-    //hint to learn the curiosity ability
+    //hints to learn the curiosity ability
     else if player.phase == PrimoridalSoup && player.location == geWhiteRoom then
       if !player.has(D.possibleAbilities("curious")) then
         return outcome + "\n" + D.ge.misc("learn")
       else
         this.commandSuccess = false
         return outcome
+    //random commands in the previous timeline
     else if player.location.timeline.name == lastExpectedTimeline && !this.commandSuccess then
       return outcome
 
-    /* Main timeline logic (if the player is in the right place at the right moment */
+    /* Main timeline logic.
+      Triggered if the player is in the right place at the right moment,
+       or after the endgame
+     */
     if (isInRightTimeline || player.phase > Endgame) && player.timelineChosen then
       player.phase match
         case Globalization =>
@@ -447,9 +406,9 @@ class Game:
           if action.commandText.contains("?") then
             player.progression += 1
             if player.progression > 2 && player.progression % 2 == 0 then
-              //commandSuccess = true
               return outcome + this.getHint(D.ge.question.split(" "))
 
+          //doesn't show the full message if the player has progressed enough in the game
           if player.remembers then
             this.commandSuccess = false
             return D.ge("intro2")
@@ -459,10 +418,8 @@ class Game:
             return D.ge("intro") + "\n" + D.ge("intro2")
 
         case PrimoridalSoup =>
-
           this.commandSuccess = false
-
-          //hint on psCenter
+          //hint in psCenter
           if player.location == psCenter then
             player.location.interactable.values.count(_.completed) match
                 case 0 =>
@@ -476,8 +433,7 @@ class Game:
                 case 3 =>
                   return D.ps("right")
                 case _ =>
-
-          //hint is psPeriphery
+          //hints is psPeriphery
           if player.location == psPeriphery then
             player.location.interactable.values.count(_.completed) match
               case 1 =>
@@ -486,12 +442,6 @@ class Game:
                 return D.ps("big")
               case _ =>
 
-          //if player.timeline == D.areas("bb") && action.verb == D.actions("go") then
-            //timelineDiscovered = true
-          /*if player.timeline == D.areas("bb") && isQuestionRight(input, D.ps.question)  then
-            outcome = D.ps.answer
-            player.phase += 1
-              commandSuccess = true*/
         case HeatDead =>
           //the only success in this timeline is achieved by trying to move
           this.commandSuccess = action.verb == D.action("go") && action.modifiers.nonEmpty
@@ -524,7 +474,6 @@ class Game:
 
         case Prehistory =>
           this.commandSuccess = action.verb == D.action("go") && D.direction.exists(_._2 == action.modifiers)
-
           //spawns random pieces of commands (3 letters)
           if this.commandSuccess then
             player.progression = 0
@@ -533,7 +482,7 @@ class Game:
           if player.progression == -1 then
             return D.ph("intro")
 
-          //listening to the steps of an approaching creature for too long can be dangerous
+          //listening to the steps of an approaching creature for too long can be dangerous!
           if phJungle.interactable("step").completed then
             player.die()
 
@@ -551,19 +500,19 @@ class Game:
 
           if action.verb == D.action("eat") && action.modifiers.nonEmpty then
             val elementTier = tierlist.indexOf(player.location.searchInteractables(action.modifiers, action.verb).map(_._2.name.toLowerCase).getOrElse(""))
-            //println(focusedElement)
+
             if elementTier == player.progression then
               player.progression += 1
             else if elementTier >= player.progression then
               return player.die()
 
-          //all eaten
+          //all creatures in the list eaten
           if player.progression == tierlist.size then
             player.progression += 1
             return D.ol.misc("done")
 
         case EndOfLife =>
-          //trying to move kills the player in this timeline
+          //trying to move anywhere is deadly in this timeline
           if action.verb == D.action("go") then
             return player.die()
           else if action.verb == D.action("examine") then
@@ -574,16 +523,15 @@ class Game:
             return D.el("intro")
 
         case ScientificRevo =>
-          if action.verb == D.action("hear") then
-            if Math.abs(player.progression) % 2 == 1 && action.modifiers == srRoom.interactable("scientist").name then
+          this.commandSuccess = action.verb == D.action("hear")
+
+          //dialogue logic
+          if this.commandSuccess then
+            if Math.abs(player.progression) % 2 == 1 && action.modifiers == srRoom.interactable("scientist").name
+                      || player.progression % 2 == 0 && action.modifiers == srRoom.interactable("priest").name then
               player.progression += 1
               return D.srConversarion(player.progression % D.srConversarion.size)
                 + "\n" +this.getHint(D.sr.question.split(" "))
-
-            else if player.progression % 2 == 0 && action.modifiers == srRoom.interactable("priest").name then
-              player.progression += 1
-              return D.srConversarion(player.progression % D.srConversarion.size)
-                + "\n" + this.getHint(D.sr.question.split(" "))
             return D.sr.misc("other")
 
           if player.progression == -1 && !player.location.interactable.exists(_._2.completed) then
@@ -599,11 +547,13 @@ class Game:
             player.phase += 1
             this.commandSuccess = true
             return D.ge("tutorial2")
+
           if player.canThink then
             return D.ge("tutorial1")
 
         case anyPhase if anyPhase > Endgame =>
           this.commandSuccess = player.progression != 0 || this.isComplete
+
           //final game message
           if this.isComplete then
             return D.ge.areaDialogues(player.location.name).abilityDesc(D.possibleAbilities(D.action.find(_._2 == action.verb).map(_._1).getOrElse(""))) + "." //+ outcome
@@ -612,14 +562,12 @@ class Game:
           if player.isInvincible && (player.location == geSwitch || player.location == geServer || player.location == geFirewall || player.location == gePC) then
             //flag to the thought part not to activate
             player.progression = 0
-            //if player.location != geSwitch then player.setLocation(Some(geSwitch))
             return D.ge.misc("finalTutorial")
 
           //keeps showing previous tutorial
           if player.progression == -1 && player.location == geWhiteRoom then
             this.commandSuccess = false
             return D.ge("tutorial2")
-
 
         case _ =>
           this.commandSuccess = false
@@ -659,13 +607,9 @@ class Game:
       this.areas.foreach(_.interactable.foreach(_._2.interactions = 0))
       this.player.dead = false
 
-
-  var commandSuccess = false
-  //var timelineDiscovered = false
-
-  /** Plays a turn by executing the given in-game command, such as “go west”. Returns a textual
-    * report of what happened, or an error message if the command was unknown. In the latter
-    * case, no turns elapse. */
+  /** Plays a turn by executing the given in-game command
+    * and it checks if the command is relevant to the story progression.
+    * Additionally, it prettifies the output or adds a "wrong input" part */
   def playTurn(command: String): String =
     val action = Action(command)
     var outcomeReport = action.execute(this.player).getOrElse("")
@@ -674,27 +618,19 @@ class Game:
     if this.isComplete then
       return storyReport + "\n" + outcomeReport
 
-    if !this.commandSuccess && outcomeReport.isBlank && !action.verb.isBlank && !player.isDead then// && action.verb != D("deathCommand") then //&& outcomeReport.isBlank && storyReport.isBlank then // needs to hide "command not found" error during successful output
-      //check if the verb could still be meaningful
-      //if outcomeReport.isEmpty then
-        //if !action.verb.isBlank then
-        //  outcomeReport = Some(parseStoryCommand(action.commandText))
-
-      //default "unknown" output text
-      //if action.verb.isEmpty then
+    //handle if and how the "wrong input" has to be printed
+    if !this.commandSuccess && outcomeReport.isBlank && !action.verb.isBlank && !player.isDead then
+      //unknown question
       if action.commandText.endsWith("?") then
         s"$storyReport\n\n${this.changeSubject(action.commandText)} ${D("wrongQuestion")}".trim
+      //unknown action
       else if action.modifiers.isBlank then
         s"$storyReport\n\n${D("unknownCommand")} ${action.verb}!".trim
-        //if !action.verb.isBlank then
-        //else
-        //outcomeReport.getOrElse(s"""${D.debug("noOutput")} "$command"""")
+      //unknown parameters
       else
         s"$storyReport\n\n${D("unknownParameter")} ${action.verb} ${action.modifiers}...".trim
-      //else //this.turnCount += 1
-      //  outcomeReport.getOrElse(s"""${D.debug("noOutput")} "$command"""")
-    else
-      (storyReport + {if storyReport.nonEmpty then "\n" else ""} + outcomeReport).trim + "\nDEBUG: " + "phase " + player.phase //+ " " +player.timelineChosen + " " + player.location.toString).trim
+    else //default output
+      (storyReport + {if storyReport.nonEmpty then "\n" else ""} + outcomeReport).trim
 
   /**
     * Executes a substitution of some first person-related words
@@ -711,21 +647,42 @@ class Game:
       .replaceAll("\\bme\\b", "you").capitalize
 
   /**
-    * Chooses the logic of the hint and the letters to be given to the user
-    * and adds some decoration to it.
-    * @param hints The number of letters to slide. If 0, shuffle the entire input.
-    * @return Some letters based on randomness and the logic applied.
+    * Selects a hint of the correct length based on the input string
+    * @param hint
+    * @return A string of the correct length
     */
-  def getHint(hints: String, letters: Int): String =
-    this.getHint(hints.sliding(letters,letters).toArray)
+  def getHint(hint: String, letters: Int): String =
+    this.getHint(hint.sliding(letters,letters).toArray)
 
   /**
-    * Chooses the logic of the hint and the letters to be given to the user
-    * and adds some decoration to it.
-    * @param hints The number of letters to slide. If 0, shuffle the entire input.
+    * Select a random hint and adds some decoration to it.
+    * @param hints
     * @return Some letters based on randomness and the logic applied.
     */
   def getHint(hints: Array[String]): String =
     s"\n~${Random.shuffle(hints).head}~"
+
+  /**
+    * Handle the description of the timeline based on current player abilities.
+    * @return
+    */
+  def timelineDescription =
+    D("timelineDesc") + " " + {
+      if player.feelsSurroundings then
+        this.player.timeline.description
+      else
+        D("unknownTimeline")
+    }
+
+  /**
+    * Handle the description of the area based on current player abilities.
+    * @return
+    */
+  def locationFullDescription =
+    if player.isDead then
+      //show a death message only if the user can see where he went
+      D("dead") + { if player.canSee then player.location.name else D("unknownTimeline") }
+    else
+      this.player.location.fullDescription(player.abilities, player.canSee, player.phase)
 
 end Game

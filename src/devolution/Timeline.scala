@@ -21,7 +21,7 @@ class Timeline(val name: String) extends Zone[Timeline]:
   
   def getMap = this.areas
 
-  def description = s"You are in ${this.name}."
+  def description = s"${this.name}."
 
   override def toString = s"${this.name}."
 end Timeline

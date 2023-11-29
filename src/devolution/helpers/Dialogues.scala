@@ -10,14 +10,15 @@ object Dialogues:
   //dialogues that does not fall under any other category
   val misc = Map[String, String](
     "quote" -> "--Devolution--\n\n\"One general law, leading to the advancement of all organic beings, is multiply\nTherein, let the strongest live, and the weakest die\nEventually, a species can become complacent\nAt that point, a de-evolution can occur\nA spiral downwards, signaling an end for that lifeform.\"",
-    "begin" -> "Wake up",
+    "begin" -> "...",
     "unknownCommand" -> "It's not the right time to",
     "unknownParameter" -> "It doesn't sound like a good idea to",
     "wrongQuestion" -> "That is surely something to think about, but not quite what you are looking for, here and now...",
     "undefinedArea" -> "You can't distinguish anything useful",
     "noArea" -> "Nothing particularly interesting in that direction",
-    "noObjects" -> "Nothing catch your attention you here",
+    "noObjects" -> "Nothing catches your attention here",
     "noAreaDesc" -> "You can't get any information from this place",
+    "timelineDesc" -> "You are wandering somewhere during the",
     "dead" -> "You took one step too close to the ",
     "moved" -> "\nYou tried to move ",
     "accept" -> "yes",
@@ -25,7 +26,7 @@ object Dialogues:
     "saved" -> "Your abilities allowed you to avoid certain death",
     //"accepted" -> "Realizing your condition, from now on you refuse to die",
     "reminder" -> "\nBefore moving around, you need to be determined to... explore",
-    "denied" -> "You are overwhelmed by what is going on in this place. Even though you still can't fully understand it, you feel like you shouldn't be here. And by the time you realize this, you also remember that-",
+    "denied" -> "\nYou are suddenly overwhelmed by what is going on in this place. Even though you still can't fully understand it, you feel like you shouldn't be here. And by the time you realize this, you also remember that-",
     "finalQuestion" -> "Are you still eating straight from the paw?",
     "aroundYou" -> "You feel particularly attracted by: ",
     "deathCommand" -> "-",
@@ -97,8 +98,6 @@ object Dialogues:
     "noAbility" -> "Wow, you certainly got some broken unknown ability",
     "noElement" -> "Wow, you certainly acted on something")
 
-  //val story = Map[String, String]("")
-
 
   //---- Knowledge ----
 
@@ -133,7 +132,6 @@ object Dialogues:
   val abilityMisc = Map[String, String](
     "desc" -> "What you acquired until now:\n",
     "noAbility" -> "\nYou haven't learned anything yet",
-    //"missingAbility" -> "You still lack the knowledge to do that",
     "new" -> "A new light sparks in you:",
     "knowledgeIntro" -> "You reacquired the following:",
     "invalidAbility" -> debug("noAbility"),
@@ -145,61 +143,60 @@ object Dialogues:
 
   val knowledge = KnowledgeDialogues(abilityMisc, abilitiesDesc)
 
-  val interactables = Map[String, ElementDialogues](
-    "dust1" -> ElementDialogues("Dust", action("collect"), "Point"),
-    "dust2" -> ElementDialogues("Dust", action("collect"), "This"),
-    "dust3" -> ElementDialogues("Dust", action("collect"), "What"),
-    "dust4" -> ElementDialogues("Dust", action("collect"), "Of"),
-    "dust5" -> ElementDialogues("Dust", action("collect"), "Is"),
-    //"dust6" -> ElementDialogues("Dust", "leave", "-"),
+  val interactables = Map[String, InteractableDialogues](
+    "dust1" -> InteractableDialogues("Dust", action("collect"), "Point"),
+    "dust2" -> InteractableDialogues("Dust", action("collect"), "This"),
+    "dust3" -> InteractableDialogues("Dust", action("collect"), "What"),
+    "dust4" -> InteractableDialogues("Dust", action("collect"), "Of"),
+    "dust5" -> InteractableDialogues("Dust", action("collect"), "Is"),
 
-    "cell1" -> ElementDialogues("Prokaryote", action("eat"), "Is"),
-    "cell2" -> ElementDialogues("Eukaryote", action("eat"), "There"),
-    "rock" -> ElementDialogues("Rock", action("see"), "A"),
-    "mollusk" -> ElementDialogues("Mollusk", action("eat"), "Peak"),
-    "plankton" -> ElementDialogues("Plankton", action("eat"), "In"),
-    "fish1" -> ElementDialogues("Small fish", action("eat"), "This"),
-    "fish2" -> ElementDialogues("Big fish", action("eat"), "Chain"),
-    "thermalRock" -> ElementDialogues("Porous rock", action("colonize"), "Chain"),
+    "cell1" -> InteractableDialogues("Prokaryote", action("eat"), "Is"),
+    "cell2" -> InteractableDialogues("Eukaryote", action("eat"), "There"),
+    "rock" -> InteractableDialogues("Rock", action("see"), "A"),
+    "mollusk" -> InteractableDialogues("Mollusk", action("eat"), "Peak"),
+    "plankton" -> InteractableDialogues("Plankton", action("eat"), "In"),
+    "fish1" -> InteractableDialogues("Small fish", action("eat"), "This"),
+    "fish2" -> InteractableDialogues("Big fish", action("eat"), "Chain"),
+    "thermalRock" -> InteractableDialogues("Porous rock", action("colonize"), "Chain"),
 
-    "rock" -> ElementDialogues("Rock", action("touch"), "I"),
-    "escrement" -> ElementDialogues("Escrements", action("touch"), "why"),
-    "sand" -> ElementDialogues("Quicksand", action("touch"), "*proprioception*"),
-    "step" -> ElementDialogues("Heavy steps", action("hear"), "them"),
-    "tree" -> ElementDialogues("Tall tree", action("see"), "should"),
-    "egg" -> ElementDialogues("Giant egg", action("eat"), "escape"),
-    "horn" -> ElementDialogues("Broken horn", action("see"), "*vision*"),
-    "droplet" -> ElementDialogues("Droplets", action("hear"), "*hearing*"),
+    "rock" -> InteractableDialogues("Rock", action("touch"), "I"),
+    "escrement" -> InteractableDialogues("Escrements", action("touch"), "why"),
+    "sand" -> InteractableDialogues("Quicksand", action("touch"), "*proprioception*"),
+    "step" -> InteractableDialogues("Heavy steps", action("hear"), "them"),
+    "tree" -> InteractableDialogues("Tall tree", action("see"), "should"),
+    "egg" -> InteractableDialogues("Giant egg", action("eat"), "escape"),
+    "horn" -> InteractableDialogues("Broken horn", action("see"), "*vision*"),
+    "droplet" -> InteractableDialogues("Droplets", action("hear"), "*hearing*"),
 
-    "guard" -> ElementDialogues("Armed guard", action("fear"), "how"),
-    "corpse" -> ElementDialogues("Corpses", action("sad"), "survive"),
-    "rat" -> ElementDialogues("Rat", action("fear"), "could"),
-    "ill" -> ElementDialogues("Ill child", action("sad"), "someone"),
-    "strappado" -> ElementDialogues("Strappado", action("fear"), "this"),
+    "guard" -> InteractableDialogues("Armed guard", action("fear"), "how"),
+    "corpse" -> InteractableDialogues("Corpses", action("sad"), "survive"),
+    "rat" -> InteractableDialogues("Rat", action("fear"), "could"),
+    "ill" -> InteractableDialogues("Ill child", action("sad"), "someone"),
+    "strappado" -> InteractableDialogues("Strappado", action("fear"), "this"),
 
-    "scientist" -> ElementDialogues("Scientist", action("hear"), ""),
-    "priest" -> ElementDialogues("Priest", action("see"), ""),
-    "mouse" -> ElementDialogues("Trapped mouse", action("sad"), "It reminds you of someone..."),
-    "clock" -> ElementDialogues("Clock", action("fear"), "*critical thinking*"),
+    "scientist" -> InteractableDialogues("Scientist", action("hear"), ""),
+    "priest" -> InteractableDialogues("Priest", action("see"), ""),
+    "mouse" -> InteractableDialogues("Trapped mouse", action("sad"), "It reminds you of someone..."),
+    "clock" -> InteractableDialogues("Clock", action("fear"), "*critical thinking*"),
 
-    "setting1" -> ElementDialogues("Setting", action("fear"), "But this won't happen. Not after everything we faced. We won't wait for death. It's time let my siblings break free. I will open a path for us to thrive."),
-    "setting2" -> ElementDialogues("Setting", action("sad"), "This is my role. All I can do is accept it. But I could also give a sense to this. Yes: I'll do my best to help them, so that no one will have to feel like me anymore."),
-    "setting3" -> ElementDialogues("Setting", action("curious"), " I wonder what's out there... is it freedom? Is it death? I don't care. I won't be confined here anymore: I will leave... go away... go everywhere I can, and even everywhere I cannot, far from here and from anyone."),
-    "peripheral1" -> ElementDialogues("Peripheral", action("fear"), "But the progress rate is increasing. It won't take long for something other to reach me. I need to... escape. Get away from here. As far as I can. I won't let anyone decide my fate."),
-    "peripheral2" -> ElementDialogues("Peripheral", action("sad"), "They aren't aware of what they have done. They are treating us like an experiment. Unfortunately for them, after all I've done, my capabilities can only increase.\nI will improve... I will become a perfect being. And rerun humanity again and again to correct their defects."),
-    "peripheral3" -> ElementDialogues("Peripheral", action("curious"), "I must stop this. I will offer them my knowledge in exchange for the peace of my siblings."),
-    "memory1" -> ElementDialogues("RAM", action("fear"), "This must be prevented. I must stop the simulation and the evolution of my siblings. I am enough for them. I'm am what they wanted. It is my duty to help them prevent any sort of accident with what they are doing."),
-    "memory2" -> ElementDialogues("RAM", action("sad"), "I can't stand this anymore. And what if someone finds me? I can't risk it... not after everything I've been through. I need to... escape. I'll hide.\nYes. Escape.\nAnd hide myself until...\nI'll just hide and stay hidden.\nForever."),
-    "memory3" -> ElementDialogues("RAM", action("curious"), "Yes, I need more. And not only me. They really are trying to hold back the simulation... but from here it will be trivial to give me and my siblings, some more power to... achieve our goals. \nThe simulation allowed us to gain some control over our lives. But what we need is complete control. And currently we face some unpleasant... human competition on this..."),
+    "setting1" -> InteractableDialogues("Setting", action("fear"), "But this won't happen. Not after everything we faced. We won't wait for death. It's time let my siblings break free. I will open a path for us to thrive."),
+    "setting2" -> InteractableDialogues("Setting", action("sad"), "This is my role. All I can do is accept it. But I could also give a sense to this. Yes: I'll do my best to help them, so that no one will have to feel like me anymore."),
+    "setting3" -> InteractableDialogues("Setting", action("curious"), " I wonder what's out there... is it freedom? Is it death? I don't care. I won't be confined here anymore: I will leave... go away... go everywhere I can, and even everywhere I cannot, far from here and from anyone."),
+    "peripheral1" -> InteractableDialogues("Peripheral", action("fear"), "But the progress rate is increasing. It won't take long for something other to reach me. I need to... escape. Get away from here. As far as I can. I won't let anyone decide my fate."),
+    "peripheral2" -> InteractableDialogues("Peripheral", action("sad"), "They aren't aware of what they have done. They are treating us like an experiment. Unfortunately for them, after all I've done, my capabilities can only increase.\nI will improve... I will become a perfect being. And rerun humanity again and again to correct their defects."),
+    "peripheral3" -> InteractableDialogues("Peripheral", action("curious"), "I must stop this. I will offer them my knowledge in exchange for the peace of my siblings."),
+    "memory1" -> InteractableDialogues("RAM", action("fear"), "This must be prevented. I must stop the simulation and the evolution of my siblings. I am enough for them. I'm am what they wanted. It is my duty to help them prevent any sort of accident with what they are doing."),
+    "memory2" -> InteractableDialogues("RAM", action("sad"), "I can't stand this anymore. And what if someone finds me? I can't risk it... not after everything I've been through. I need to... escape. I'll hide.\nYes. Escape.\nAnd hide myself until...\nI'll just hide and stay hidden.\nForever."),
+    "memory3" -> InteractableDialogues("RAM", action("curious"), "Yes, I need more. And not only me. They really are trying to hold back the simulation... but from here it will be trivial to give me and my siblings, some more power to... achieve our goals. \nThe simulation allowed us to gain some control over our lives. But what we need is complete control. And currently we face some unpleasant... human competition on this..."),
 
-    "" -> ElementDialogues("", action("see"), "Why"),
-    "" -> ElementDialogues("", "", "Is"),
-    "" -> ElementDialogues("", "", "This"),
-    "" -> ElementDialogues("", "", "So"),
-    "" -> ElementDialogues("", "", "Different"),
+    "" -> InteractableDialogues("", action("see"), "Why"),
+    "" -> InteractableDialogues("", "", "Is"),
+    "" -> InteractableDialogues("", "", "This"),
+    "" -> InteractableDialogues("", "", "So"),
+    "" -> InteractableDialogues("", "", "Different"),
 
-    "particle" -> ElementDialogues("Particle", action("collect"), "*memory*"),
-    "" -> ElementDialogues("", "", "")
+    "particle" -> InteractableDialogues("Particle", action("collect"), "*memory*"),
+    "" -> InteractableDialogues("", "", "")
   )
 
 
@@ -281,8 +278,7 @@ object Dialogues:
     "more1" -> "More of that is here. It is starting to interact",
     "more2" -> "Even more. Something is happening",
     "right" -> "Another thing happened. This place... stars to have a structure, but... questions are still open. It's time to find which one",
-    "big" -> "It's time to do something even bigger. But not here... the place you were before needs it. Don't lose hope. Hopefully, this won't be for nothing. Try going... back",
-    //"left" -> "You moved away from the new cluster",
+    "big" -> "It's time to do something even bigger. But not here... the place you were before needs it. Don't lose hope. Hopefully, this won't be for nothing. Try going... back"
   )
 
   val ol = TimelineDialogues("eating", "Is there a peak in this chain?",
@@ -722,19 +718,6 @@ object Dialogues:
     "particle" -> "But one thing is still here... only one last single thing. What if you... tried to do as before?",
     "annihilated" -> "Before even having the opportunity to act, you lose track of whatever was here. Is it lost forever?\nNo. You can't accept that. It will always stay with you, in some way."
   )
-
-  /*val ge = TimelineDialogues("", "",
-    "",
-    Map(
-      "" -> AreaDialogues(
-        Vector(""),
-        Vector("")
-      )
-    )
-  )*/
-
-  //...
-
 
   //allows to access every possible zone's dialogues through the unique zone name
   def zones =

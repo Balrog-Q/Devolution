@@ -54,32 +54,14 @@ object DevolutionGUI extends SimpleSwingApplication:
 
     this.reactions += {
       case keyEvent: KeyPressed =>
-        if keyEvent.source == this.input && keyEvent.key == Key.Enter && !this.game.isOver then
+        if keyEvent.source == this.input && keyEvent.key == Key.Enter && !this.game.isComplete then
           val command = this.input.text.trim
           if command.nonEmpty then
             this.input.text = ""
             this.playTurn(command)
-            //TO-DO: shows a dead message for some time and then resets the GUI
             if game.player.isDead then
-              //this.turnOutput.text = this.game
-
-              //this.playTurn(D("deathCommand"))
               game.reset()
               game.player.dead = false
-              /*Thread.sleep(1000)
-              this.locationInfo.repaint()
-              this.turnOutput.repaint()
-              Thread.sleep(1000)
-              //this.peer.repaint()
-              Thread.sleep(1000)
-              robot.keyPress(KeyEvent.VK_MINUS)
-              robot.keyPress(KeyEvent.VK_ENTER)
-              Thread.sleep(1000)
-              this.locationInfo.repaint()
-              this.turnOutput.repaint()
-              this.locationInfo.repaint()
-              this.turnOutput.repaint()*/
-              //this.playTurn("")
     }
 
     // Layout:
@@ -108,14 +90,12 @@ object DevolutionGUI extends SimpleSwingApplication:
     //this.updateInfo(this.game.welcomeMessage)
     this.turnOutput.text = D("begin")
     this.locationInfo.text = this.game.welcomeMessage
-    this.timelineInfo.text = this.player.timeline.description
+    this.timelineInfo.text = ""
     this.location = Point(200, 200)
     this.minimumSize = Dimension(500, 500)
     this.preferredSize = Dimension(800, 800)
     this.pack()
     this.input.requestFocusInWindow()
-    // sends an empty command to trigger the story logic
-    //this.playTurn("")
 
 
     def playTurn(command: String) =
@@ -124,23 +104,20 @@ object DevolutionGUI extends SimpleSwingApplication:
         this.dispose()
       else
         this.updateInfo(turnReport)
-        this.input.enabled = !this.game.isOver
-      //if this.player.isDead then
+        this.input.enabled = !this.game.isComplete
 
 
     def updateInfo(info: String) =
-      if !this.game.isOver then
+      if !this.game.isComplete then
         this.turnOutput.text = info
       else
         this.turnOutput.text = info + "\n\n" + this.game.goodbyeMessage
       if player.timelineChosen then
-        this.locationInfo.text = this.player.location.fullDescription(player.abilities, player.canSee, player.phase)
-        this.timelineInfo.text = this.player.timeline.description
+        this.locationInfo.text = this.game.locationFullDescription
       else
         this.locationInfo.text = this.player.location.shortDescription(player.abilities, player.canSee, player.phase)
-        this.timelineInfo.text = this.player.timeline.description
 
-      //this.turnCounter.text = "Turns played: " + this.game.turnCount
+        this.timelineInfo.text = this.game.timelineDescription
 
   end top
 

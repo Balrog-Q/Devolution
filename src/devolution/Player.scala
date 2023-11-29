@@ -87,7 +87,7 @@ class Player(startingArea: Area):
 
   /**
     * Add an ability to the knowledge of the user.
-    * @param abilityName
+    * @param abilityName  the name of ability
     * @return
     */
   def learn(abilityName: String) =
@@ -134,7 +134,7 @@ class Player(startingArea: Area):
 
   /**
     * Tries to execute an action on some object.
-    * @param action
+    * @param action The name of action
     * @param name The name of the interactable.
     *             If the player can't see, this name won't matter.
     * @return
@@ -215,8 +215,8 @@ class Player(startingArea: Area):
 
   /**
     * Check the conditions to interact with an object
-    * @param ability
-    * @param interactable
+    * @param ability  The ability that player intend to use for the object
+    * @param interactable The interactable of the object
     * @return
     */
   def feel(ability: String, interactable: String) =

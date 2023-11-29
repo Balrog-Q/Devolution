@@ -33,12 +33,15 @@ object DevolutionGUI extends SimpleSwingApplication:
     val robot = new Robot()
 
     // Components:
-
+    val timelineInfo = new TextArea(1, 40):
+      editable = false
+      wordWrap = false
+      lineWrap = false
     val locationInfo = new TextArea(7, 80):
       editable = false
       wordWrap = true
       lineWrap = true
-    val turnOutput = new TextArea(7, 80):
+    val turnOutput = new TextArea(4, 80):
       editable = false
       wordWrap = true
       lineWrap = true
@@ -84,13 +87,15 @@ object DevolutionGUI extends SimpleSwingApplication:
     this.contents = new GridBagPanel:
       import scala.swing.GridBagPanel.Anchor.*
       import scala.swing.GridBagPanel.Fill
-      layout += Label("Location:") -> Constraints(0, 0, 1, 1, 0, 1, NorthWest.id, Fill.None.id, Insets(8, 5, 5, 5), 0, 0)
-      layout += Label("Command:")  -> Constraints(0, 1, 1, 1, 0, 0, NorthWest.id, Fill.None.id, Insets(8, 5, 5, 5), 0, 0)
-      layout += Label("Events:")   -> Constraints(0, 2, 1, 1, 0, 0, NorthWest.id, Fill.None.id, Insets(8, 5, 5, 5), 0, 0)
-      layout += turnCounter        -> Constraints(0, 3, 2, 1, 0, 0, NorthWest.id, Fill.None.id, Insets(8, 5, 5, 5), 0, 0)
-      layout += locationInfo       -> Constraints(1, 0, 1, 1, 1, 1, NorthWest.id, Fill.Both.id, Insets(5, 5, 5, 5), 0, 0)
-      layout += input              -> Constraints(1, 1, 1, 1, 1, 0, NorthWest.id, Fill.None.id, Insets(5, 5, 5, 5), 0, 0)
-      layout += turnOutput         -> Constraints(1, 2, 1, 1, 1, 1, SouthWest.id, Fill.Both.id, Insets(5, 5, 5, 5), 0, 0)
+      layout += Label("Timeline:") -> Constraints(0, 0, 1, 1, 0, 1, NorthWest.id, Fill.None.id, Insets(8, 5, 5, 5), 0, 0)
+      layout += Label("Location:") -> Constraints(0, 1, 1, 1, 0, 1, NorthWest.id, Fill.None.id, Insets(8, 5, 5, 5), 0, 0)
+      layout += Label("Command:")  -> Constraints(0, 2, 1, 1, 0, 0, NorthWest.id, Fill.None.id, Insets(8, 5, 5, 5), 0, 0)
+      layout += Label("Events:")   -> Constraints(0, 3, 1, 1, 0, 0, NorthWest.id, Fill.None.id, Insets(8, 5, 5, 5), 0, 0)
+      layout += turnCounter        -> Constraints(0, 4, 2, 1, 0, 0, NorthWest.id, Fill.None.id, Insets(8, 5, 5, 5), 0, 0)
+      layout += timelineInfo       -> Constraints(1, 0, 1, 1, 1, 1, NorthWest.id, Fill.Both.id, Insets(5, 5, 5, 5), 0, 0)
+      layout += locationInfo       -> Constraints(1, 1, 1, 1, 1, 1, NorthWest.id, Fill.Both.id, Insets(5, 5, 5, 5), 0, 0)
+      layout += input              -> Constraints(1, 2, 1, 1, 1, 0, NorthWest.id, Fill.None.id, Insets(5, 5, 5, 5), 0, 0)
+      layout += turnOutput         -> Constraints(1, 3, 1, 1, 1, 1, SouthWest.id, Fill.Both.id, Insets(5, 5, 5, 5), 0, 0)
 
     // Menu:
     this.menuBar = new MenuBar:
@@ -103,6 +108,7 @@ object DevolutionGUI extends SimpleSwingApplication:
     //this.updateInfo(this.game.welcomeMessage)
     this.turnOutput.text = D("begin")
     this.locationInfo.text = this.game.welcomeMessage
+    this.timelineInfo.text = this.player.timeline.description
     this.location = Point(200, 200)
     this.minimumSize = Dimension(500, 500)
     this.preferredSize = Dimension(800, 800)
@@ -129,8 +135,10 @@ object DevolutionGUI extends SimpleSwingApplication:
         this.turnOutput.text = info + "\n\n" + this.game.goodbyeMessage
       if player.timelineChosen then
         this.locationInfo.text = this.player.location.fullDescription(player.abilities, player.canSee, player.phase)
+        this.timelineInfo.text = this.player.timeline.description
       else
         this.locationInfo.text = this.player.location.shortDescription(player.abilities, player.canSee, player.phase)
+        this.timelineInfo.text = this.player.timeline.description
 
       //this.turnCounter.text = "Turns played: " + this.game.turnCount
 

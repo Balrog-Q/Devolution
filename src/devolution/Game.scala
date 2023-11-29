@@ -46,23 +46,24 @@ class Game:
   private val elTower = Area(D.areas("tower"), endOfLife)
   private val hdVacuum = Area(D.areas("vacuum"), headDead)
 
-  overflow    .setNeighbors(Vector(                       "future" -> bbVacuum))
-  bbVacuum    .setNeighbors(Vector("past" -> overflow,    "future" -> psCenter))
+  overflow    .setNeighbors(Vector(                       D.specialDirection("future") -> bbVacuum))
+  bbVacuum    .setNeighbors(Vector(D.specialDirection("past") -> overflow,    D.specialDirection("future") -> psCenter))
   bbVacuum.setDeadly()
-  psCenter    .setNeighbors(Vector("past" -> bbVacuum,    "future" -> olOcean1, "outside" -> overflow))
-  olOcean1   .setNeighbors(Vector("past" -> psCenter,    "future" -> phClearing))
-  phClearing    .setNeighbors(Vector("past" -> olOcean1,   "future" -> maPath))
-  maPath      .setNeighbors(Vector("past" -> phClearing,    "future" -> srRoom))
-  srRoom      .setNeighbors(Vector("past" -> maPath,      "future" -> geWhiteRoom))
-  geWhiteRoom .setNeighbors(Vector("past" -> srRoom,      "future" -> elTower))
-  elTower     .setNeighbors(Vector("past" -> geWhiteRoom, "future" -> hdVacuum))
-  hdVacuum    .setNeighbors(Vector("past" -> elTower,     "future" -> hdVacuum))
+  psCenter    .setNeighbors(Vector(D.specialDirection("past") -> bbVacuum,    D.specialDirection("future") -> olOcean1, D.specialDirection("outside") -> overflow))
+  olOcean1   .setNeighbors(Vector(D.specialDirection("past") -> psCenter,    D.specialDirection("future") -> phClearing))
+  phClearing    .setNeighbors(Vector(D.specialDirection("past") -> olOcean1,   D.specialDirection("future") -> maPath))
+  maPath      .setNeighbors(Vector(D.specialDirection("past") -> phClearing,    D.specialDirection("future") -> srRoom))
+  srRoom      .setNeighbors(Vector(D.specialDirection("past") -> maPath,      D.specialDirection("future") -> geWhiteRoom))
+  geWhiteRoom .setNeighbors(Vector(D.specialDirection("past") -> srRoom,      D.specialDirection("future") -> elTower))
+  elTower     .setNeighbors(Vector(D.specialDirection("past") -> geWhiteRoom, D.specialDirection("future") -> hdVacuum))
+  hdVacuum    .setNeighbors(Vector(D.specialDirection("past") -> elTower,     D.specialDirection("future") -> hdVacuum))
 
   val entryPoints = Vector(geWhiteRoom, psCenter, hdVacuum, maPath, phClearing, olOcean1, elTower, srRoom, geWhiteRoom)
     .zipWithIndex.map(_.swap).toMap
   entryPoints.foreach((k,v) => v.setMovePhase(k))
   //assign the correct move phase based on the order the zone has been added to the entryPoint vector
 
+  overflow.foundAbility = D.possibleAbilities("invincible")
 
   private val psPeriphery = Area(D.areas("closeVoid"), primordialSoup)
   private val psVoid = Area(D.areas("vacuum"), primordialSoup)
@@ -345,14 +346,32 @@ class Game:
   def parseStoryCommand(action: Action): String =
     val input = action.commandText
     var outcome = ""
-    commandSuccess = true
+    this.commandSuccess = true
 
-    //bonus cheat mode
+    //bonus cheat mode unlocked of the overflow area is accessed for the first time or efter the endgame
     if player.location == overflow then
-      player.timelineChosen = true
+      if (!player.isInvincible || player.phase > Endgame) then
+        if action.verb == D("accept") then
+          player.progression += 1
+
+          //player.invincible = true
+          outcome = player.learn(D.possibleAbilities("invincible"))
+
+          //moves the player to the real world if the phase is right
+          if player.phase > Endgame then
+            player.progression = -1
+            player.setLocation(Some(geSwitch))
+          else
+            player.setLocation(Some(player.lastEntryPoint))
+            return outcome
+        else if action.verb == D("refuse") then
+          player.setLocation(Some(player.lastEntryPoint))
+        else
+          return D.bonus.question
+
     //game start
     if player.isDead then
-      return ""//D("dead") + player.location.name//player.die()
+      return "a"//D("dead") + player.location.name//player.die()
 
 
     /* Timeline question guess check */
@@ -369,9 +388,9 @@ class Game:
         if isQuestionRight(input, D("finalQuestion")) then //final question found
           //player.setLocation(Some(gePC))
           player.setLocation(Some(overflow))
-          //return D.bonus.question
+          return D.bonus.question
         if player.progression > -1 && player.canThink then //keep showing contemplate message
-          outcome += D.zones(player.location.timeline.name).thought + "\n"
+          outcome += "\n" + D.zones(player.location.timeline.name).thought + "\n"
 
         if isQuestionRight(input, D.zones(player.location.timeline.name).word) then //&& player.progression == -1 then //special timeline word found. True only if there was no previous progression
           player.phase += 1
@@ -390,16 +409,6 @@ class Game:
         if player.progression > -1 && player.canThink then //keep showing contemplate message
           return /*outcome +=*/ D.zones(player.location.timeline.name).thought*/
 
-      if player.location == overflow && !player.invincible then
-        if action.verb == D("accept") then
-          player.progression += 1
-          player.invincible = true
-          player.setLocation(Some(geSwitch))
-          outcome = D.bonus.realization
-        else if action.verb == D("refuse") then
-          player.setLocation(Some(player.lastEntryPoint))
-        else
-          return D.bonus.question
 
 
     /* Answer showing logic */
@@ -594,15 +603,17 @@ class Game:
             return D.ge("tutorial1")
 
         case anyPhase if anyPhase > Endgame =>
-          if player.invincible && player.location == geSwitch then
-            //flag to the thought part not to activate
-            player.progression = -1
-            //if player.location != geSwitch then player.setLocation(Some(geSwitch))
-            return D.ge.misc("finalTutorial")
-
+          this.commandSuccess = player.progression != 0 || this.isComplete
           //final game message
           if this.isComplete then
-            return D.ge.areaDialogues(player.location.name).abilityDesc(D.possibleAbilities(D.action.find(_._2 == action.verb).map(_._1).getOrElse(""))) + "." + outcome
+            return D.ge.areaDialogues(player.location.name).abilityDesc(D.possibleAbilities(D.action.find(_._2 == action.verb).map(_._1).getOrElse(""))) + "." //+ outcome
+
+          //keeps printing the final hint in each of the final areas
+          if player.isInvincible && (player.location == geSwitch || player.location == geServer || player.location == geFirewall || player.location == gePC) then
+            //flag to the thought part not to activate
+            player.progression = 0
+            //if player.location != geSwitch then player.setLocation(Some(geSwitch))
+            return D.ge.misc("finalTutorial")
 
           //keeps showing previous tutorial
           if player.progression == -1 && player.location == geWhiteRoom then
@@ -644,7 +655,7 @@ class Game:
     * The program freeze for some instants to let the player read the output, then automatically reset.
     */
   def reset() =
-    if !player.invincible then
+    if !player.isInvincible then
       this.areas.foreach(_.interactable.foreach(_._2.interactions = 0))
       this.player.dead = false
 

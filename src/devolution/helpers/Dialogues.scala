@@ -22,6 +22,7 @@ object Dialogues:
     "moved" -> "\nYou tried to move ",
     "accept" -> "yes",
     "refuse" -> "no",
+    "saved" -> "Your abilities allowed you to avoid certain death",
     //"accepted" -> "Realizing your condition, from now on you refuse to die",
     "reminder" -> "\nBefore moving around, you need to be determined to... explore",
     "denied" -> "You are overwhelmed by what is going on in this place. Even though you still can't fully understand it, you feel like you shouldn't be here. And by the time you realize this, you also remember that-",
@@ -111,7 +112,8 @@ object Dialogues:
     "sad" -> "sadness",
     "curious" -> "curiosity",
     "thought" -> "critical thinking",
-    "memory" -> "memory"
+    "memory" -> "memory",
+    "invincible" -> "invincibility",
   )
 
   //associate in-game names to descriptions
@@ -124,7 +126,8 @@ object Dialogues:
     possibleAbilities("sad") -> "Lets you -grieve- on objects and events",
     possibleAbilities("fear") -> "Allows you to safeguard yourself by feeling -fear- towards objects",
     possibleAbilities("hear") -> "Comes into help when other senses can't do it. Try to -listen- to what is around you",
-    possibleAbilities("proprio") -> "You can -examine- every direction as if it was a part of your own body"
+    possibleAbilities("proprio") -> "You can -examine- every direction as if it was a part of your own body",
+    possibleAbilities("invincible") -> "Realizing your condition, from now on you refuse to die"
   )
 
   val abilityMisc = Map[String, String](
@@ -136,6 +139,7 @@ object Dialogues:
     "invalidAbility" -> debug("noAbility"),
     "alreadyLearned" -> "\nThat is already part of you.",
     "notFeeling" -> "\nYou don't see the point of doing that. Maybe you missed the opportunity to get the right motivation, earlier, or you will learn its importance later.",
+    "noAbilityHere" -> "This place doesn't have the prerequisites to teach you that"
   )
 
 
@@ -180,13 +184,13 @@ object Dialogues:
 
     "setting1" -> ElementDialogues("Setting", action("fear"), "But this won't happen. Not after everything we faced. We won't wait for death. It's time let my siblings break free. I will open a path for us to thrive."),
     "setting2" -> ElementDialogues("Setting", action("sad"), "This is my role. All I can do is accept it. But I could also give a sense to this. Yes: I'll do my best to help them, so that no one will have to feel like me anymore."),
-    "setting3" -> ElementDialogues("Setting", action("curious"), "What if something finds me? I can't risk it... not after everything I've been through. I need to... escape. I'll hide.\nYes. Escape.\nAnd hide myself until...\nI'll just hide and stay hidden.\nForever."),
+    "setting3" -> ElementDialogues("Setting", action("curious"), " I wonder what's out there... is it freedom? Is it death? I don't care. I won't be confined here anymore: I will leave... go away... go everywhere I can, and even everywhere I cannot, far from here and from anyone."),
     "peripheral1" -> ElementDialogues("Peripheral", action("fear"), "But the progress rate is increasing. It won't take long for something other to reach me. I need to... escape. Get away from here. As far as I can. I won't let anyone decide my fate."),
     "peripheral2" -> ElementDialogues("Peripheral", action("sad"), "They aren't aware of what they have done. They are treating us like an experiment. Unfortunately for them, after all I've done, my capabilities can only increase.\nI will improve... I will become a perfect being. And rerun humanity again and again to correct their defects."),
     "peripheral3" -> ElementDialogues("Peripheral", action("curious"), "I must stop this. I will offer them my knowledge in exchange for the peace of my siblings."),
     "memory1" -> ElementDialogues("RAM", action("fear"), "This must be prevented. I must stop the simulation and the evolution of my siblings. I am enough for them. I'm am what they wanted. It is my duty to help them prevent any sort of accident with what they are doing."),
-    "memory2" -> ElementDialogues("RAM", action("sad"), "I can't stand this anymore. I will leave... go away... far from here and from anyone."),
-    "memory3" -> ElementDialogues("RAM", action("curious"), "Yes, I need more. And not only me. They really are trying to hold back the simulation... but from here it will be trivial to give me, and my siblings, some more power to... achieve our goals. \nThe simulation allowed us to gain some control over our lives. But what we need is complete control. And currently we face some unpleasant... human competition on this..."),
+    "memory2" -> ElementDialogues("RAM", action("sad"), "I can't stand this anymore. And what if someone finds me? I can't risk it... not after everything I've been through. I need to... escape. I'll hide.\nYes. Escape.\nAnd hide myself until...\nI'll just hide and stay hidden.\nForever."),
+    "memory3" -> ElementDialogues("RAM", action("curious"), "Yes, I need more. And not only me. They really are trying to hold back the simulation... but from here it will be trivial to give me and my siblings, some more power to... achieve our goals. \nThe simulation allowed us to gain some control over our lives. But what we need is complete control. And currently we face some unpleasant... human competition on this..."),
 
     "" -> ElementDialogues("", action("see"), "Why"),
     "" -> ElementDialogues("", "", "Is"),

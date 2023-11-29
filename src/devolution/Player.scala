@@ -17,7 +17,7 @@ class Player(startingArea: Area):
 
   private var currentLocation = startingArea        // gatherer: changes in relation to the previous location
   private var quitCommandGiven = false              // one-way flag
-  //private var possibleAbilities = D.possibleAbilities.values.toVector
+
   /**
     * Container of all the abilities that the player has.
     * Starts with fixed length to put abilities in the right place (as defined in the possibleAbilities dialogue vector).
@@ -26,7 +26,6 @@ class Player(startingArea: Area):
   var abilitiesStatus = D.possibleAbilities.map((k,v) => v -> false)
   var dead = false
   var lastEntryPoint = startingArea
-  var invincible = false
   var timelineChosen = true
 
   /**
@@ -37,11 +36,15 @@ class Player(startingArea: Area):
 
   /* The phase the player is currently in. It allows to select the right dialogues. */
   var phase = Globalization
+
   /** Determines if the player has indicated a desire to quit the game. */
   def hasQuit = this.quitCommandGiven
+
   /** Returns the player's current location. */
   def location = this.currentLocation
+
   def timeline = this.currentLocation.timeline
+
   /** Attempts to move the player in the given direction. This is successful if there
     * is an exit from the player's current location towards the direction name. Returns
     * a description of the result: "You go DIRECTION." or "You can't go DIRECTION." */
@@ -60,11 +63,12 @@ class Player(startingArea: Area):
       D("reminder")
 
   def abilities = abilitiesStatus.filter(_._2).keys.toVector
+
   def setLocation(destination: Option[Area]) = this.currentLocation = destination.getOrElse(this.currentLocation)
-    //if destination.isDefined then "You go " + direction + "." else "You can't go " + direction + "."
+
   /** Causes the player to rest for a short while (this has no substantial effect in game terms).
     * Returns a description of what happened. */
-  //def rest() = "You rest for a while. Better get a move on, though."
+
   /** Signals that the player wants to quit the game. Returns a description of what happened
     * within the game as a result (which is the empty string, in this case). */
   def quit() =
@@ -98,7 +102,7 @@ class Player(startingArea: Area):
         this.abilitiesStatus.update(abilityName, true)
         s"\n${D.knowledge("new")} $abilityName.\n${D.knowledge.desc(abilityName)}."
     else
-      ""
+      D.knowledge("noAbilityHere")
 
   /** Determines whether the player is carrying an ability of the given name. */
   def has(abilityName: String) = this.abilities.contains(abilityName)
@@ -116,6 +120,7 @@ class Player(startingArea: Area):
   def canSee = this.has(D.possibleAbilities("vision"))
   def canThink = this.has(D.possibleAbilities("thought"))
   def feelsSurroundings = this.has(D.possibleAbilities("proprio"))
+  def isInvincible = this.has(D.possibleAbilities("invincible"))
 
   /** Causes the player to examine the ability of the given name. This is successful if such
     * an ability is currently in the player's possession. Returns a description of the result,
@@ -164,10 +169,10 @@ class Player(startingArea: Area):
 
 
   def devolve() =
-    timeTravelTo("past")
+    timeTravelTo(D.specialDirection("past"))
 
   def evolve() =
-    timeTravelTo("future")
+    timeTravelTo(D.specialDirection("future"))
 
   /**
     * Handle every variable that must be updated at timeline change.
@@ -182,9 +187,9 @@ class Player(startingArea: Area):
       this.timelineChosen = false
       this.progression = -1
       this.currentLocation = this.lastEntryPoint
-      this.go(direction)
+      val outcome = this.go(direction)
       this.lastEntryPoint = this.currentLocation
-      D.misc(direction)
+      s"${D.misc(direction)}\n$outcome"
     else
       D.knowledge("notFeeling")
 
@@ -226,7 +231,7 @@ class Player(startingArea: Area):
       D.knowledge("notFeeling")
 
   def die() =
-    if !this.invincible then
+    if !this.isInvincible then
       if !this.remembers then
         this.abilitiesStatus.foreach((k,v) => this.abilitiesStatus.update(k, false))
       this.dead = true
@@ -237,7 +242,8 @@ class Player(startingArea: Area):
       this.lastEntryPoint = startingArea
       D("denied")
     else
-      ""
+      this.currentLocation = this.lastEntryPoint
+      D("saved")
 
   /**
     * This function only flags the main program to show and keep showing the thought.
